@@ -1,0 +1,33 @@
+.resource-svg polygon {
+  stroke-width: 0.01;
+  cursor: pointer;
+}
+
+.resource-svg polygon.status-free {
+  fill: #effaf3;
+  stroke: #48c774;
+  stroke-width: 0.1;
+}
+
+.resource-svg polygon.status-free.active {
+  fill: #48c774;
+}
+
+.resource-svg polygon.status-reserved, .resource-svg polygon.status-taken, .resource-svg polygon.error  {
+  fill: #333;
+  stroke: #f14668;
+  cursor: not-allowed;
+  stroke-width: 0.1;
+}
+
+.resource-svg text {
+  font-size: 0.2px;
+  text-anchor: middle;
+  alignment-baseline: central;
+  cursor: pointer;
+}
+
+.resource-svg text.status-reserved, .resource-svg text.status-taken, .resource-svg text.error {
+  fill: #fff;
+  cursor: not-allowed;
+}
