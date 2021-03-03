@@ -17,6 +17,33 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+
+/*
+ * validates all reservations by renewing them
+ */
+add_action('woocommerce_after_checkout_validation', function ($data, $errors) {
+    if (!WC()->cart)
+        return;
+    if (WC()->cart->is_empty())
+        return;
+    foreach ( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
+        $result = obb_renew_reservation($cart_item['_uid'], $cart_item['_session'], $cart_item['_request_uid']);
+        if (!$result || $result->status !== 0) {
+            $errors->add( 'validation', 'Der angefragte Stellplatz wurde zwischenzeitlich leider von jemand anderem gebucht.');
+            obb_remove_from_cart($cart_item);
+            WC()->cart->remove_cart_item($cart_item_key);
+        }
+    }
+}, 10, 2);
+
+function obb_renew_reservation(string $uid, string  $session, string $request_uid) {
+    return bike_box_request(OPEN_BIKE_BOX_BACKEND . '/api/action/renew', array(
+        'uid' => $uid,
+        'session' => $session,
+        'request_uid' => $request_uid
+    ));
+}
+
 /*
  * copy cart item attributes to order item
  */
