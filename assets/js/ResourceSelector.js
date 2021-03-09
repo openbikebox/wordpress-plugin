@@ -136,7 +136,7 @@ export default class ResourceSelector extends Component {
                             </div>
                         </div>
                         <div className="block">
-                            {this.state.bookingEnd && <p style={{marginBottom: '0.5em'}}>Buchung bis zum {this.state.bookingEnd.clone().subtract(1, 'day').format('D.M.YY, 24:00')}</p>}
+                            {this.state.bookingEnd && <p style={{marginBottom: '0.5em'}}>Buchung bis zum {this.state.bookingEnd.clone().subtract(1, 'day').format('D.M.YY, 24:00')} Uhr</p>}
                             {this.state.bookingPrice && <h3 style={{marginTop: 0}}>Preis: {formatPrice(this.state.bookingPrice)}</h3>}
                             <button
                                 onClick={this.submit.bind(this)}
