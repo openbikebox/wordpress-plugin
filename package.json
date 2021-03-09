@@ -8,8 +8,8 @@
     "watch": "webpack --watch --config assets/webpack.config.js",
     "build": "NODE_ENV=production webpack --mode production --config assets/webpack.config.js"
   },
-  "author": "Ernesto Ruge",
-  "license": "BSD-3-Clause",
+  "author": "binarz butterfly GmbH",
+  "license": "GPL-3.0-only",
   "devDependencies": {
     "@babel/core": "^7.10",
     "@babel/plugin-proposal-class-properties": "^7.8",
