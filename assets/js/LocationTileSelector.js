@@ -46,7 +46,7 @@ export default class LocationTileSelector extends Component {
             <div id="obb-location-tiles">
                 {[...Array(Math.floor(this.state.locations.length / 3))].map((item, i) =>
                     <div className="columns" key={`line-${i}`}>
-                        {this.state.locations.slice(i, i+3).map((location, j) => this.renderLocationTile(location, j))}
+                        {this.state.locations.slice(i * 3, (i + 1) * 3).map((location, j) => this.renderLocationTile(location, j))}
                     </div>
                 )}
 
