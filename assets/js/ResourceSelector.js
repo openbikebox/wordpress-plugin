@@ -52,6 +52,14 @@ export default class ResourceSelector extends Component {
             });
             return;
         }
+        if (selectedResource[0].pricegroup['fee_' + this.state.selectedTimespan] === undefined) {
+            this.setState({
+                selectedResource: selectedResource[0],
+                selectedTimespan: 'none',
+                bookingPrice: null
+            });
+            return;
+        }
         this.setState({
             selectedResource: selectedResource[0],
             bookingPrice: this.calculatePrice(selectedResource[0], this.state.selectedTimespan)
@@ -59,13 +67,14 @@ export default class ResourceSelector extends Component {
     }
 
     updateSelectedTimespan(evt) {
-        if (evt.target.value === 0) {
-            return this.setState({
-                selectedTimespan: null,
+        if (evt.target.value === 'none') {
+            this.setState({
+                selectedTimespan: 'none',
                 bookingBegin: null,
                 bookingEnd: null,
                 bookingPrice: null
             });
+            return;
         }
         let begin = moment().second(0).minute(0).hour(0);
         let end = begin.clone().add(1, evt.target.value + 's').add(1, 'day');
@@ -127,11 +136,11 @@ export default class ResourceSelector extends Component {
                                     value={this.state.selectedTimespan}
                                     onChange={this.updateSelectedTimespan.bind(this)}
                                 >
-                                    <option key='resource-0' value={0}>bitte wählen</option>
-                                    <option value="day">Tag</option>
-                                    <option value="week">Woche</option>
-                                    <option value="month">Monat</option>
-                                    <option value="year">Jahr</option>
+                                    <option key='resource-0' value='none'>bitte wählen</option>
+                                    {(!this.state.selectedResource || this.state.selectedResource.pricegroup.fee_day !== undefined) && <option value="day">Tag</option>}
+                                    {(!this.state.selectedResource || this.state.selectedResource.pricegroup.fee_week !== undefined) && <option value="week">Woche</option>}
+                                    {(!this.state.selectedResource || this.state.selectedResource.pricegroup.fee_month !== undefined) && <option value="month">Monat</option>}
+                                    {(!this.state.selectedResource || this.state.selectedResource.pricegroup.fee_year !== undefined) && <option value="year">Jahr</option>}
                                 </select>
                             </div>
                         </div>
