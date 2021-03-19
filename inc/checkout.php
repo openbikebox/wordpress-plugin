@@ -71,10 +71,15 @@ add_action('woocommerce_checkout_order_created', function (WC_Order $order) {
             'request_uid' => $item->get_meta('_request_uid'),
             'session' => $item->get_meta('_session'),
             'paid_at' => gmdate("Y-m-d\TH:i:s\Z"),
-            'pin' => generate_uid(4, '0123456789')
+            'token' => array(
+                array(
+                    'type' => 'code',
+                    'identifier' => generate_uid(4, '0123456789')
+                )
+            )
         ));
-        $item->add_meta_data('_code', $result->data->code, true);
-        $item->add_meta_data('_pin', $result->data->pin, true);
+        $item->add_meta_data('_code', $result->data->token[0]->secret, true);
+        $item->add_meta_data('_pin', $result->data->token[0]->identifier, true);
         $item->save();
     }
     if ($order->get_payment_method() === 'cod') {
