@@ -26,7 +26,7 @@ add_action('wp_ajax_nopriv_obb_add_to_cart', 'obb_add_to_cart');
 function obb_add_to_cart() {
     $data = json_decode(stripslashes($_POST['data']));
     obb_clear_cart();
-    $result = bike_box_request(OPEN_BIKE_BOX_BACKEND . '/api/action/reserve', array(
+    $result = bike_box_request(OPEN_BIKE_BOX_BACKEND . '/api/v1/action/reserve', array(
         'request_uid' => generate_uid(),
         'resource_id' => $data->resource_id,
         'requested_at' => gmdate("Y-m-d\TH:i:s\Z"),
@@ -86,7 +86,7 @@ function obb_remove_from_cart(array $cart_item) {
         if (!array_key_exists($field, $cart_item) || !$cart_item[$field])
             return;
     }
-    bike_box_request(OPEN_BIKE_BOX_BACKEND . '/api/action/cancel', array(
+    bike_box_request(OPEN_BIKE_BOX_BACKEND . '/api/v1/action/cancel', array(
         'uid' => $cart_item['_uid'],
         'session' => $cart_item['_session'],
         'request_uid' => $cart_item['_request_uid']

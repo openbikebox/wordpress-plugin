@@ -37,7 +37,7 @@ add_action('woocommerce_after_checkout_validation', function ($data, $errors) {
 }, 10, 2);
 
 function obb_renew_reservation(string $uid, string  $session, string $request_uid) {
-    return bike_box_request(OPEN_BIKE_BOX_BACKEND . '/api/action/renew', array(
+    return bike_box_request(OPEN_BIKE_BOX_BACKEND . '/api/v1/action/renew', array(
         'uid' => $uid,
         'session' => $session,
         'request_uid' => $request_uid
@@ -66,7 +66,7 @@ add_action('woocommerce_checkout_order_created', function (WC_Order $order) {
         if ($item->get_product_id() !== OPEN_BIKE_BOX_PRODUCT) {
             continue;
         }
-        $result = bike_box_request(OPEN_BIKE_BOX_BACKEND . '/api/action/book', array(
+        $result = bike_box_request(OPEN_BIKE_BOX_BACKEND . '/api/v1/action/book', array(
             'uid' => $item->get_meta('_uid'),
             'request_uid' => $item->get_meta('_request_uid'),
             'session' => $item->get_meta('_session'),
