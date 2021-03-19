@@ -24,7 +24,7 @@ add_filter('woocommerce_order_item_get_formatted_meta_data', function (array $fo
     $result = array();
     $fields = array(
         'uid', 'request_uid', 'session', 'status', 'value_gross', 'value_net', 'value_tax', 'tax_rate', 'requested_at',
-        'location_id', 'location_name', 'resource_identifier', 'location_slug', 'operator_name'
+        'location_id', 'location_name', 'resource_identifier', 'location_slug', 'operator_name', 'valid_till'
     );
     foreach ($formatted_meta as $key => $item) {
         if (in_array(substr($item->key, 1), $fields, true)) {
@@ -40,6 +40,10 @@ add_filter('woocommerce_order_item_get_formatted_meta_data', function (array $fo
         }
         if ($item->key === '_code') {
             $item->display_key = 'Code';
+            $item->display_value = $item->value;
+        }
+        if ($item->key === '_pin') {
+            $item->display_key = 'PIN';
             $item->display_value = $item->value;
         }
         $result[$key] = $item;
