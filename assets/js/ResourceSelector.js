@@ -18,7 +18,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import React from 'react';
 
-const {Component} = React;
 import {Decimal} from 'decimal.js';
 import moment from 'moment';
 import {getLocationBySlug, submitBooking} from './Api';
@@ -26,167 +25,158 @@ import {formatPrice} from './Format';
 import {ComponentStatus} from './Helpers';
 import ResourceSvg from './ResourceSvg';
 
+const ResourceSelector = (props) => {
+    const [selectedResource, setSelectedResource] = React.useState('');
+    const [selectedTimespan, setSelectedTimespan] = React.useState('');
+    const [bookingBegin, setBookingBegin] = React.useState(null);
+    const [bookingEnd, setBookingEnd] = React.useState(null);
+    const [bookingPrice, setBookingPrice] = React.useState(null);
+    const [status, setStatus] = React.useState(ComponentStatus.loading);
+    const [location, setLocation] = React.useState(null);
 
-export default class ResourceSelector extends Component {
-    state = {
-        selectedResource: null,
-        status: ComponentStatus.loading,
-    };
+    React.useEffect(() => {
+        const func = async () => {
+            const fetchedLocation = await getLocationBySlug(props.apiBackend, props.locationSlug);
+            if (fetchedLocation) {
+                setLocation(fetchedLocation.data);
+                setStatus(ComponentStatus.ready);
+            } else {
+                setStatus(ComponentStatus.error);
+            }
+        };
+        func().then();
+    }, []);
 
-    async componentDidMount() {
-        const location = await getLocationBySlug(this.props.apiBackend, this.props.locationSlug);
-        if (location) {
-            this.setState({
-                location: location.data,
-                status: ComponentStatus.ready,
-            });
-        } else {
-            this.setState({
-                status: ComponentStatus.error,
-            });
-        }
-    }
-
-    updateSelectedResourceEvt(evt) {
-        this.updateSelectedResource(parseInt(evt.target.value));
-    }
-
-    updateSelectedResource(resource_id) {
-        let selectedResource = this.state.location.resource.filter(resource => resource.id === resource_id);
-        if (!selectedResource.length) {
-            this.setState({
-                selectedResource: null,
-            });
-            return;
-        }
-        if (selectedResource[0].pricegroup['fee_' + this.state.selectedTimespan] === undefined) {
-            this.setState({
-                selectedResource: selectedResource[0],
-                selectedTimespan: 'none',
-                bookingPrice: null,
-            });
-            return;
-        }
-        this.setState({
-            selectedResource: selectedResource[0],
-            bookingPrice: this.calculatePrice(selectedResource[0], this.state.selectedTimespan),
-        });
-    }
-
-    updateSelectedTimespan(evt) {
-        if (evt.target.value === 'none') {
-            this.setState({
-                selectedTimespan: 'none',
-                bookingBegin: null,
-                bookingEnd: null,
-                bookingPrice: null,
-            });
-            return;
-        }
-        let begin = moment().second(0).minute(0).hour(0);
-        let end = begin.clone().add(1, evt.target.value + 's').add(1, 'day');
-        if (evt.target.value !== 'day') {
-            end.add(1, 'day');
-        }
-        this.setState({
-            selectedTimespan: evt.target.value,
-            bookingBegin: begin,
-            bookingEnd: end,
-            bookingPrice: this.calculatePrice(this.state.selectedResource, evt.target.value),
-        });
-    }
-
-    calculatePrice(resource, timespan) {
+    const calculatePrice = (resource, timespan) => {
         if (!resource || !timespan)
             return null;
         return Decimal(resource.pricegroup['fee_' + timespan]);
-    }
+    };
 
-    submit(evt) {
-        evt.preventDefault();
-        if (!this.state.selectedResource || !this.state.selectedTimespan)
-            return;
-        submitBooking({
-            begin: this.state.bookingBegin.toISOString().substr(0, 19) + 'Z',
-            end: this.state.bookingEnd.toISOString().substr(0, 19) + 'Z',
-            location_id: this.state.location.id,
-            resource_id: this.state.selectedResource.id,
-        }).then(result => {
-            window.location.href = wc_add_to_cart_params.cart_url;
-        });
-    }
-
-    render() {
-        if (this.state.status === ComponentStatus.loading) {
-            return <p>Lade Stationsdaten...</p>;
-        } else if (this.state.status === ComponentStatus.error) {
-            return <p>Bei Laden der Station ist ein serverseitiger Fehler aufgetreten.<br/>
-                Bitte versuchen Sie es später erneut.</p>;
+    const updateSelectedResource = (resource_id) => {
+        let newSelectedResource = location.resource.filter(resource => resource.id === resource_id);
+        if (!newSelectedResource.length) {
+            setSelectedResource('');
+        } else if (newSelectedResource[0].pricegroup['fee_' + selectedTimespan] === undefined) {
+            setSelectedResource(newSelectedResource[0]);
+            setSelectedTimespan('');
+            setBookingPrice(null);
+        } else {
+            setSelectedResource(newSelectedResource[0]);
+            setBookingPrice(calculatePrice(newSelectedResource[0], selectedTimespan));
         }
-        return (
-            <div>
-                <h2 className="column is-12">{this.state.location.name} buchen</h2>
-                <div className="columns control">
-                    <div className="column is-6">
-                        <div className="block">
-                            <label htmlFor="selector-resource" className="label">Stellplatz</label>
-                            <div className="control select is-fullwidth">
-                                <select value={(this.state.selectedResource) ? this.state.selectedResource.id : ''}
-                                        onChange={this.updateSelectedResourceEvt.bind(this)}>
-                                    <option key="resource-0" value={0}>bitte wählen</option>
-                                    {this.state.location.resource.filter(resource => resource.status === 'free').map(resource =>
-                                        <option key={`resource-${resource.id}`}
-                                                value={resource.id}>{resource.identifier}</option>,
-                                    )}
-                                </select>
-                            </div>
+    };
+
+    const handleSelectedResourceUpdate = (e) => {
+        updateSelectedResource(parseInt(e.target.value));
+    };
+
+    const handleSelectedTimespanChange = (e) => {
+        const value = e.target.value;
+        if (value === 'none') {
+            setSelectedTimespan('');
+            setBookingBegin(null);
+            setBookingEnd(null);
+            setBookingPrice(null);
+        } else {
+            const begin = moment().second(0).minute(0).hour(0);
+            let end = begin.clone().add(1, value + 's').add(1, 'day');
+            if (value !== 'day') {
+                end.add(1, 'day');
+            }
+            setSelectedTimespan(value);
+            setBookingBegin(begin);
+            setBookingEnd(end);
+            setBookingPrice(calculatePrice(selectedResource, value));
+        }
+    };
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        if (selectedResource && selectedTimespan) {
+            submitBooking({
+                begin: bookingBegin,
+                end: bookingEnd,
+                location_id: location.id,
+                resource_id: selectedResource.id,
+            }).then(() => {
+                window.location.href = wc_add_to_cart_params.cart_url;
+            });
+        }
+    };
+
+    if (status === ComponentStatus.loading) {
+        return <p>Lade Stationsdaten...</p>;
+    } else if (status === ComponentStatus.error) {
+        return <p>Beim Laden der Station is ein serverseitiger Fehler aufgetreten.<br/>
+            Bitte versuchen Sie es später erneut.</p>;
+    }
+
+    return (
+        <div>
+            <h2 className="column is-12">{location.name} buchen</h2>
+            <div className="columns control">
+                <div className="column is-6">
+                    <div className="block">
+                        <label htmlFor="selector-resource" className="label">Stellplatz</label>
+                        <div className="control select is-fullwidth">
+                            <select value={(selectedResource) ? selectedResource.id : ''}
+                                    onChange={handleSelectedResourceUpdate}>
+                                <option key="resource-0" value={0}>bitte wählen</option>
+                                {location.resource.filter(resource => resource.status === 'free').map(resource =>
+                                    <option key={`resource-${resource.id}`}
+                                            value={resource.id}>{resource.identifier}</option>,
+                                )}
+                            </select>
                         </div>
-                        <div className="block">
-                            <label htmlFor="selector-timespan" className="label">Mietdauer</label>
-                            <div className="control select is-fullwidth">
-                                <select
-                                    value={this.state.selectedTimespan}
-                                    onChange={this.updateSelectedTimespan.bind(this)}
-                                >
-                                    <option key="resource-0" value="none">bitte wählen</option>
-                                    {(!this.state.selectedResource || this.state.selectedResource.pricegroup.fee_day !== undefined) &&
-                                    <option value="day">Tag</option>}
-                                    {(!this.state.selectedResource || this.state.selectedResource.pricegroup.fee_week !== undefined) &&
-                                    <option value="week">Woche</option>}
-                                    {(!this.state.selectedResource || this.state.selectedResource.pricegroup.fee_month !== undefined) &&
-                                    <option value="month">Monat</option>}
-                                    {(!this.state.selectedResource || this.state.selectedResource.pricegroup.fee_year !== undefined) &&
-                                    <option value="year">Jahr</option>}
-                                </select>
-                            </div>
-                        </div>
-                        <div className="block">
-                            {this.state.bookingEnd && <p style={{marginBottom: '0.5em'}}>Buchung bis
-                                zum {this.state.bookingEnd.clone().subtract(1, 'day').format('D.M.YY, 24:00')} Uhr</p>}
-                            {this.state.bookingPrice &&
-                            <h3 style={{marginTop: 0}}>Preis: {formatPrice(this.state.bookingPrice)}</h3>}
-                            <button
-                                onClick={this.submit.bind(this)}
-                                className={`button is-fullwidth ${(this.state.selectedResource && this.state.selectedTimespan) ? 'is-success' : ''}`}
-                                disabled={!(this.state.selectedResource && this.state.selectedTimespan)}
+                    </div>
+                    <div className="block">
+                        <label htmlFor="selector-timespan" className="label">Mietdauer</label>
+                        <div className="control select is-fullwidth">
+                            <select
+                                value={selectedTimespan}
+                                onChange={handleSelectedTimespanChange}
                             >
-                                buchen
-                            </button>
+                                <option key="resource-0" value="none">bitte wählen</option>
+                                {(!selectedResource || selectedResource.pricegroup.fee_day !== undefined) &&
+                                <option value="day">Tag</option>}
+                                {(!selectedResource || selectedResource.pricegroup.fee_week !== undefined) &&
+                                <option value="week">Woche</option>}
+                                {(!selectedResource || selectedResource.pricegroup.fee_month !== undefined) &&
+                                <option value="month">Monat</option>}
+                                {(!selectedResource || selectedResource.pricegroup.fee_year !== undefined) &&
+                                <option value="year">Jahr</option>}
+                            </select>
                         </div>
-                        {!!this.state.location.description && <div className="block">
-                            {this.state.location.description}
-                        </div>}
                     </div>
-                    <div className="column is-6">
-                        <ResourceSvg
-                            apiBackend={this.props.apiBackend}
-                            locationSlug={this.props.locationSlug}
-                            selectedResource={this.state.selectedResource}
-                            updateSelectedResource={this.updateSelectedResource.bind(this)}
-                        />
+                    <div className="block">
+                        {bookingEnd && <p style={{marginBottom: '0.5em'}}>Buchung bis
+                            zum {bookingEnd.clone().subtract(1, 'day').format('D.M.YY, 24:00')} Uhr</p>}
+                        {bookingPrice &&
+                        <h3 style={{marginTop: 0}}>Preis: {formatPrice(bookingPrice)}</h3>}
+                        <button
+                            onClick={handleSubmit}
+                            className={`button is-fullwidth ${(selectedResource && selectedTimespan) ? 'is-success' : ''}`}
+                            disabled={!(selectedResource && selectedTimespan)}
+                        >
+                            buchen
+                        </button>
                     </div>
+                    {!!location.description && <div className="block">
+                        {location.description}
+                    </div>}
+                </div>
+                <div className="column is-6">
+                    <ResourceSvg
+                        apiBackend={props.apiBackend}
+                        locationSlug={props.locationSlug}
+                        selectedResource={selectedResource}
+                        updateSelectedResource={updateSelectedResource}
+                    />
                 </div>
             </div>
-        );
-    }
-}
+        </div>
+    );
+};
+
+export default ResourceSelector;

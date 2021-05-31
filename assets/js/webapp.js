@@ -40,10 +40,7 @@ document.addEventListener('DOMContentLoaded', function(event) {
                 props[transformAttribute(key.substr(5))] = dom_obj.getAttribute(key)
             })
             ReactDOM.render(
-                <ReactClass
-                    ref={(reactClass) => {window[ReactClass.name.charAt(0).toLowerCase() + ReactClass.name.slice(1)] = reactClass}}
-                    {...props}
-                />,
+                <ReactClass{...props}/>,
                 dom_obj
             );
         }
