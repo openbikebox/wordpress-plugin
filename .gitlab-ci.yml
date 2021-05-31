@@ -1,19 +1,20 @@
-variables:
-  DOCKER_HOST: tcp://docker:2375/
-  DOCKER_DRIVER: overlay2
+stages:
+  - build
 
-# Official docker compose image.
-image:
-  name: docker/compose:1.24.1
-  entrypoint: ["/bin/sh", "-c"]
+default:
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - .npm/
 
-services:
-  - docker:18.09.7-dind
-
+# Build stage
 build-js:
   stage: build
+  image:
+    name: node:12
   artifacts:
     paths:
       - static
   script:
-    - docker-compose run -T --entrypoint '' --rm webpack npm run build
+    - npm install --cache .npm --prefer-offline
+    - npm run build
