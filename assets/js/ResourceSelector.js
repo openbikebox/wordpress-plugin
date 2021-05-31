@@ -16,28 +16,35 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import React from "react";
-const { Component } = React;
+import React from 'react';
+
+const {Component} = React;
 import {Decimal} from 'decimal.js';
 import moment from 'moment';
-import { getLocationBySlug, submitBooking } from './Api';
-import { formatPrice } from './Format';
-import { ComponentStatus } from "./Helpers";
+import {getLocationBySlug, submitBooking} from './Api';
+import {formatPrice} from './Format';
+import {ComponentStatus} from './Helpers';
 import ResourceSvg from './ResourceSvg';
 
 
 export default class ResourceSelector extends Component {
     state = {
         selectedResource: null,
-        status: ComponentStatus.loading
-    }
+        status: ComponentStatus.loading,
+    };
 
     async componentDidMount() {
         const location = await getLocationBySlug(this.props.apiBackend, this.props.locationSlug);
-        this.setState({
-            location: location.data,
-            status: ComponentStatus.ready
-        });
+        if (location) {
+            this.setState({
+                location: location.data,
+                status: ComponentStatus.ready,
+            });
+        } else {
+            this.setState({
+                status: ComponentStatus.error,
+            });
+        }
     }
 
     updateSelectedResourceEvt(evt) {
@@ -48,7 +55,7 @@ export default class ResourceSelector extends Component {
         let selectedResource = this.state.location.resource.filter(resource => resource.id === resource_id);
         if (!selectedResource.length) {
             this.setState({
-                selectedResource: null
+                selectedResource: null,
             });
             return;
         }
@@ -56,13 +63,13 @@ export default class ResourceSelector extends Component {
             this.setState({
                 selectedResource: selectedResource[0],
                 selectedTimespan: 'none',
-                bookingPrice: null
+                bookingPrice: null,
             });
             return;
         }
         this.setState({
             selectedResource: selectedResource[0],
-            bookingPrice: this.calculatePrice(selectedResource[0], this.state.selectedTimespan)
+            bookingPrice: this.calculatePrice(selectedResource[0], this.state.selectedTimespan),
         });
     }
 
@@ -72,7 +79,7 @@ export default class ResourceSelector extends Component {
                 selectedTimespan: 'none',
                 bookingBegin: null,
                 bookingEnd: null,
-                bookingPrice: null
+                bookingPrice: null,
             });
             return;
         }
@@ -85,7 +92,7 @@ export default class ResourceSelector extends Component {
             selectedTimespan: evt.target.value,
             bookingBegin: begin,
             bookingEnd: end,
-            bookingPrice: this.calculatePrice(this.state.selectedResource, evt.target.value)
+            bookingPrice: this.calculatePrice(this.state.selectedResource, evt.target.value),
         });
     }
 
@@ -103,15 +110,18 @@ export default class ResourceSelector extends Component {
             begin: this.state.bookingBegin.toISOString().substr(0, 19) + 'Z',
             end: this.state.bookingEnd.toISOString().substr(0, 19) + 'Z',
             location_id: this.state.location.id,
-            resource_id: this.state.selectedResource.id
+            resource_id: this.state.selectedResource.id,
         }).then(result => {
             window.location.href = wc_add_to_cart_params.cart_url;
-        })
+        });
     }
 
     render() {
         if (this.state.status === ComponentStatus.loading) {
-            return <div>...</div>;
+            return <p>Lade Stationsdaten...</p>;
+        } else if (this.state.status === ComponentStatus.error) {
+            return <p>Bei Laden der Station ist ein serverseitiger Fehler aufgetreten.<br/>
+                Bitte versuchen Sie es später erneut.</p>;
         }
         return (
             <div>
@@ -121,10 +131,12 @@ export default class ResourceSelector extends Component {
                         <div className="block">
                             <label htmlFor="selector-resource" className="label">Stellplatz</label>
                             <div className="control select is-fullwidth">
-                                <select value={(this.state.selectedResource) ? this.state.selectedResource.id : ''} onChange={this.updateSelectedResourceEvt.bind(this)}>
-                                    <option key='resource-0' value={0}>bitte wählen</option>
+                                <select value={(this.state.selectedResource) ? this.state.selectedResource.id : ''}
+                                        onChange={this.updateSelectedResourceEvt.bind(this)}>
+                                    <option key="resource-0" value={0}>bitte wählen</option>
                                     {this.state.location.resource.filter(resource => resource.status === 'free').map(resource =>
-                                        <option key={`resource-${resource.id}`} value={resource.id}>{resource.identifier}</option>
+                                        <option key={`resource-${resource.id}`}
+                                                value={resource.id}>{resource.identifier}</option>,
                                     )}
                                 </select>
                             </div>
@@ -136,17 +148,23 @@ export default class ResourceSelector extends Component {
                                     value={this.state.selectedTimespan}
                                     onChange={this.updateSelectedTimespan.bind(this)}
                                 >
-                                    <option key='resource-0' value='none'>bitte wählen</option>
-                                    {(!this.state.selectedResource || this.state.selectedResource.pricegroup.fee_day !== undefined) && <option value="day">Tag</option>}
-                                    {(!this.state.selectedResource || this.state.selectedResource.pricegroup.fee_week !== undefined) && <option value="week">Woche</option>}
-                                    {(!this.state.selectedResource || this.state.selectedResource.pricegroup.fee_month !== undefined) && <option value="month">Monat</option>}
-                                    {(!this.state.selectedResource || this.state.selectedResource.pricegroup.fee_year !== undefined) && <option value="year">Jahr</option>}
+                                    <option key="resource-0" value="none">bitte wählen</option>
+                                    {(!this.state.selectedResource || this.state.selectedResource.pricegroup.fee_day !== undefined) &&
+                                    <option value="day">Tag</option>}
+                                    {(!this.state.selectedResource || this.state.selectedResource.pricegroup.fee_week !== undefined) &&
+                                    <option value="week">Woche</option>}
+                                    {(!this.state.selectedResource || this.state.selectedResource.pricegroup.fee_month !== undefined) &&
+                                    <option value="month">Monat</option>}
+                                    {(!this.state.selectedResource || this.state.selectedResource.pricegroup.fee_year !== undefined) &&
+                                    <option value="year">Jahr</option>}
                                 </select>
                             </div>
                         </div>
                         <div className="block">
-                            {this.state.bookingEnd && <p style={{marginBottom: '0.5em'}}>Buchung bis zum {this.state.bookingEnd.clone().subtract(1, 'day').format('D.M.YY, 24:00')} Uhr</p>}
-                            {this.state.bookingPrice && <h3 style={{marginTop: 0}}>Preis: {formatPrice(this.state.bookingPrice)}</h3>}
+                            {this.state.bookingEnd && <p style={{marginBottom: '0.5em'}}>Buchung bis
+                                zum {this.state.bookingEnd.clone().subtract(1, 'day').format('D.M.YY, 24:00')} Uhr</p>}
+                            {this.state.bookingPrice &&
+                            <h3 style={{marginTop: 0}}>Preis: {formatPrice(this.state.bookingPrice)}</h3>}
                             <button
                                 onClick={this.submit.bind(this)}
                                 className={`button is-fullwidth ${(this.state.selectedResource && this.state.selectedTimespan) ? 'is-success' : ''}`}
@@ -169,6 +187,6 @@ export default class ResourceSelector extends Component {
                     </div>
                 </div>
             </div>
-        )
+        );
     }
 }
