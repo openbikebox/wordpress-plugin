@@ -3,7 +3,6 @@ services:
   webpack:
     image: node:12
     working_dir: /app
-    init: true
     volumes:
       - .:/app
     entrypoint: ['/app/webpack_dev.sh']
