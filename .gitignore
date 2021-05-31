@@ -1,5 +1,6 @@
 
-node_modules
-static/css
-static/js
-static/webpack-assets.json
+/.npm
+/node_modules
+/static/css
+/static/js
+/static/webpack-assets.json

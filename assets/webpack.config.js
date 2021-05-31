@@ -128,6 +128,5 @@ module.exports = (env, argv) => {
         );
     }
     return result;
-
 };
 

@@ -17,6 +17,8 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+defined('ABSPATH') or die('nope.');
+
 add_action( 'wp_enqueue_scripts', function() {
     if (!file_exists(OPEN_BIKE_BOX_BASE_PATH . 'static/webpack-assets.json'))
         return;
@@ -24,14 +26,14 @@ add_action( 'wp_enqueue_scripts', function() {
     if (!$assets_data)
         return;
     $assets = json_decode($assets_data);
-    if ($assets->main->css) {
+    if (isset($assets->main->css)) {
         wp_enqueue_style(
             'openbikebox',
             OPEN_BIKE_BOX_BASE_URL . $assets->main->css, array(),
             OPEN_BIKE_BOX_VERSION
         );
     }
-    if ($assets->main->js) {
+    if (isset($assets->main->js)) {
         wp_enqueue_script(
             'openbikebox',
             OPEN_BIKE_BOX_BASE_URL . $assets->main->js, array('jquery'),

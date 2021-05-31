@@ -17,30 +17,33 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-add_action('wp_ajax_obb_add_to_cart', 'obb_add_to_cart');
-add_action('wp_ajax_nopriv_obb_add_to_cart', 'obb_add_to_cart');
+defined('ABSPATH') or die('nope.');
+
+add_action('wp_ajax_obb_add_to_cart', 'obb_add_to_cart_ajax');
+add_action('wp_ajax_nopriv_obb_add_to_cart', 'obb_add_to_cart_ajax');
 
 /*
  * reserves an resource and adds it to cart
  */
-function obb_add_to_cart() {
+function obb_add_to_cart_ajax(): array {
     $data = json_decode(stripslashes($_POST['data']));
     obb_clear_cart();
-    $result = bike_box_request(OPEN_BIKE_BOX_BACKEND . '/api/v1/action/reserve', array(
+    echo json_encode(handle_obb_add_to_cart(bike_box_request(OPEN_BIKE_BOX_BACKEND . '/api/v1/action/reserve', array(
         'request_uid' => generate_uid(),
         'resource_id' => $data->resource_id,
         'requested_at' => gmdate("Y-m-d\TH:i:s\Z"),
         'begin' => $data->begin,
         'end' => $data->end
-    ));
-    if (!$result) {
-        echo json_encode(array('status' => -1, 'error' => 'invalid response'));
-        wp_die();
-    }
-    if ($result->status) {
-        echo json_encode(array('status' => -1, 'error' => 'invalide response status'));
-        wp_die();
-    }
+    ))));
+    wp_die();
+}
+
+
+function handle_obb_add_to_cart(object $result, ?int $extended_order_id = null, ?int $extended_order_item_id = null): array {
+    if (!$result)
+        return array('status' => -1, 'error' => 'invalid response');
+    if ($result->status)
+        return array('status' => -1, 'error' => 'invalide response status');
     $fields = array(
         'uid', 'request_uid', 'session', 'status', 'value_gross', 'value_net', 'value_tax', 'tax_rate', 'requested_at',
         'begin', 'end', 'valid_till'
@@ -58,9 +61,12 @@ function obb_add_to_cart() {
             $cart_item_data['_' . $parent_field . '_' . $child_field] = $result->data->$parent_field->$child_field;
         }
     }
+    if ($extended_order_item_id !== null && $extended_order_id !== null) {
+        $cart_item_data['_extended_order_id'] = $extended_order_id;
+        $cart_item_data['_extended_order_item_id'] = $extended_order_item_id;
+    }
     WC()->cart->add_to_cart(OPEN_BIKE_BOX_PRODUCT, 1, 0, array(), $cart_item_data);
-    echo json_encode(array('status' => 0));
-    wp_die();
+    return array('status' => 0);
 }
 
 /*

@@ -17,6 +17,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+defined('ABSPATH') or die('nope.');
 
 /*
  * validates all reservations by renewing them
@@ -51,9 +52,11 @@ add_action('woocommerce_checkout_create_order_line_item', function (WC_Order_Ite
     $fields = array(
         'uid', 'request_uid', 'session', 'status', 'value_gross', 'value_net', 'value_tax', 'tax_rate', 'requested_at',
         'begin', 'end', 'location_id', 'location_name', 'resource_identifier', 'location_slug', 'operator_name',
-        'valid_till'
+        'valid_till', 'extended_order_id', 'extended_order_item_id'
     );
     foreach ($fields as $field) {
+        if (!array_key_exists('_' . $field, $values))
+            continue;
         $item->add_meta_data('_' . $field, $values['_' . $field], true);
     }
 }, 10, 3);
@@ -63,9 +66,8 @@ add_action('woocommerce_checkout_create_order_line_item', function (WC_Order_Ite
  */
 add_action('woocommerce_checkout_order_created', function (WC_Order $order) {
     foreach($order->get_items() as $item_id => $item) {
-        if ($item->get_product_id() !== OPEN_BIKE_BOX_PRODUCT) {
+        if ($item->get_product_id() !== OPEN_BIKE_BOX_PRODUCT)
             continue;
-        }
         $result = bike_box_request(OPEN_BIKE_BOX_BACKEND . '/api/v1/action/book', array(
             'uid' => $item->get_meta('_uid'),
             'request_uid' => $item->get_meta('_request_uid'),
@@ -80,6 +82,21 @@ add_action('woocommerce_checkout_order_created', function (WC_Order $order) {
         ));
         $item->add_meta_data('_code', $result->data->token[0]->secret, true);
         $item->add_meta_data('_pin', $result->data->token[0]->identifier, true);
+
+        // check if extended order
+        $extended_order_id = $item->get_meta('_extended_order_id');
+        if ($extended_order_id) {
+            $extended_order_item_id = $item->get_meta('_extended_order_item_id');
+            if (!$extended_order_item_id)
+                continue;
+            $extended_order_item = get_order_item_by_id(wc_get_order($extended_order_id), $extended_order_item_id);
+            $extended_order_item->add_meta_data('_booking_extend_done', 'yes');
+            $extended_order_item->add_meta_data('_followup_order_id', $order->get_id());
+            $extended_order_item->add_meta_data('_followup_order_item_id', $item_id);
+            $extended_order_item->save();
+        }
+        if (!$item->get_meta('_extend_order_notification_id'))
+            $item->add_meta_data('_extend_order_notification_id', obb_schedule_remember_mail($order, $item));
         $item->save();
     }
     if ($order->get_payment_method() === 'cod') {
@@ -90,13 +107,28 @@ add_action('woocommerce_checkout_order_created', function (WC_Order $order) {
 /*
  * display time at order item
  */
-add_filter('woocommerce_order_item_name', function(string $name, WC_Order_Item_Product $item): string {
-    if (!$item->is_type('line_item'))
+add_filter('woocommerce_order_item_name', function(string $name, WC_Order_Item_Product $order_item): string {
+    if (!$order_item->is_type('line_item'))
         return $name;
-    if ($item->get_product_id() !== OPEN_BIKE_BOX_PRODUCT)
+    if ($order_item->get_product_id() !== OPEN_BIKE_BOX_PRODUCT)
         return $name;
-    $result = '<strong>' . $item->get_meta('_location_name') . ': Box ' . $item->get_meta('_resource_identifier') . '</strong><br>';
-    $result .= 'Zeitraum: ' . combine_datetime($item->get_meta('_begin'), $item->get_meta('_end'));
+    $result = '<strong>' . $order_item->get_meta('_location_name') . ': Box ' . $order_item->get_meta('_resource_identifier') . '</strong><br>';
+    $result .= 'Zeitraum: ' . combine_datetime_str($order_item->get_meta('_begin'), $order_item->get_meta('_end')). '<br>';
+    if (is_account_page()) {
+        $extended_order_id = $order_item->get_meta('_extended_order_id');
+        if ($extended_order_id) {
+            $result .= '<a class="button is-info" href="/mein-konto/bestellung/' . $extended_order_id . '/">Alte Buchung</a> ';
+        }
+        if (order_item_is_extendable($order_item)) {
+            $result .= '<a class="button is-success" href="' . get_booking_extended_link($order_item) . '">jetzt Buchung verlängern</a>';
+        }
+        else {
+            $followup_order_id = $order_item->get_meta('_followup_order_id');
+            if ($followup_order_id) {
+                $result .= '<a class="button is-info" href="/mein-konto/bestellung/' . $followup_order_id . '/">Neue Buchung</a> ';
+            }
+        }
+    }
     return $result;
 }, 10, 2);
 
@@ -123,7 +155,7 @@ add_filter('woocommerce_thankyou_order_received_text', function (string $text, W
         if (!$item->get_meta('_code'))
             continue;
         if ($first)
-            $text .= '<h2>Ihre Zugangsdaten / access code</h2>';
+            $text .= '<h2>Ihre ' . ($item->get_meta('_extended_order_id') ? 'neuen ': '') . 'Zugangsdaten / access code</h2>';
         $text .= '<table><tr><td>Gültig bis <strong>Datum</strong> /<br>valid until <strong>date</strong></td><th>' . localize_datetime($item->get_meta('_end'))->modify("-1 day")->format('Ymd') . '</th></tr>';
         $text .= '<tr><td>Box <strong>Nummer</strong> /<br>box <strong>number</strong></td><th>' . $item->get_meta('_resource_identifier') . '</th></tr>';
         $text .= '<tr><td><strong>PIN</strong></td><th>' . $item->get_meta('_pin') . '</th></tr>';
@@ -131,3 +163,65 @@ add_filter('woocommerce_thankyou_order_received_text', function (string $text, W
     }
     return $text . '<h2>Bestelldaten</h2>';
 }, 10, 2);
+
+/*
+ * schedules the remember e-mail
+ */
+function obb_schedule_remember_mail(WC_Order $order, WC_Order_Item $order_item): int {
+    $begin = DateTime::createFromFormat(
+        'Y-m-d\TH:i:s\Z',
+        $order_item->get_meta('_begin'),
+        new DateTimeZone('UTC')
+    );
+    $end = DateTime::createFromFormat(
+        'Y-m-d\TH:i:s\Z',
+        $order_item->get_meta('_end'),
+        new DateTimeZone('UTC')
+    );
+    $remember_datetime = obb_get_remember_datetime($begin, $end);
+    if ($remember_datetime < new DateTime())
+        return 0;
+    return as_schedule_single_action(
+        $remember_datetime->getTimestamp(),
+        'openbikebox_order_renew_notification',
+        array('order_id' => $order->get_id(), 'order_item_id' => $order_item->get_id())
+    );
+}
+
+/*
+ * calculates the moment when the remember mail should be sent
+ */
+function obb_get_remember_datetime(DateTime $begin, DateTime $end): DateTime {
+    $timedelta = $begin->diff($end)->days;
+    if ($timedelta > 40)
+        return (clone $end)->sub(new DateInterval('P7D'));
+    if ($timedelta > 20)
+        return (clone $end)->sub(new DateInterval('P3D'));
+    if ($timedelta > 3)
+        return (clone $end)->sub(new DateInterval('P1D'));
+    return (clone $end)->sub(new DateInterval('PT12H'));
+}
+
+/*
+ * registers remember mail trigger and by transforming args
+ */
+add_action('init', function () {
+    add_action('openbikebox_order_renew_notification', function ($args) {
+        do_action('openbikebox_order_renew_notification_mail', $args['order_id'], $args['order_item_id']);
+    });
+});
+
+function obb_test() {
+    /*
+    $order = new WC_Order(154);
+
+    foreach($order->get_items() as $item_id => $item) {
+        if ($item->get_product_id() !== OPEN_BIKE_BOX_PRODUCT)
+            continue;
+        if (!$item->get_meta('_extend_order_notification_id'))
+            $item->add_meta_data('_extend_order_notification_id', obb_schedule_remember_mail($order, $item));
+        $item->save();
+    }
+    */
+    do_action('openbikebox_order_renew_notification_mail', 172, 116);
+}

@@ -17,6 +17,8 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+defined('ABSPATH') or die('nope.');
+
 add_action('init', function () {
     remove_action('woocommerce_order_details_after_order_table', 'woocommerce_order_again_button');
 });
