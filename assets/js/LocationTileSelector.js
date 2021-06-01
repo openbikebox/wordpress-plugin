@@ -16,42 +16,51 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import React from "react";
-const { Component } = React;
-import { getLocations } from './Api';
+import React from 'react';
+
+const {Component} = React;
+import {getLocations} from './Api';
 
 const ComponentStatus = {
     loading: 1,
-    ready: 2
-}
+    ready: 2,
+};
 
 
 export default class LocationTileSelector extends Component {
     state = {
-        status: ComponentStatus.loading
-    }
+        status: ComponentStatus.loading,
+    };
 
     async componentDidMount() {
         const location = await getLocations(this.props.apiBackend);
-        this.setState({
-            locations: location.data,
-            status: ComponentStatus.ready
-        });
+        if (location) {
+            this.setState({
+                locations: location.data,
+                status: ComponentStatus.ready,
+            });
+        } else {
+            this.setState({
+                status: ComponentStatus.error,
+            });
+        }
     }
 
     render() {
-        if (this.state.status === ComponentStatus.loading)
-            return '...';
+        if (this.state.status === ComponentStatus.loading) {
+            return 'Lade Stationen...';
+        } else if (this.state.status === ComponentStatus.error) {
+            return 'Beim Laden der Stationen ist ein serverseitiger Fehler aufgetreten. Bitte versuchen Sie es später erneut.';
+        }
         return (
             <div id="obb-location-tiles">
                 {[...Array(Math.ceil(this.state.locations.length / 3))].map((item, i) =>
                     <div className="columns" key={`line-${i}`}>
                         {this.state.locations.slice(i * 3, (i + 1) * 3).map((location, j) => this.renderLocationTile(location, j))}
-                    </div>
+                    </div>,
                 )}
-
             </div>
-        )
+        );
     }
 
     selectLocation(slug) {
@@ -66,7 +75,7 @@ export default class LocationTileSelector extends Component {
                 onClick={this.selectLocation.bind(this, location.slug)}
             >
                 <figure className="image is-3by2">
-                    <img src={location.photo.url} alt={`Station ${location.name}`} />
+                    <img src={location.photo.url} alt={`Station ${location.name}`}/>
                 </figure>
                 <h4>{location.name}</h4>
                 <p>
@@ -75,8 +84,8 @@ export default class LocationTileSelector extends Component {
                     <i className="fa fa-bicycle" aria-hidden="true"></i>{' '}
                     {location.ressource_count} Räder
                 </p>
-                <button className="button is-fullwidth is-success">jetzt buchen</button>
+                <button className="button is-fullwidth is-success">Jetzt Buchen</button>
             </div>
-        )
+        );
     }
 }
