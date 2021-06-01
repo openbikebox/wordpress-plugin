@@ -1,0 +1,99 @@
+.resourceList {
+  box-sizing: border-box;
+}
+
+.resource {
+  border: 1px solid #d9d9d9;
+  border-radius: 1rem;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  background-color: #fdfdfd;
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.resourceHeader {
+  width: 100%;
+}
+
+.resourcePhoto {
+  width: 25%;
+  position: relative;
+}
+
+.resourcePhoto img {
+  width: 100%;
+  height: auto;
+  border-radius: 0.5rem;
+}
+
+.resourceDescription {
+  width: 75%;
+  padding: 1rem;
+}
+
+.resourceDescription.fullwidth {
+  width: 100%;
+}
+
+.resourceFoot {
+  margin-top: 1rem;
+  width: 100%;
+  border-radius: 0.75rem;
+  border: 1px solid #e6e6e6;
+  display: flex;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  padding: 0.25rem;
+}
+
+.resourceFoot table {
+  font-size: 0.75rem;
+  margin: 0;
+  flex-shrink: 0;
+  width: 50%;
+}
+
+.resourceFoot table:not(.has-background) tbody tr:nth-child(2n) td, .resourceFoot table:not(.has-background) th {
+  background-color: inherit;
+}
+
+.resourceFoot table tr:not(:last-child) th, .resourceFoot table tr:not(:last-child) td {
+  border-bottom: 1px solid #e6e6e6;
+}
+
+@media(max-width: 500px) {
+  .resourcePhoto {
+    width: 100%;
+    justify-content: center;
+    display: flex;
+  }
+
+  .resourceDescription {
+    padding-bottom: 0;
+  }
+
+  .resourceFoot {
+    margin-top: 0.5rem;
+  }
+
+  .resourceFoot table {
+    width: 100%;
+  }
+
+  .bookingLink {
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+  }
+}
+
+.bookingLink {
+  align-self: center;
+  margin-left: auto;
+  margin-right: auto;
+  min-width: 35%;
+}
+
+.bookingLink a {
+  width: 100%;
+}

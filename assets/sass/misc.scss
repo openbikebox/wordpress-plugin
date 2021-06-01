@@ -2,3 +2,7 @@
   display: block;
   width: 100%;
 }
+
+.button.is-success:hover, .button.is-success:active {
+  box-shadow: 2px 2px 2px #2a894b;
+}
