@@ -28,6 +28,7 @@ import { transformAttribute } from './Helpers';
 
 document.addEventListener('DOMContentLoaded', function(event) {
     let reactObjects = {
+        'obb-resource-select-box': LocationView,
         'obb-location-tiles-box': LocationTileSelector,
         'obb-resource-select-box': LocationView
     };

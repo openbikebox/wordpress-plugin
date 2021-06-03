@@ -42,24 +42,24 @@ PricingContainer.propTypes = {
     pricegroup: PropTypes.shape(pricegroupPropTypes).isRequired,
 };
 
-const Resource = (props) => {
+const ResourceListItem = (props) => {
     const {resource} = props;
     return <article className="resource">
-        <h3 className="resourceHeader">{resource.identifier}</h3>
+        <h3 className="resource-header">{resource.identifier}</h3>
         {!!resource.photo &&
-        <div className="resourcePhoto">
+        <div className="resource-photo">
             <img src={resource.photo.url} alt={'Foto von ' + resource.identifier}/>
         </div>}
-        <p className={resource.photo ? 'resourceDescription' : 'resourceDescription fullwidth'}>{resource.description}</p>
-        <div className="resourceFoot">
+        <p className={resource.photo ? 'resource-description' : 'resource-description fullwidth'}>{resource.description}</p>
+        <div className="resource-foot">
             <PricingContainer pricegroup={resource.pricegroup}/>
-            <span className="bookingLink"><a className="button is-success" href="#">Jetzt Buchen</a></span>
+            <span className="booking-link"><a className="button is-success" href={'/resource/' + resource.id}>Jetzt Buchen</a></span>
         </div>
     </article>;
 };
 
-Resource.propTypes = {
+ResourceListItem.propTypes = {
     resource: PropTypes.shape(resourcePropTypes),
 };
 
-export default Resource;
+export default ResourceListItem;

@@ -1,13 +1,16 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import Resource from './Resource';
+import ResourceListItem from './ResourceListItem';
 import {locationPropTypes} from './Models';
 
 const ResourceList = (props) => {
     const {location} = props;
-    return <div className="resourceList">
-        {location.resource.map((resource, index) => <Resource key={'resource' + index} resource={resource}/>)}
-    </div>;
+    return <>
+        <h2>{location.name} buchen</h2>
+        <div className="resource-list">
+            {location.resource.map((resource, index) => <ResourceListItem key={'resource' + index} resource={resource}/>)}
+        </div>
+    </>;
 };
 
 ResourceList.propTypes = {

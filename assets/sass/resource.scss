@@ -1,4 +1,4 @@
-.resourceList {
+.resource-list {
   box-sizing: border-box;
 }
 
@@ -12,31 +12,31 @@
   flex-wrap: wrap;
 }
 
-.resourceHeader {
+.resource-header {
   width: 100%;
 }
 
-.resourcePhoto {
+.resource-photo {
   width: 25%;
   position: relative;
 }
 
-.resourcePhoto img {
+.resource-photo img {
   width: 100%;
   height: auto;
   border-radius: 0.5rem;
 }
 
-.resourceDescription {
+.resource-description {
   width: 75%;
   padding: 1rem;
 }
 
-.resourceDescription.fullwidth {
+.resource-description.fullwidth {
   width: 100%;
 }
 
-.resourceFoot {
+.resource-foot {
   margin-top: 1rem;
   width: 100%;
   border-radius: 0.75rem;
@@ -47,53 +47,53 @@
   padding: 0.25rem;
 }
 
-.resourceFoot table {
+.resource-foot table {
   font-size: 0.75rem;
   margin: 0;
   flex-shrink: 0;
   width: 50%;
 }
 
-.resourceFoot table:not(.has-background) tbody tr:nth-child(2n) td, .resourceFoot table:not(.has-background) th {
+.resource-foot table:not(.has-background) tbody tr:nth-child(2n) td, .resource-foot table:not(.has-background) th {
   background-color: inherit;
 }
 
-.resourceFoot table tr:not(:last-child) th, .resourceFoot table tr:not(:last-child) td {
+.resource-foot table tr:not(:last-child) th, .resource-foot table tr:not(:last-child) td {
   border-bottom: 1px solid #e6e6e6;
 }
 
 @media(max-width: 500px) {
-  .resourcePhoto {
+  .resource-photo {
     width: 100%;
     justify-content: center;
     display: flex;
   }
 
-  .resourceDescription {
+  .resource-description {
     padding-bottom: 0;
   }
 
-  .resourceFoot {
+  .resource-foot {
     margin-top: 0.5rem;
   }
 
-  .resourceFoot table {
+  .resource-foot table {
     width: 100%;
   }
 
-  .bookingLink {
+  .booking-link {
     margin-top: 1rem;
     margin-bottom: 0.5rem;
   }
 }
 
-.bookingLink {
+.booking-link {
   align-self: center;
   margin-left: auto;
   margin-right: auto;
   min-width: 35%;
 }
 
-.bookingLink a {
+.booking-link a {
   width: 100%;
 }
