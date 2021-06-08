@@ -64,8 +64,8 @@ const GenericResourceSelector = (props) => {
         e.preventDefault();
         if (selectedResource && selectedTimespan) {
             submitBooking({
-                begin: bookingBegin,
-                end: bookingEnd,
+                begin: bookingBegin.toISOString().substr(0, 19) + 'Z',
+                end: bookingEnd.toISOString().substr(0, 19) + 'Z',
                 location_id: location.id,
                 resource_id: selectedResource.id,
             }).then(() => {
