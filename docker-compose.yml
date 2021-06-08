@@ -1,14 +1,8 @@
 version: '3'
 services:
   webpack:
-    build:
-      context: .
-      dockerfile: Dockerfile.webpack
-    container_name: bike-box-booking-wordpress-webpack
+    image: node:12
+    working_dir: /app
     volumes:
       - .:/app
-      - bike_box_booking_wordpress_node_modules:/app/node_modules
-    entrypoint: ['/app/webpack.sh']
-
-volumes:
-  bike_box_booking_wordpress_node_modules:
+    entrypoint: ['/app/webpack_dev.sh']

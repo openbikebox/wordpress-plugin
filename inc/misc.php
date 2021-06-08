@@ -51,3 +51,5 @@ function generate_uid(int $length = 32, string $keyspace='0123456789abcdefghijkl
     }
     return implode('', $pieces);
 }
+
+add_filter( 'woocommerce_persistent_cart_enabled', '__return_false' );

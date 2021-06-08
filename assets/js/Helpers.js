@@ -18,7 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 export const requestGet = async (url) => {
     const response = await fetch(url, {
-        method: 'GET'
+        method: 'GET',
     });
     return response.json();
 };
@@ -28,9 +28,9 @@ export const requestJsonPost = async (url, data, csrf_token) => {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            ...(csrf_token && {'X-CSRFToken': csrf_token})
+            ...(csrf_token && {'X-CSRFToken': csrf_token}),
         },
-        body: JSON.stringify(data)
+        body: JSON.stringify(data),
     });
     return response.json();
 };
@@ -41,7 +41,7 @@ export const requestAdminAjaxPost = async (url, action, data) => {
     form_data.append('data', JSON.stringify(data));
     const response = await fetch(url, {
         method: 'POST',
-        body: form_data
+        body: form_data,
     });
     return response.json();
 };
@@ -51,7 +51,7 @@ export const transformAttribute = (attribute) => {
     let counter = 0;
     while (counter < attribute.length) {
         if (attribute[counter] === '-' && counter < attribute.length + 1) {
-            result += attribute[counter + 1].toUpperCase()
+            result += attribute[counter + 1].toUpperCase();
             counter += 2;
             continue;
         }
@@ -62,9 +62,10 @@ export const transformAttribute = (attribute) => {
         counter++;
     }
     return result;
-}
+};
 
 export const ComponentStatus = {
     loading: 1,
-    ready: 2
-}
+    ready: 2,
+    error: 3,
+};

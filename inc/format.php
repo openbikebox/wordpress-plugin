@@ -17,6 +17,8 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+defined('ABSPATH') or die('nope.');
+
 /*
  * localizes datetime string to local datetime
  */
@@ -38,7 +40,7 @@ function format_datetime(?string $datetime_string, string $format = 'd.m.Y, H:i'
 /*
  * formats combined begin till end datetime string
  */
-function combine_datetime(string $begin_string, string $end_string, string $separator = ' - '): string {
+function combine_datetime_str(string $begin_string, string $end_string, string $separator = ' - '): string {
     //$begin = localize_datetime($begin_string);
     $end = localize_datetime($end_string);
     /*if ($begin->format('Y') === $end->format('Y'))
@@ -46,5 +48,10 @@ function combine_datetime(string $begin_string, string $end_string, string $sepa
     return $begin->format('d.m.y') . $separator . $end->format('d.m.y');
     */
     $end->modify('-12 hours');
+    return 'bis ' . $end->format('d.m.'). ', 24:00 Uhr';
+}
+
+function obb_format_end(DateTime $end): string {
+    $end = (clone $end)->modify('-12 hours');
     return 'bis ' . $end->format('d.m.'). ', 24:00 Uhr';
 }

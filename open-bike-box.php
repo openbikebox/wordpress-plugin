@@ -54,3 +54,4 @@ require 'inc/ajax.php';
 require 'inc/checkout.php';
 require 'inc/wc-admin.php';
 require 'inc/shortcodes.php';
+require 'inc/extend-booking.php';

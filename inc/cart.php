@@ -17,6 +17,8 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+defined('ABSPATH') or die('nope.');
+
 /*
  * remove cart link
  */
@@ -42,7 +44,7 @@ add_filter('woocommerce_cart_item_name', function(string $name, array $cart_item
     if ($cart_item['product_id'] !== OPEN_BIKE_BOX_PRODUCT)
         return $name;
     $result = '<strong>' . $cart_item['_location_name'] . ': Box ' . $cart_item['_resource_identifier'] . '</strong><br>';
-    $result .= 'Zeitraum: ' . combine_datetime($cart_item['_begin'], $cart_item['_end']);
+    $result .= 'Zeitraum: ' . combine_datetime_str($cart_item['_begin'], $cart_item['_end']);
     //$result .= '<br><small>Die Buchung ist noch bis ' . format_datetime($cart_item['_valid_till'], 'H:i') . ' für Sie reserviert.</small>';
     return $result;
 }, 10, 2);
@@ -55,7 +57,7 @@ add_filter('woocommerce_cart_item_name', function (string $name, array $cart_ite
         return $name;
     }
     $result = '<strong>' . $cart_item['_location_name'] . ': Box ' . $cart_item['_resource_identifier'] . '</strong><br>';
-    $result .= 'Zeitraum: ' . combine_datetime($cart_item['_begin'], $cart_item['_end']) . '<br>';
+    $result .= 'Zeitraum: ' . combine_datetime_str($cart_item['_begin'], $cart_item['_end']) . '<br>';
     //$result .= '<br><small>Die Buchung ist noch bis ' . format_datetime($cart_item['_valid_till'], 'H:i') . ' für Sie reserviert.</small>';
     return $result;
 }, 10, 2);
