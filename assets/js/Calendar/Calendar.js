@@ -28,14 +28,12 @@ const Calendar = (props) => {
     const today = new Date();
 
     const [view, setView] = React.useState(props.initialView ?? 'day');
-    const [activeDays, _setActiveDays] = React.useState(new Map());
-    const [activeDaysRerender, setActiveDaysRerender] = React.useState(false);
     const [errorString, setErrorString] = React.useState('');
     const [errors, _setErrors] = React.useState(new Map());
     const [maxReached, setMaxReached] = React.useState(false);
     const [bookingBegin, _setBookingBegin] = React.useState();
     const [bookingEnd, _setBookingEnd] = React.useState();
-    const [bookings, setBookings] = React.useState();
+    const [bookings, setBookings] = React.useState([]);
 
     const getNewDateWhilePreservingTimeIfNeeded = (oldDate, newDate) => {
         if (newDate) {
@@ -106,40 +104,6 @@ const Calendar = (props) => {
             newErrors.delete(error);
             setErrors(newErrors);
         }
-    };
-
-    const addActiveDay = (key, value) => {
-        if (props.maxBookingLength) {
-            if (activeDays.size >= props.maxBookingLength) {
-                addError('tooLong', 'Sie können maximal ' + props.maxBookingLength + ' Tage am Stück buchen.');
-                return false;
-            } else if (activeDays.size + 1 === props.maxBookingLength) {
-                setMaxReached(true);
-            }
-        }
-        removeError('tooLong');
-
-        let newActiveDays = activeDays;
-        newActiveDays.set(key, value);
-        setActiveDays(newActiveDays);
-
-        return true;
-    };
-
-    const removeActiveDay = (key) => {
-        removeError('tooLong');
-        let newActiveDays = activeDays;
-        newActiveDays.delete(key);
-        setActiveDays(newActiveDays);
-        setMaxReached(newActiveDays.size >= props.maxBookingLength);
-    };
-
-    const setActiveDays = (newActiveDays) => {
-        _setActiveDays(newActiveDays);
-        // React components do not change when the contents of a list or map property changes.
-        // Because of this, we have to change a boolean property to "manually" cause the rerender of calendar components.
-        setActiveDaysRerender(!activeDaysRerender);
-        return true;
     };
 
     const handleViewChange = (e) => {

@@ -46,7 +46,7 @@ const ResourceView = (props) => {
         <h2>{resource.identifier}</h2>
         {resource.photo && <img src={resource.photo.url} alt={'Foto von ' + resource.identifier}/>}
         <p>{resource.description}</p>
-        <Calendar bookings={[]} maxBookingLength={30} initialView={'asap'}/>
+        <Calendar bookings={[]} maxBookingLength={30} initialView={screen.width > 800 ? 'month' : 'asap'}/>
     </div>;
 };
 

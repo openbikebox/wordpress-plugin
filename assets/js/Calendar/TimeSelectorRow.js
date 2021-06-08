@@ -67,18 +67,20 @@ const TimeSelectorRow = (props) => {
         setMinute(newMinute);
     };
 
-    return <tr>
-        <td>
+    return <div className='calendar-booking-time-row'>
+        <div className='calendar-booking-time-input'>
+            <label htmlFor={props.hourId}>Stunde</label>
             <input type="number" id={props.hourId} min={props.minHour ?? 0} max={props.maxHour ?? 23}
                    onChange={handleHourChange} value={hour ?? ''} className="calendar-numeric-input"/>
             <DateTimeInputWarning min={props.minHour ?? 0} max={props.maxHour ?? 23} show={!hourValid}/>
-        </td>
-        <td>
+        </div>
+        <div className='calendar-booking-time-input'>
+            <label htmlFor={props.minuteId}>Minute</label>
             <input type="number" id={props.minuteId} min={getMinMinute()} max={getMaxMinute()}
                    onChange={handleMinuteChange} value={minute ?? ''} className="calendar-numeric-input"/>
             <DateTimeInputWarning min={getMinMinute()} max={getMaxMinute()} show={!minuteValid}/>
-        </td>
-    </tr>;
+        </div>
+    </div>;
 };
 
 TimeSelectorRow.propTypes = {
