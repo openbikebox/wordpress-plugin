@@ -188,4 +188,23 @@
     width: 45%;
     margin-right: 2.5%;
   }
+
+  .calendar-date, .calendar-week-day {
+    font-size: 0.8rem;
+  }
+
+  .calendar-heading-row h3 {
+    font-size: 1.2rem;
+    padding-top: 0.5rem;
+  }
+}
+
+@media(max-width: 500px) {
+  .calendar-date, .calendar-week-day {
+    font-size: 0.6rem;
+  }
+
+  .calendar-heading-row h3 {
+    font-size: 1rem;
+  }
 }
