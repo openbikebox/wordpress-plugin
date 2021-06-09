@@ -33,7 +33,8 @@ function obb_add_to_cart_ajax(): array {
         'resource_id' => $data->resource_id,
         'requested_at' => gmdate("Y-m-d\TH:i:s\Z"),
         'begin' => $data->begin,
-        'end' => $data->end
+        'end' => $data->end,
+        'predefined_daterange' => $data->predefined_daterange
     ))));
     wp_die();
 }

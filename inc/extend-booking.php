@@ -22,10 +22,14 @@ defined('ABSPATH') or die('nope.');
 
 
 function order_item_is_extendable(WC_Order_Item $order_item): bool {
+    $begin = DateTime::createFromFormat('Y-m-d\TH:i:s\Z', $order_item->get_meta('_begin'), new DateTimeZone('UTC'));
     $end = DateTime::createFromFormat('Y-m-d\TH:i:s\Z', $order_item->get_meta('_end'), new DateTimeZone('UTC'));
     if ($end < new DateTime()) {
         return false;
     }
+    // after half of the time the button is shown in user backend
+    if ((new DateTime())->getTimestamp() - $begin->getTimestamp() < 0.5 * ($end->getTimestamp() - $begin->getTimestamp()))
+        return false;
     if ($order_item->get_meta('_booking_extend_done') === 'yes')
         return false;
     return true;

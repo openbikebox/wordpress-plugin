@@ -26,12 +26,14 @@ import LocationTileSelector from './LocationTileSelector';
 import LocationView from './LocationView'
 import { transformAttribute } from './Helpers';
 import ResourceView from './ResourceView';
+import ThankYou from "./ThankYou";
 
 document.addEventListener('DOMContentLoaded', function(event) {
     let reactObjects = {
         'obb-resource-select-box': LocationView,
         'obb-location-tiles-box': LocationTileSelector,
         'obb-resource-info-box': ResourceView,
+        'obb-thank-you': ThankYou
     };
 
     for (const [html_id, ReactClass] of Object.entries(reactObjects)) {

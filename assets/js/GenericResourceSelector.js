@@ -68,6 +68,7 @@ const GenericResourceSelector = (props) => {
                 end: bookingEnd.toISOString().substr(0, 19) + 'Z',
                 location_id: location.id,
                 resource_id: selectedResource.id,
+                predefined_daterange: selectedTimespan
             }).then(() => {
                 window.location.href = wc_add_to_cart_params.cart_url;
             });
