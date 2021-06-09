@@ -145,4 +145,66 @@
 
 .calendar-asap-booking-button {
   margin-right: 1rem;
+  margin-bottom: 1rem;
+}
+
+.calendar-booking-container {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.calendar-booking-container h4 {
+  width: 100%;
+}
+
+.calendar-booking-date-input, .calendar-booking-time-input {
+  width: 32%;
+  margin-right: 1%;
+}
+
+.calendar-booking-date-input label, .calendar-booking-time-input label {
+  width: 100%;
+  display: inline-block;
+}
+
+.calendar-booking-time-row {
+  width: 100%;
+  display: flex;
+  align-content: flex-start;
+  flex-wrap: wrap;
+}
+
+.calendar-booking-date-input input, .calendar-booking-time-input input {
+  max-width: 100%;
+}
+
+.calendar-booking-date-input, .calendar-booking-time-input {
+  width: 32%;
+  margin-right: 1%;
+}
+
+@media(max-width: 1000px) {
+  .calendar-booking-date-input, .calendar-booking-time-input {
+    width: 45%;
+    margin-right: 2.5%;
+  }
+
+  .calendar-date, .calendar-week-day {
+    font-size: 0.8rem;
+  }
+
+  .calendar-heading-row h3 {
+    font-size: 1.2rem;
+    padding-top: 0.5rem;
+  }
+}
+
+@media(max-width: 500px) {
+  .calendar-date, .calendar-week-day {
+    font-size: 0.6rem;
+  }
+
+  .calendar-heading-row h3 {
+    font-size: 1rem;
+  }
 }

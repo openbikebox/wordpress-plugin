@@ -81,52 +81,27 @@ const BookingForm = (props) => {
     return <form onSubmit={props.submit} ref={props.submitRef}>
         <h3>Buchung</h3>
         <h4>Von</h4>
-        <table>
-            <tbody>
-            <tr>
-                <td><label htmlFor={'calendar-booking-begin-day-input'}>Tag</label></td>
-                <td><label htmlFor={'calendar-booking-begin-month-input'}>Monat</label></td>
-                <td><label htmlFor={'calendar-booking-begin-year-input'}>Jahr</label></td>
-            </tr>
+        <div className={'calendar-booking-container'}>
             <DateSelectorRow setDate={props.setBookingBegin} yearId={'calendar-booking-begin-year-input'}
                              monthId={'calendar-booking-begin-month-input'} date={props.bookingBegin}
                              minDate={props.today} dayId={'calendar-booking-begin-day-input'}/>
-            <tr>
-                <td><label htmlFor={'calendar-booking-begin-hour-input'}>Stunde</label></td>
-                <td><label htmlFor={'calendar-booking-begin-minute-input'}>Minute</label></td>
-            </tr>
             <TimeSelectorRow hourId={'calendar-booking-begin-hour-input'}
                              minuteId={'calendar-booking-begin-minute-input'}
                              minHour={beginSame ? props.today.getHours() : 0} setHour={setBeginHour} hour={beginHour}
                              minMinute={beginSame ? props.today.getMinutes() : 0} setMinute={setBeginMinute}
                              minute={beginMinute}/>
-            </tbody>
-        </table>
-        <h4>Bis</h4>
-        <table>
-            <tbody>
-            <tr>
-                <td><label htmlFor={'calendar-booking-end-day-input'}>Tag</label></td>
-                <td><label htmlFor={'calendar-booking-end-month-input'}>Monat</label></td>
-                <td><label htmlFor={'calendar-booking-end-year-input'}>Jahr</label></td>
-            </tr>
+            <h4>Bis</h4>
             <DateSelectorRow setDate={props.setBookingEnd} yearId={'calendar-booking-end-year-input'}
                              monthId={'calendar-booking-end-month-input'} date={props.bookingEnd}
                              minDate={props.bookingBegin ?? undefined} dayId={'calendar-booking-end-day-input'}/>
-            <tr>
-                <td><label htmlFor={'calendar-booking-end-hour-input'}>Stunde</label></td>
-                <td><label htmlFor={'calendar-booking-end-minute-input'}>Minute</label></td>
-            </tr>
             <TimeSelectorRow hourId={'calendar-booking-end-hour-input'}
                              minuteId={'calendar-booking-end-minute-input'}
                              minHour={endSame ? beginHour : 0} hour={endHour} setHour={setEndHour}
                              minMinute={endSame ? beginMinute : 0} minute={endMinute} setMinute={setEndMinute}/>
-            </tbody>
-        </table>
+        </div>
         <button type="submit" className="button is-success" disabled={!props.bookingBegin || !props.bookingEnd}>
             Buchung abschicken
         </button>
-
     </form>;
 };
 
