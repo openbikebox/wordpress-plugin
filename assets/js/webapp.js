@@ -23,13 +23,17 @@ import React from "react";
 import ReactDOM from "react-dom";
 
 import LocationTileSelector from './LocationTileSelector';
-import ResourceSelector from './ResourceSelector'
+import LocationView from './LocationView'
 import { transformAttribute } from './Helpers';
+import ResourceView from './ResourceView';
+import ThankYou from "./ThankYou";
 
 document.addEventListener('DOMContentLoaded', function(event) {
     let reactObjects = {
+        'obb-resource-select-box': LocationView,
         'obb-location-tiles-box': LocationTileSelector,
-        'obb-resource-select-box': ResourceSelector
+        'obb-resource-info-box': ResourceView,
+        'obb-thank-you': ThankYou
     };
 
     for (const [html_id, ReactClass] of Object.entries(reactObjects)) {
@@ -40,10 +44,7 @@ document.addEventListener('DOMContentLoaded', function(event) {
                 props[transformAttribute(key.substr(5))] = dom_obj.getAttribute(key)
             })
             ReactDOM.render(
-                <ReactClass
-                    ref={(reactClass) => {window[ReactClass.name.charAt(0).toLowerCase() + ReactClass.name.slice(1)] = reactClass}}
-                    {...props}
-                />,
+                <ReactClass{...props}/>,
                 dom_obj
             );
         }

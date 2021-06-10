@@ -1,0 +1,210 @@
+@import './vars';
+
+.calendar {
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: row;
+  width: 100%;
+  box-sizing: border-box;
+  justify-content: space-around;
+}
+
+.calendar-week {
+  width: 100%;
+  flex-shrink: 0;
+  display: flex;
+  justify-content: space-around;
+  padding-bottom: 1%;
+}
+
+.calendar-date, .calendar-week-day {
+  flex-shrink: 0;
+  width: 13.5%;
+  min-height: 3rem;
+  text-align: center;
+  border-radius: 0.5rem;
+  background-color: inherit;
+}
+
+.calendar-date[aria-disabled=true] {
+  color: $gray;
+  font-weight: initial;
+}
+
+.calendar-date:not([aria-disabled=true]:not([data-active=true])):hover, .calendar-date[data-active=true] {
+  background-color: $greenTransparent;
+  cursor: pointer;
+}
+
+.calendar-date:not([aria-disabled=true])[data-partial=true], .calendar-date[data-partial=true]:not([aria-disabled=true]):hover, .calendar-date[data-partial=true][data-active=true] {
+  background-color: $yellow;
+}
+
+.calendar-date[aria-disabled=true]:not[data-active=true]:hover {
+  background-color: lightgray;
+  cursor: not-allowed;
+}
+
+.calendar-heading-row {
+  display: flex;
+  align-content: center;
+  width: 100%;
+  margin-bottom: 0.5rem;
+}
+
+.calendar-heading-row h3 {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.calendar-change-month-button {
+  cursor: pointer;
+  height: 100%;
+  background-color: inherit;
+  border-radius: 0.5rem;
+}
+
+.calendar-change-month-button[disabled=true] {
+  cursor: not-allowed;
+}
+
+.calendar-change-month-button[disabled=true]:hover {
+  background-color: initial;
+}
+
+.calendar-last-month-button {
+  align-self: flex-start;
+  margin-right: auto;
+}
+
+.calendar-next-month-button {
+  align-self: flex-end;
+  margin-left: auto;
+}
+
+.calendar-view-change-meta-label {
+  display: block;
+  padding-bottom: 0.5rem;
+}
+
+.calendar-view-change-button {
+  padding: 0.5rem;
+  border: 1px solid;
+  border-radius: 0.25rem;
+  margin: 0.25rem;
+  cursor: pointer;
+}
+
+.calendar-view-change-button:focus {
+  border-color: $green;
+}
+
+.calendar-view-change-button[data-checked=true] {
+  background-color: $greenTransparent;
+  box-shadow: 2px 2px 2px $darkGreen;
+  text-decoration: underline;
+}
+
+.calendar-view-change-button input[type=radio] {
+  position: fixed;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.calendar-meta-display {
+  padding: 0.25rem;
+  border-radius: 0.25rem;
+  border: 1px solid;
+}
+
+.calendar-meta-display:empty {
+  visibility: hidden;
+}
+
+.calendar-error-display {
+  border-color: $red;
+  color: $red;
+}
+
+.calendar-warning-display {
+  border-color: $orange;
+  color: $orange;
+}
+
+.calendar-date-input-warning {
+  color: $orange;
+}
+
+.calendar-numeric-input {
+  border-radius: 0.25rem;
+}
+
+.calendar-numeric-input:invalid {
+  border: 1px solid $red;
+}
+
+.calendar-asap-booking-button {
+  margin-right: 1rem;
+  margin-bottom: 1rem;
+}
+
+.calendar-booking-container {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.calendar-booking-container h4 {
+  width: 100%;
+}
+
+.calendar-booking-date-input, .calendar-booking-time-input {
+  width: 32%;
+  margin-right: 1%;
+}
+
+.calendar-booking-date-input label, .calendar-booking-time-input label {
+  width: 100%;
+  display: inline-block;
+}
+
+.calendar-booking-time-row {
+  width: 100%;
+  display: flex;
+  align-content: flex-start;
+  flex-wrap: wrap;
+}
+
+.calendar-booking-date-input input, .calendar-booking-time-input input {
+  max-width: 100%;
+}
+
+.calendar-booking-date-input, .calendar-booking-time-input {
+  width: 32%;
+  margin-right: 1%;
+}
+
+@media(max-width: 1000px) {
+  .calendar-booking-date-input, .calendar-booking-time-input {
+    width: 45%;
+    margin-right: 2.5%;
+  }
+
+  .calendar-date, .calendar-week-day {
+    font-size: 0.8rem;
+  }
+
+  .calendar-heading-row h3 {
+    font-size: 1.2rem;
+    padding-top: 0.5rem;
+  }
+}
+
+@media(max-width: 500px) {
+  .calendar-date, .calendar-week-day {
+    font-size: 0.6rem;
+  }
+
+  .calendar-heading-row h3 {
+    font-size: 1rem;
+  }
+}

@@ -1,4 +1,19 @@
+@import './vars';
+
 .bike-box-booking select, .bike-box-booking label, .bike-box-booking button {
   display: block;
   width: 100%;
+}
+
+.button {
+  font-size: 1.2rem;
+}
+
+.button.is-success {
+  background-color: $green;
+}
+
+.button.is-success:hover, .button.is-success:active, .button.is-success:focus, .button.is-success:focus:not(:active) {
+  background-color: $darkGreen;
+  box-shadow: 2px 2px 2px $darkGreen;
 }

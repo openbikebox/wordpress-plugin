@@ -20,27 +20,32 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 defined('ABSPATH') or die('nope.');
 
 /*
- * includes location template file for single locations
+ * includes location and resource template files for single locations or resources
  */
-add_filter( 'template_include', function(string $template): string {
+add_filter('template_include', function (string $template): string {
     if (get_query_var('location')) {
         return OPEN_BIKE_BOX_BASE_PATH . '/templates/location.php';
+    } else if (get_query_var('resource')) {
+        return OPEN_BIKE_BOX_BASE_PATH . '/templates/resource.php';
     }
     return $template;
 });
 
 /*
- * add location query var
+ * add location and resource query vars
  */
-add_filter('query_vars', function(array $vars): array {
-    $vars[] = 'location';
+add_filter('query_vars', function (array $vars): array {
+    array_push($vars, 'location', 'resource');
     return $vars;
 });
 
 /*
  * enable location to rewrite rules
  */
-add_filter('rewrite_rules_array',  function(array $rules): array {
-    $new = array('^location/([^/]*[/]?)$' => 'index.php?location=$matches[1]');
+add_filter('rewrite_rules_array', function (array $rules): array {
+    $new = [
+        '^location/([^/]*[/]?)$' => 'index.php?location=$matches[1]',
+        '^resource/([^/]*[/]?)$' => 'index.php?resource=$matches[1]',
+    ];
     return $new + $rules;
 });
