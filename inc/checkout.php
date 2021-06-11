@@ -52,7 +52,7 @@ add_action('woocommerce_checkout_create_order_line_item', function (WC_Order_Ite
     $fields = array(
         'uid', 'request_uid', 'session', 'status', 'value_gross', 'value_net', 'value_tax', 'tax_rate', 'requested_at',
         'begin', 'end', 'location_id', 'location_name', 'resource_identifier', 'location_slug', 'operator_name',
-        'valid_till', 'extended_order_id', 'extended_order_item_id'
+        'valid_till', 'extended_order_id', 'extended_order_item_id', 'auth_methods'
     );
     foreach ($fields as $field) {
         if (!array_key_exists('_' . $field, $values))
@@ -148,25 +148,33 @@ add_action('woocommerce_order_item_quantity_html', function (string $count, WC_O
  */
 add_filter('woocommerce_thankyou_order_received_text', function (string $text, WC_Order $order): string {
     $first = true;
-    foreach($order->get_items() as $item_id => $item) {
-        if ($item->get_product_id() !== OPEN_BIKE_BOX_PRODUCT) {
+    foreach($order->get_items() as $item_id => $order_item) {
+        if ($order_item->get_product_id() !== OPEN_BIKE_BOX_PRODUCT) {
             continue;
         }
-        if ($item->get_meta('_code')) {
+        $auth_methods = explode(',', $order_item->get_meta('_auth_methods') ?? '');
+        print_r($auth_methods);
+        if (in_array('code', $auth_methods) && $order_item->get_meta('_code')) {
             if ($first)
-                $text .= '<h2>Ihre ' . ($item->get_meta('_extended_order_id') ? 'neuen ' : '') . 'Zugangsdaten / access code</h2>';
-            $text .= '<table><tr><td>Gültig bis <strong>Datum</strong> /<br>valid until <strong>date</strong></td><th>' . localize_datetime($item->get_meta('_end'))->modify("-1 day")->format('Ymd') . '</th></tr>';
-            $text .= '<tr><td>Box <strong>Nummer</strong> /<br>box <strong>number</strong></td><th>' . $item->get_meta('_resource_identifier') . '</th></tr>';
-            $text .= '<tr><td><strong>PIN</strong></td><th>' . $item->get_meta('_pin') . '</th></tr>';
-            $text .= '<tr><td>Prüf <strong>Summe</strong> /<br>check <strong>sum</strong></td><th>' . $item->get_meta('_code') . '</th></tr></table>';
+                $text .= '<h2>Ihre ' . ($order_item->get_meta('_extended_order_id') ? 'neuen ' : '') . 'Zugangsdaten / access code</h2>';
+            $text .= '<table><tr><td>Gültig bis <strong>Datum</strong> /<br>valid until <strong>date</strong></td><th>' . localize_datetime($order_item->get_meta('_end'))->modify("-1 day")->format('Ymd') . '</th></tr>';
+            $text .= '<tr><td>Box <strong>Nummer</strong> /<br>box <strong>number</strong></td><th>' . $order_item->get_meta('_resource_identifier') . '</th></tr>';
+            $text .= '<tr><td><strong>PIN</strong></td><th>' . $order_item->get_meta('_pin') . '</th></tr>';
+            $text .= '<tr><td>Prüf <strong>Summe</strong> /<br>check <strong>sum</strong></td><th>' . $order_item->get_meta('_code') . '</th></tr></table>';
         }
-        $text .= '<div 
-            id="obb-thank-you" 
-            data-session="' . hash('sha256', $item->get_meta('_session')) . '" 
-            data-uid="' . $item->get_meta('uid') . '" 
-            data-request-uid="' . $item->get_meta('request_uid') . '" 
-            data-url="' . OPEN_BIKE_BOX_BACKEND . '"
-        ></div>';
+
+        $begin = DateTime::createFromFormat('Y-m-d\TH:i:s\Z', $order_item->get_meta('_begin'), new DateTimeZone('UTC'));
+        $end = DateTime::createFromFormat('Y-m-d\TH:i:s\Z', $order_item->get_meta('_end'), new DateTimeZone('UTC'));
+        if (in_array('connect', $auth_methods) && $begin->getTimestamp() <= (new DateTime())->getTimestamp() && $end->getTimestamp() >= (new DateTime())->getTimestamp()) {
+            $text .= '<div 
+                id="obb-thank-you" 
+                data-session="' . hash('sha256', $order_item->get_meta('_session')) . '" 
+                data-uid="' . $order_item->get_meta('_uid') . '" 
+                data-request-uid="' . $order_item->get_meta('_request_uid') . '" 
+                data-url="' . OPEN_BIKE_BOX_BACKEND . '"
+                data-resource-id="' . $order_item->get_meta('_resource') . '"
+            ></div>';
+        }
     }
     return $text . '<h2>Bestelldaten</h2>';
 }, 10, 2);
@@ -217,18 +225,3 @@ add_action('init', function () {
         do_action('openbikebox_order_renew_notification_mail', $args['order_id'], $args['order_item_id']);
     });
 });
-
-function obb_test() {
-    /*
-    $order = new WC_Order(154);
-
-    foreach($order->get_items() as $item_id => $item) {
-        if ($item->get_product_id() !== OPEN_BIKE_BOX_PRODUCT)
-            continue;
-        if (!$item->get_meta('_extend_order_notification_id'))
-            $item->add_meta_data('_extend_order_notification_id', obb_schedule_remember_mail($order, $item));
-        $item->save();
-    }
-    */
-    do_action('openbikebox_order_renew_notification_mail', 172, 116);
-}

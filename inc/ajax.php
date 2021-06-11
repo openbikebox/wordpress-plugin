@@ -52,6 +52,7 @@ function handle_obb_add_to_cart(object $result, ?int $extended_order_id = null, 
     foreach ($fields as $field) {
         $cart_item_data['_' . $field] = $result->data->$field;
     }
+    $cart_item_data['_auth_methods'] = implode(',', $result->data->auth_methods);
     $child_defs = array(
         'location' => array('id', 'name', 'slug'),
         'resource' => array('identifier'),

@@ -28,7 +28,10 @@ function order_item_is_extendable(WC_Order_Item $order_item): bool {
         return false;
     }
     // after half of the time the button is shown in user backend
-    if ((new DateTime())->getTimestamp() - $begin->getTimestamp() < 0.5 * ($end->getTimestamp() - $begin->getTimestamp()))
+    //if ((new DateTime())->getTimestamp() - $begin->getTimestamp() < 0.5 * ($end->getTimestamp() - $begin->getTimestamp()))
+    //    return false;
+    $remember_datetime = obb_get_remember_datetime($begin, $end);
+    if ($remember_datetime < new DateTime())
         return false;
     if ($order_item->get_meta('_booking_extend_done') === 'yes')
         return false;
@@ -57,6 +60,7 @@ function get_booking_extend_link_by_order(WC_Order $order): string {
     return '';
 }
 
+
 function get_booking_extended_link(WC_Order_Item $order_item): string {
     if ($order_item->get_meta('_booking_extend_secret')) {
         $booking_extend_secret = $order_item->get_meta('_booking_extend_secret');
@@ -68,6 +72,7 @@ function get_booking_extended_link(WC_Order_Item $order_item): string {
     }
     return wc_get_cart_url() . '?action=extend-booking&order=' . $order_item->get_order_id() . '&item=' . $order_item->get_id() . '&secret=' . $booking_extend_secret;
 }
+
 
 add_action('wp', function () {
     if (!is_cart()) {
@@ -122,6 +127,7 @@ add_action('wp', function () {
     }
     wc_add_notice('Die Verlängerung wurde zum Warenkorb hinzugefügt.', 'success');
 });
+
 
 function get_order_item_by_id(WC_Order $order, int $order_item_id) {
     foreach($order->get_items() as $item_id => $order_item) {
