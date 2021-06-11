@@ -153,7 +153,6 @@ add_filter('woocommerce_thankyou_order_received_text', function (string $text, W
             continue;
         }
         $auth_methods = explode(',', $order_item->get_meta('_auth_methods') ?? '');
-        print_r($auth_methods);
         if (in_array('code', $auth_methods) && $order_item->get_meta('_code')) {
             if ($first)
                 $text .= '<h2>Ihre ' . ($order_item->get_meta('_extended_order_id') ? 'neuen ' : '') . 'Zugangsdaten / access code</h2>';

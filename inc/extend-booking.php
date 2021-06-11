@@ -27,9 +27,6 @@ function order_item_is_extendable(WC_Order_Item $order_item): bool {
     if ($end < new DateTime()) {
         return false;
     }
-    // after half of the time the button is shown in user backend
-    //if ((new DateTime())->getTimestamp() - $begin->getTimestamp() < 0.5 * ($end->getTimestamp() - $begin->getTimestamp()))
-    //    return false;
     $remember_datetime = obb_get_remember_datetime($begin, $end);
     if ($remember_datetime < new DateTime())
         return false;
@@ -125,7 +122,7 @@ add_action('wp', function () {
         wc_add_notice('Die Verlängerung konnte nicht zum Warenkorb hinzugefügt werden.', 'error');
         return;
     }
-    wc_add_notice('Die Verlängerung wurde zum Warenkorb hinzugefügt.', 'success');
+    wc_add_notice('Die Verlängerung wurde zum Warenkorb hinzugefügt.');
 });
 
 
