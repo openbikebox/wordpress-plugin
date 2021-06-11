@@ -13,13 +13,17 @@ const RequestStatus = {
 }
 
 const ThankYou = (props) => {
-    const [requestStatus, setRequestStatus] = useState();
+    const [requestStatus, setRequestStatus] = useState(RequestStatus.idle);
 
     const openResource = () => {
         if (requestStatus !== RequestStatus.idle)
             return;
-        setRequestStatus(RequestStatus.requestOpenRunning)
-        requestJsonPost(props.url + '/api/v1/action/open', {session: props.session, request_uid: props.request_uid, uid: props.uid})
+        setRequestStatus(RequestStatus.requestOpenRunning);
+        setTimeout(() => {
+            if (RequestStatus.requestOpenRunning === requestStatus)
+                setRequestStatus(RequestStatus.idle)
+        }, 2000);
+        requestJsonPost(props.url + '/api/v1/action/open', {session: props.session, request_uid: props.requestUid, uid: props.uid})
             .then(data => {
                 setRequestStatus((data.status === 0) ? RequestStatus.requestOpenSuccess : RequestStatus.requestOpenFailed);
                 setTimeout(() => setRequestStatus(RequestStatus.idle), 3000);
@@ -30,23 +34,29 @@ const ThankYou = (props) => {
         if (requestStatus !== RequestStatus.idle)
             return;
         setRequestStatus(RequestStatus.requestCloseRunning)
-        requestJsonPost(props.url + '/api/v1/action/close', {session: props.session, request_uid: props.request_uid, uid: props.uid})
+        setTimeout(() => {
+            if (RequestStatus.requestCloseRunning === requestStatus)
+                setRequestStatus(RequestStatus.idle)
+        }, 2000);
+        requestJsonPost(props.url + '/api/v1/action/close', {session: props.session, request_uid: props.requestUid, uid: props.uid})
             .then(data => {
                 setRequestStatus((data.status === 0) ? RequestStatus.requestCloseSuccess : RequestStatus.requestCloseFailed);
                 setTimeout(() => setRequestStatus(RequestStatus.idle), 3000);
             })
     }
 
+    const getIcon = classes => <i className={`fa ${classes}`} style={{marginLeft: '20px'}} />;
+
     return <div className="columns control">
-        <div className="column is-6">
+        <div className="column is-6" style={{marginBottom: 30}}>
             <button
                 onClick={closeResource}
-                className={`button is-fullwidth is-success`}
+                className={`button is-fullwidth is-danger`}
             >
-                schliessen{' '}
-                {requestStatus === RequestStatus.requestCloseRunning && <i className="fa fa-spinner fa-spin fa-fw"></i>}
-                {requestStatus === RequestStatus.requestCloseSuccess && <i className="fa fa-check-circle" aria-hidden="true"></i>}
-                {requestStatus === RequestStatus.requestCloseFailed && <i className="fa fa-exclamation-circle" aria-hidden="true"></i>}
+                schliessen
+                {requestStatus === RequestStatus.requestCloseRunning && getIcon('fa-spinner fa-spin fa-fw')}
+                {requestStatus === RequestStatus.requestCloseSuccess && getIcon('fa-check-circle')}
+                {requestStatus === RequestStatus.requestCloseFailed && getIcon('fa-exclamation-circle')}
             </button>
         </div>
         <div className="column is-6">
@@ -54,10 +64,10 @@ const ThankYou = (props) => {
                 onClick={openResource}
                 className={`button is-fullwidth is-success`}
             >
-                öffnen{' '}
-                {requestStatus === RequestStatus.requestOpenRunning && <i className="fa fa-spinner fa-spin fa-fw"></i>}
-                {requestStatus === RequestStatus.requestOpenSuccess && <i className="fa fa-check-circle" aria-hidden="true"></i>}
-                {requestStatus === RequestStatus.requestOpenFailed && <i className="fa fa-exclamation-circle" aria-hidden="true"></i>}
+                öffnen
+                {requestStatus === RequestStatus.requestOpenRunning && getIcon('fa-spinner fa-spin fa-fw')}
+                {requestStatus === RequestStatus.requestOpenSuccess && getIcon('fa-check-circle')}
+                {requestStatus === RequestStatus.requestOpenFailed && getIcon('fa-exclamation-circle')}
             </button>
         </div>
     </div>
@@ -66,7 +76,7 @@ const ThankYou = (props) => {
 ThankYou.propTypes = {
     url: PropTypes.string,
     session: PropTypes.string,
-    request_uid: PropTypes.string,
+    requestUid: PropTypes.string,
     uid: PropTypes.string
 }
 
