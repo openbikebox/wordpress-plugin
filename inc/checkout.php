@@ -65,6 +65,25 @@ add_action('woocommerce_checkout_create_order_line_item', function (WC_Order_Ite
  * finalizes action at backend after successfull order
  */
 add_action('woocommerce_checkout_order_created', function (WC_Order $order) {
+    if ($order->get_payment_method() === 'cod') {
+        $order->update_status('completed', 'Automatische Fertigstellung aufgrund von Barzahlung');
+    }
+    if (floatval($order->get_total('raw')) === 0.0) {
+        $order->update_status('completed', 'Automatische Fertigstellung aufgrund von Gutschein');
+    }
+}, 10, 1);
+
+
+add_action('woocommerce_order_status_completed', function (int $order_id, WC_Order $order) {
+    eventually_finalize_booking($order);
+}, 10, 2);
+
+
+function eventually_finalize_booking(WC_Order $order) {
+    if ($order->get_status() !== 'completed')
+        return;
+    if ($order->get_meta('_booking_finalized'))
+        return;
     foreach($order->get_items() as $item_id => $item) {
         if ($item->get_product_id() !== OPEN_BIKE_BOX_PRODUCT)
             continue;
@@ -99,10 +118,10 @@ add_action('woocommerce_checkout_order_created', function (WC_Order $order) {
             $item->add_meta_data('_extend_order_notification_id', obb_schedule_remember_mail($order, $item));
         $item->save();
     }
-    if ($order->get_payment_method() === 'cod') {
-        $order->update_status('completed', 'Automatische Fertigstellung aufgrund von Barzahlung');
-    }
-}, 10, 1);
+    $order->update_meta_data('_booking_finalized', '1');
+    $order->save();
+}
+
 
 /*
  * display time at order item
@@ -196,7 +215,8 @@ function obb_schedule_remember_mail(WC_Order $order, WC_Order_Item $order_item):
     if ($remember_datetime < new DateTime())
         return 0;
     return as_schedule_single_action(
-        $remember_datetime->getTimestamp(),
+        //$remember_datetime->getTimestamp(),
+        (new DateTime())->getTimestamp() + 60,
         'openbikebox_order_renew_notification',
         array('order_id' => $order->get_id(), 'order_item_id' => $order_item->get_id())
     );
@@ -217,10 +237,18 @@ function obb_get_remember_datetime(DateTime $begin, DateTime $end): DateTime {
 }
 
 /*
+ * force loading emails in scheduler
+ */
+add_action('action_scheduler_run_queue', function() {
+    if(!class_exists('WC_Emails'))
+        return;
+    WC_Emails::instance();
+}, 0);
+
+
+/*
  * registers remember mail trigger and by transforming args
  */
-add_action('init', function () {
-    add_action('openbikebox_order_renew_notification', function ($args) {
-        do_action('openbikebox_order_renew_notification_mail', $args['order_id'], $args['order_item_id']);
-    });
-});
+add_action('openbikebox_order_renew_notification', function ($order_id, $order_item_id) {
+    do_action('openbikebox_order_renew_notification_mail', $order_id, $order_item_id);
+}, 10, 2);

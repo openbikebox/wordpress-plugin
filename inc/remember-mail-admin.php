@@ -46,7 +46,7 @@ class WC_Extend_Booking_Email extends WC_Email {
         $order = wc_get_order($order_id);
         $order_item = get_order_item_by_id($order, $order_item_id);
 
-        if ( !is_a( $order, 'WC_Order' ) ) {
+        if ( !is_a( $order, 'WC_Order' ) || $order->get_status() !== 'completed') {
             $this->restore_locale();
             return;
         }
@@ -62,8 +62,7 @@ class WC_Extend_Booking_Email extends WC_Email {
         $this->placeholders['{new_booking_end_date}'] = obb_format_end($new_end);
         $this->placeholders['{booking_extend_link}'] = get_booking_extend_link_by_order($order);
         if ( $this->is_enabled() && $this->get_recipient() ) {
-            $result = $this->send( $this->get_recipient(), $this->get_subject(), $this->get_content(), $this->get_headers(), $this->get_attachments() );
-            echo($result);
+            $this->send( $this->get_recipient(), $this->get_subject(), $this->get_content(), $this->get_headers(), $this->get_attachments() );
         }
 
         $this->restore_locale();
