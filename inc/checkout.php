@@ -215,8 +215,7 @@ function obb_schedule_remember_mail(WC_Order $order, WC_Order_Item $order_item):
     if ($remember_datetime < new DateTime())
         return 0;
     return as_schedule_single_action(
-        //$remember_datetime->getTimestamp(),
-        (new DateTime())->getTimestamp() + 60,
+        $remember_datetime->getTimestamp(),
         'openbikebox_order_renew_notification',
         array('order_id' => $order->get_id(), 'order_item_id' => $order_item->get_id())
     );
