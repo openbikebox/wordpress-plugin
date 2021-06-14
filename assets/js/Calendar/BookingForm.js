@@ -13,8 +13,16 @@ const BookingForm = (props) => {
     const [endSame, setEndSame] = React.useState(false);
 
     const updateBeginAndEndSame = () => {
-        setBeginSame(compareDateWithoutTime(props.bookingBegin, props.today) === 0);
-        setEndSame(compareDateWithoutTime(props.bookingEnd, props.bookingBegin) === 0);
+        if (props.bookingBegin) {
+            setBeginSame(compareDateWithoutTime(props.bookingBegin, props.today) === 0);
+        } else {
+            setBeginSame(false);
+        }
+        if (props.bookingEnd) {
+            setEndSame(compareDateWithoutTime(props.bookingEnd, props.bookingBegin) === 0);
+        } else {
+            setEndSame(false);
+        }
     };
 
     const setBeginAndEndSame = (to) => {
