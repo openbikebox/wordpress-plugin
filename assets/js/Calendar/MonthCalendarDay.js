@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import {calculateDateDiff, checkInDateRange, compareDateWithoutTime, compareMonthAndYear} from './CalendarHelper';
+import {convertedBookingPropTypes} from './CalendarPropTypes';
 
 const MonthCalendarDay = (props) => {
     const {date, bookings} = props;
@@ -102,7 +103,7 @@ const MonthCalendarDay = (props) => {
 };
 
 MonthCalendarDay.propTypes = {
-    bookings: PropTypes.array.isRequired,
+    bookings: PropTypes.arrayOf(PropTypes.shape(convertedBookingPropTypes)).isRequired,
     disabled: PropTypes.bool.isRequired,
     date: PropTypes.object.isRequired,
     dragging: PropTypes.bool.isRequired,

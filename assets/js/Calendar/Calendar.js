@@ -6,6 +6,7 @@ import MultiMonthCalendar from './MultiMonthCalendar';
 import BookingForm from './BookingForm';
 import AsapCalendar from './AsapCalendar';
 import {compareDateWithoutTime} from './CalendarHelper';
+import {rawBookingPropTypes} from './CalendarPropTypes';
 
 const CalendarMeta = (props) => {
     return <div aria-live="assertive" aria-relevant="additions text">
@@ -77,7 +78,7 @@ const Calendar = (props) => {
         }
     }, [props.bookings]);
 
-    const submitRef = React.createRef();
+    const submitRef = React.useRef(null);
 
     const maxReachedWarning = 'Sie haben die längste mögliche Buchnungszeit von ' + props.maxBookingLength + ' Tagen erreicht.';
 
@@ -133,7 +134,7 @@ const Calendar = (props) => {
         </p>
         {view === 'asap' &&
         <AsapCalendar today={today} setBookingBegin={setBookingBegin} setBookingEnd={setBookingEnd}
-                      submitRef={submitRef}/>}
+                      submitRef={submitRef} bookings={bookings}/>}
         {view === 'day' &&
         <DayCalendar bookings={bookings}/>}
         {view === 'month' &&
@@ -155,7 +156,7 @@ const Calendar = (props) => {
 };
 
 Calendar.propTypes = {
-    bookings: PropTypes.array.isRequired,
+    bookings: PropTypes.arrayOf(PropTypes.shape(rawBookingPropTypes)).isRequired,
     maxBookingLength: PropTypes.number, //TODO: seconds, not days
     initialView: PropTypes.oneOf(['day', 'month', '3months', 'asap']),
 };

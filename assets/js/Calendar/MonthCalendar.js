@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import MonthCalendarDay from './MonthCalendarDay';
 import {compareMonthAndYear} from './CalendarHelper';
+import {convertedBookingPropTypes} from './CalendarPropTypes';
 
 const MonthCalendar = (props) => {
     const {today} = props;
@@ -56,8 +57,7 @@ const MonthCalendar = (props) => {
     };
 
     const handlePreviousMonthClick = () => {
-        // TODO: add config option to allow going to past months
-        if (present === 1) {
+        if (props.allowPast || present === 1) {
             goToPreviousMonth();
         }
     };
@@ -138,7 +138,7 @@ const MonthCalendar = (props) => {
 };
 
 export const monthCalendarPropTypes = {
-    bookings: PropTypes.array.isRequired,
+    bookings: PropTypes.arrayOf(PropTypes.shape(convertedBookingPropTypes)).isRequired,
     maxReached: PropTypes.bool.isRequired,
     today: PropTypes.object.isRequired,
     bookingBegin: PropTypes.object,
