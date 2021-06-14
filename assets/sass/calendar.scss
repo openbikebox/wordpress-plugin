@@ -36,10 +36,6 @@
   cursor: pointer;
 }
 
-.calendar-date:not([aria-disabled=true])[data-partial=true], .calendar-date[data-partial=true]:not([aria-disabled=true]):hover, .calendar-date[data-partial=true][data-active=true] {
-  background-color: $yellow;
-}
-
 .calendar-date[aria-disabled=true]:not[data-active=true]:hover {
   background-color: lightgray;
   cursor: not-allowed;
@@ -87,7 +83,13 @@
   padding-bottom: 0.5rem;
 }
 
-.calendar-view-change-button {
+.calendar-view-radio {
+  position: fixed;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.calendar-view-radio + label {
   padding: 0.5rem;
   border: 1px solid;
   border-radius: 0.25rem;
@@ -95,20 +97,16 @@
   cursor: pointer;
 }
 
-.calendar-view-change-button:focus {
-  border-color: $green;
-}
-
-.calendar-view-change-button[data-checked=true] {
-  background-color: $greenTransparent;
+.calendar-view-radio:checked + label {
+  background-color: $darkGreen;
   box-shadow: 2px 2px 2px $darkGreen;
+  border-color: $darkGreen;
+  color: #e5e5e5;
   text-decoration: underline;
 }
 
-.calendar-view-change-button input[type=radio] {
-  position: fixed;
-  opacity: 0;
-  pointer-events: none;
+.calendar-view-radio:focus + label {
+  box-shadow: 3px 3px 3px $darkGreen;
 }
 
 .calendar-meta-display {

@@ -114,23 +114,18 @@ const Calendar = (props) => {
     return <div>
         <CalendarMeta maxReached={maxReached} errorString={errorString} maxReachedWarning={maxReachedWarning}/>
         <p><span className="calendar-view-change-meta-label">Ansicht:</span>
-            <label className={'calendar-view-change-button'} data-checked={view === 'asap'}>
-                <input type="radio" name="view" value="asap" checked={view === 'asap'} onChange={handleViewChange}/>
-                Sofort
-            </label>
-            <label className={'calendar-view-change-button'} data-checked={view === 'day'}>
-                <input type="radio" name="view" value="day" checked={view === 'day'} onChange={handleViewChange}/>
-                Tag
-            </label>
-            <label className={'calendar-view-change-button'} data-checked={view === 'month'}>
-                <input type="radio" name="view" value="month" checked={view === 'month'} onChange={handleViewChange}/>
-                Monat
-            </label>
-            <label className={'calendar-view-change-button'} data-checked={view === '3months'}>
-                <input type="radio" name="view" value="3months" checked={view === '3months'}
-                       onChange={handleViewChange}/>
-                3 Monate
-            </label>
+            <input type="radio" name="view" value="asap" className="calendar-view-radio" checked={view === 'asap'}
+                   onChange={handleViewChange} id="calendar-view-radio-asap"/>
+            <label htmlFor="calendar-view-radio-asap">Sofort</label>
+            <input type="radio" name="view" value="day" className="calendar-view-radio" checked={view === 'day'}
+                   onChange={handleViewChange} id="calendar-view-radio-day"/>
+            <label htmlFor="calendar-view-radio-day">Tag</label>
+            <input type="radio" name="view" value="month" className="calendar-view-radio" checked={view === 'month'}
+                   onChange={handleViewChange} id="calendar-view-radio-month"/>
+            <label htmlFor="calendar-view-radio-month">Monat</label>
+            <input type="radio" name="view" className="calendar-view-radio" value="3months" checked={view === '3months'}
+                   onChange={handleViewChange} id="calendar-view-radio-3months"/>
+            <label htmlFor="calendar-view-radio-3months">3 Monate</label>
         </p>
         {view === 'asap' &&
         <AsapCalendar today={today} setBookingBegin={setBookingBegin} setBookingEnd={setBookingEnd}
