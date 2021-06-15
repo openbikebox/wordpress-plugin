@@ -8,16 +8,44 @@ const MonthCalendarDay = (props) => {
     const [active, setActive] = React.useState();
     const [dragStated, setDragStarted] = React.useState(false);
     const [available, setAvailable] = React.useState(true);
-    const [partial, setPartial] = React.useState(false);
+    const [partial, setPartial] = React.useState('false');
+    const [partialTopTime, setPartialTopTime] = React.useState();
+    const [partialBottomTime, setPartialBottomTime] = React.useState();
+    const [partialActive, setPartialActive] = React.useState('');
+    const [partialAvailable, setPartialAvailable] = React.useState('');
 
     const ref = React.createRef();
 
+    const updatePartialActiveForSwitch = (newPartialActive, bottomTime) => {
+        if (props.bookingEnd) {
+            newPartialActive = bottomTime > props.bookingEnd.getHours() ? 'bottom' : 'top';
+        }
+        return newPartialActive;
+    };
+
     React.useEffect(() => {
+        let newPartialActive = '';
         if (props.bookingBegin && props.bookingEnd) {
-            setActive(checkInDateRange(props.bookingBegin, props.bookingEnd, date));
+            const newActive = checkInDateRange(props.bookingBegin, props.bookingEnd, date);
+            setActive(newActive);
+            if (newActive) {
+                const beginComparison = compareDateWithoutTime(props.bookingBegin, date);
+                const endComparison = compareDateWithoutTime(props.bookingEnd, date);
+                if (beginComparison === 0 && props.bookingBegin.getHours() > 0) {
+                    newPartialActive = 'bottom';
+                }
+                if (endComparison === 0 && props.bookingEnd.getHours() < 23) {
+                    if (newPartialActive === 'bottom') {
+                        newPartialActive = updatePartialActiveForSwitch('switch', partialBottomTime);
+                    } else {
+                        newPartialActive = 'top';
+                    }
+                }
+            }
         } else {
             setActive(false);
         }
+        setPartialActive(newPartialActive);
     }, [date, props.bookingBegin, props.bookingEnd]);
 
     React.useEffect(() => {
@@ -25,12 +53,37 @@ const MonthCalendarDay = (props) => {
             const beginComparison = compareDateWithoutTime(booking.begin, date);
             const endComparison = compareDateWithoutTime(booking.end, date);
             setAvailable(beginComparison > 0 || endComparison < 0);
-            if (beginComparison === 0) {
-                setPartial(true);
-            } else if (endComparison === 0) {
-                setPartial(true);
-            } else {
-                setPartial(false);
+            if (beginComparison <= 0 && endComparison >= 0) {
+                let newPartialTopTime = null;
+                let newPartialBottomTime = null;
+                let newPartial = 'false';
+
+                if (!props.disabled && beginComparison === 0) {
+                    setAvailable(true);
+                    newPartial = 'bottom';
+                    if (!partialBottomTime || partialBottomTime < booking.begin) {
+                        newPartialBottomTime = booking.end;
+                    }
+                }
+                if (!props.disabled && endComparison === 0 && booking.end.getHours() < 23) {
+                    if (newPartial === 'bottom') {
+                        newPartial = 'switch';
+                        if (active && props.bookingEnd) {
+                            setPartialActive(updatePartialActiveForSwitch(partialActive, newPartialBottomTime));
+                        }
+                    } else {
+                        newPartial = 'top';
+                    }
+                    setAvailable(true);
+                    newPartialTopTime = booking.end;
+                    if (!partialTopTime || partialTopTime > booking.end) {
+                        newPartialTopTime = booking.begin;
+                    }
+                }
+                setPartialTopTime(newPartialTopTime);
+                setPartialBottomTime(newPartialBottomTime);
+                setPartial(newPartial);
+                break;
             }
         }
     }, [date, bookings]);
@@ -60,10 +113,10 @@ const MonthCalendarDay = (props) => {
                 }
             } else {
                 if (!props.bookingBegin || compareDateWithoutTime(date, props.bookingBegin) < 0) {
-                    props.setBookingBegin(date);
+                    props.setBookingBegin(partialTopTime ?? date);
                 }
                 if (!props.bookingEnd || compareDateWithoutTime(date, props.bookingEnd) > 0) {
-                    props.setBookingEnd(date);
+                    props.setBookingEnd(partialBottomTime ?? date);
                 }
             }
         }
@@ -92,13 +145,14 @@ const MonthCalendarDay = (props) => {
         }
     };
 
-    return <button className="calendar-date" onClick={handleDayClick}
+    return <button className="calendar-date" onClick={handleDayClick} data-available={available}
                    aria-disabled={props.disabled || props.maxReached || !available}
-                   aria-label={date.toLocaleDateString()}
-                   data-partial={partial} data-active={active} aria-checked={active} role="checkbox"
+                   aria-label={date.toLocaleDateString()} data-part-available={partialAvailable}
+                   data-partial={!partialTopTime || !partialBottomTime ? partial : 'switch'} data-active={active}
+                   aria-checked={active} role="checkbox" data-part-active={partialActive}
                    onMouseDown={handleMouseDown} onMouseUp={handleMouseUp} onMouseLeave={handleMouseLeave}
                    onMouseEnter={handleDrag} ref={ref}>
-        {date.getDate()}
+        <span>{date.getDate()}</span>
     </button>;
 };
 
