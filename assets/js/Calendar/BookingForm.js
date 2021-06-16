@@ -121,7 +121,7 @@ const BookingForm = (props) => {
         }
     }, [props.bookingBegin, props.bookingEnd]);
 
-    return <form onSubmit={props.submit} ref={props.submitRef}>
+    return <form onSubmit={props.handleSubmit} ref={props.submitRef}>
         <h3>Buchung</h3>
         <div className={'calendar-booking-container'}>
             {editingBegin
@@ -178,7 +178,7 @@ BookingForm.propTypes = {
     setBookingBegin: PropTypes.func.isRequired,
     bookingEnd: PropTypes.object,
     setBookingEnd: PropTypes.func.isRequired,
-    submit: PropTypes.func.isRequired,
+    handleSubmit: PropTypes.func.isRequired,
     submitRef: PropTypes.object.isRequired,
     priceGroup: PropTypes.shape(pricegroupPropTypes).isRequired,
 };

@@ -185,18 +185,16 @@ const Calendar = (props) => {
         <CalendarMeta maxReached={maxReached} maxReachedWarning={maxReachedWarning} errorString={errorString}/>
         <BookingForm bookingBegin={bookingBegin} setBookingBegin={setBookingBegin} bookingEnd={bookingEnd}
                      setBookingEnd={setBookingEnd} priceGroup={props.priceGroup}
-                     today={today} submitRef={submitRef}
-                     submit={(e) => {
-                         e.preventDefault();
-                     }}/>
+                     today={today} submitRef={submitRef} handleSubmit={props.handleSubmit}/>
     </div>;
 };
 
 Calendar.propTypes = {
     bookings: PropTypes.arrayOf(PropTypes.shape(rawBookingPropTypes)).isRequired,
-    maxBookingLength: PropTypes.number, //TODO: seconds, not days
+    maxBookingLength: PropTypes.number,
     initialView: PropTypes.oneOf(['day', 'month', '3months', 'asap']),
     priceGroup: PropTypes.shape(pricegroupPropTypes).isRequired,
+    handleSubmit: PropTypes.func.isRequired,
 };
 
 export default Calendar;
