@@ -1,8 +1,61 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import MonthCalendarDay from './MonthCalendarDay';
-import {compareMonthAndYear} from './CalendarHelper';
+import {checkIfDateActive, checkIfDateAvailable, compareMonthAndYear} from './CalendarHelper';
 import {convertedBookingPropTypes} from './CalendarPropTypes';
+
+const getCalendarWeeks = (year, month, day, present, unavailableDates, newBookingBegin, newBookingEnd, dragging, setDragging, lastSet, setBookingBegin, setBookingEnd) => {
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const firstWeekdayInMonth = new Date(year, month, 1).getDay();
+    const lastDayInLastMonth = new Date(year, month, 0);
+    const lastDateInLastMonth = lastDayInLastMonth.getDate();
+    const lastWeekdayInLastMonth = lastDayInLastMonth.getDay();
+
+    const getPreviousMonthDay = (c) => {
+        let dayValue;
+        if (c < lastWeekdayInLastMonth) {
+            dayValue = lastDateInLastMonth - (lastWeekdayInLastMonth - c);
+        } else {
+            dayValue = lastDateInLastMonth;
+        }
+        return dayValue;
+    };
+
+    const getDayDisabledState = (elapsed) => {
+        if (present === 0) {
+            return elapsed < day;
+        } else {
+            return present === -1;
+        }
+    };
+
+    let weeks = [];
+    let weekCounter = 0;
+    let elapsed = 0;
+
+    while (elapsed < daysInMonth) {
+        let days = [];
+        for (let c = 0; c < 7; c++) {
+            let thisDate;
+            if (weekCounter === 0 && c < firstWeekdayInMonth) {
+                thisDate = new Date(year, month - 1, getPreviousMonthDay(c));
+            } else {
+                elapsed++;
+                thisDate = new Date(year, month, elapsed);
+            }
+            const available = checkIfDateAvailable(thisDate, unavailableDates);
+            const active = checkIfDateActive(thisDate, newBookingBegin, newBookingEnd);
+            days.push(<MonthCalendarDay date={thisDate} disabled={getDayDisabledState(elapsed)} available={available}
+                                        active={active} isToday={present === 0 && day === elapsed} dragging={dragging}
+                                        setDragging={setDragging} lastSet={lastSet} setBookingBegin={setBookingBegin}
+                                        setBookingEnd={setBookingEnd} bookingBegin={newBookingBegin}
+                                        bookingEnd={newBookingEnd}/>);
+        }
+        weekCounter++;
+        weeks.push(days);
+    }
+    return weeks;
+};
 
 const MonthCalendar = (props) => {
     const {today} = props;
@@ -11,12 +64,9 @@ const MonthCalendar = (props) => {
     const [present, setPresent] = React.useState(null);
     const [year, setYear] = React.useState(null);
     const [month, setMonth] = React.useState(null);
-    const [day, setDay] = React.useState(null);
-    const [firstDayOfMonth, setFirstDayOfMonth] = React.useState(null);
     const [daysInMonth, setDaysInMonth] = React.useState(null);
-    const [lastDayInLastMonth, setLastDayInLastMonth] = React.useState(null);
     const [dragging, setDragging] = React.useState(false);
-
+    const [calendarWeeks, setCalendarWeeks] = React.useState([]);
 
     React.useEffect(() => {
         if (props.initialCurrent) {
@@ -30,12 +80,14 @@ const MonthCalendar = (props) => {
         const newDay = current.getDate();
         setYear(newYear);
         setMonth(newMonth);
-        setDay(newDay);
-        setFirstDayOfMonth(new Date(newYear, newMonth, 1).getDay());
         setDaysInMonth(new Date(newYear, newMonth + 1, 0).getDate());
-        setLastDayInLastMonth(new Date(newYear, newMonth, 0));
-        setPresent(compareMonthAndYear(current, today));
-    }, [current]);
+
+        const newPresent = compareMonthAndYear(current, today);
+        setCalendarWeeks(getCalendarWeeks(newYear, newMonth, newDay, newPresent, props.unavailableDates,
+            props.bookingBegin, props.bookingEnd, dragging, setDragging, props.lastSet, props.setBookingBegin,
+            props.setBookingEnd));
+        setPresent(newPresent);
+    }, [current, props.unavailableDates, props.bookingBegin, props.bookingEnd]);
 
     const switchMonth = (newCurrent, back) => {
         if (props.handleMonthSwitch) {
@@ -62,48 +114,49 @@ const MonthCalendar = (props) => {
         }
     };
 
-    const getPreviousMonthDay = (days, c) => {
-        const lastWeekdayInLastMonth = lastDayInLastMonth.getDay();
-        let dayValue;
-        if (c < lastWeekdayInLastMonth) {
-            dayValue = lastDayInLastMonth.getDate() - (lastWeekdayInLastMonth - c);
-        } else {
-            dayValue = lastDayInLastMonth.getDate();
-        }
-        return dayValue;
-    };
-
-    const getDayDisabledState = (elapsed) => {
-        if (present === 0) {
-            return elapsed < day;
-        } else {
-            return present === -1;
-        }
-    };
-
-    let weeks = [];
-    let elapsed = 0;
-    let weekCounter = 0;
-    while (elapsed < daysInMonth) {
-        let days = [];
-        for (let c = 0; c < 7; c++) {
-            let thisDate;
-            if ((weekCounter === 0 && c < firstDayOfMonth)) {
-                thisDate = new Date(year, month - 1, getPreviousMonthDay(days, c));
-            } else {
-                elapsed++;
-                thisDate = new Date(year, month, elapsed);
-            }
-            days.push(<MonthCalendarDay date={thisDate} bookingBegin={props.bookingBegin}
-                                        bookingEnd={props.bookingEnd} setBookingBegin={props.setBookingBegin}
-                                        setBookingEnd={props.setBookingEnd} bookings={props.bookings}
-                                        dragging={dragging} maxReached={props.maxReached}
-                                        setDragging={setDragging}
-                                        disabled={getDayDisabledState(elapsed)}/>);
-        }
-        weeks.push(days);
-        weekCounter++;
-    }
+    // const getPreviousMonthDay = (days, c) => {
+    //     const lastWeekdayInLastMonth = lastDayInLastMonth.getDay();
+    //     let dayValue;
+    //     if (c < lastWeekdayInLastMonth) {
+    //         dayValue = lastDayInLastMonth.getDate() - (lastWeekdayInLastMonth - c);
+    //     } else {
+    //         dayValue = lastDayInLastMonth.getDate();
+    //     }
+    //     return dayValue;
+    // };
+    //
+    // const getDayDisabledState = (elapsed) => {
+    //     if (present === 0) {
+    //         return elapsed < day;
+    //     } else {
+    //         return present === -1;
+    //     }
+    // };
+    //
+    //
+    // let weeks = [];
+    // let elapsed = 0;
+    // let weekCounter = 0;
+    // while (elapsed < daysInMonth) {
+    //     let days = [];
+    //     for (let c = 0; c < 7; c++) {
+    //         let thisDate;
+    //         if ((weekCounter === 0 && c < firstDayOfMonth)) {
+    //             thisDate = new Date(year, month - 1, getPreviousMonthDay(days, c));
+    //         } else {
+    //             elapsed++;
+    //             thisDate = new Date(year, month, elapsed);
+    //         }
+    //         days.push(<MonthCalendarDay date={thisDate} bookingBegin={props.bookingBegin}
+    //                                     bookingEnd={props.bookingEnd} setBookingBegin={props.setBookingBegin}
+    //                                     setBookingEnd={props.setBookingEnd} bookings={props.bookings}
+    //                                     dragging={dragging} maxReached={props.maxReached}
+    //                                     setDragging={setDragging}
+    //                                     disabled={getDayDisabledState(elapsed)}/>);
+    //     }
+    //     weeks.push(days);
+    //     weekCounter++;
+    // }
 
     const weekDays = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
 
@@ -125,7 +178,7 @@ const MonthCalendar = (props) => {
             {weekDays.map((weekDay) => <div key={'calendarWeekDay' + weekDay}
                                             className="calendar-week-day">{weekDay}</div>)}
         </div>
-        {weeks.map((week, index) => {
+        {calendarWeeks.map((week, index) => {
             return <div className="calendar-week" key={'calendarWeek' + index}>
                 {week.map((day, dayIndex) => {
                     return <React.Fragment
@@ -139,8 +192,10 @@ const MonthCalendar = (props) => {
 
 export const monthCalendarPropTypes = {
     bookings: PropTypes.arrayOf(PropTypes.shape(convertedBookingPropTypes)).isRequired,
+    unavailableDates: PropTypes.object, //TODO Shape?
     maxReached: PropTypes.bool.isRequired,
     today: PropTypes.object.isRequired,
+    lastSet: PropTypes.oneOf(['begin', 'end']).isRequired,
     bookingBegin: PropTypes.object,
     bookingEnd: PropTypes.object,
     setBookingBegin: PropTypes.func.isRequired,

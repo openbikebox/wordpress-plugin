@@ -1,171 +1,139 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import {calculateDateDiff, checkInDateRange, compareDateWithoutTime, compareMonthAndYear} from './CalendarHelper';
-import {convertedBookingPropTypes} from './CalendarPropTypes';
+import {calculateDateDiff, compareDateWithoutTime} from './CalendarHelper';
 
-const MonthCalendarDay = (props) => {
-    const {date, bookings} = props;
-    const [active, setActive] = React.useState();
-    const [dragStated, setDragStarted] = React.useState(false);
-    const [available, setAvailable] = React.useState(true);
-    const [partial, setPartial] = React.useState('false');
-    const [partialTopTime, setPartialTopTime] = React.useState();
-    const [partialBottomTime, setPartialBottomTime] = React.useState();
-    const [partialActive, setPartialActive] = React.useState('');
-    const [partialAvailable, setPartialAvailable] = React.useState('');
+const CalendarDayTooltip = (props) => {
+    const {available} = props;
 
-    const ref = React.createRef();
-
-    const updatePartialActiveForSwitch = (newPartialActive, bottomTime) => {
-        if (props.bookingEnd) {
-            newPartialActive = bottomTime > props.bookingEnd.getHours() ? 'bottom' : 'top';
-        }
-        return newPartialActive;
-    };
-
-    React.useEffect(() => {
-        let newPartialActive = '';
-        if (props.bookingBegin && props.bookingEnd) {
-            const newActive = checkInDateRange(props.bookingBegin, props.bookingEnd, date);
-            setActive(newActive);
-            if (newActive) {
-                const beginComparison = compareDateWithoutTime(props.bookingBegin, date);
-                const endComparison = compareDateWithoutTime(props.bookingEnd, date);
-                if (beginComparison === 0 && props.bookingBegin.getHours() > 0) {
-                    newPartialActive = 'bottom';
-                }
-                if (endComparison === 0 && props.bookingEnd.getHours() < 23) {
-                    if (newPartialActive === 'bottom') {
-                        newPartialActive = updatePartialActiveForSwitch('switch', partialBottomTime);
-                    } else {
-                        newPartialActive = 'top';
-                    }
-                }
-            }
-        } else {
-            setActive(false);
-        }
-        setPartialActive(newPartialActive);
-    }, [date, props.bookingBegin, props.bookingEnd]);
-
-    React.useEffect(() => {
-        for (const booking of bookings) {
-            const beginComparison = compareDateWithoutTime(booking.begin, date);
-            const endComparison = compareDateWithoutTime(booking.end, date);
-            setAvailable(beginComparison > 0 || endComparison < 0);
-            if (beginComparison <= 0 && endComparison >= 0) {
-                let newPartialTopTime = null;
-                let newPartialBottomTime = null;
-                let newPartial = 'false';
-
-                if (!props.disabled && beginComparison === 0) {
-                    setAvailable(true);
-                    newPartial = 'bottom';
-                    if (!partialBottomTime || partialBottomTime < booking.begin) {
-                        newPartialBottomTime = booking.end;
-                    }
-                }
-                if (!props.disabled && endComparison === 0 && booking.end.getHours() < 23) {
-                    if (newPartial === 'bottom') {
-                        newPartial = 'switch';
-                        if (active && props.bookingEnd) {
-                            setPartialActive(updatePartialActiveForSwitch(partialActive, newPartialBottomTime));
-                        }
-                    } else {
-                        newPartial = 'top';
-                    }
-                    setAvailable(true);
-                    newPartialTopTime = booking.end;
-                    if (!partialTopTime || partialTopTime > booking.end) {
-                        newPartialTopTime = booking.begin;
-                    }
-                }
-                setPartialTopTime(newPartialTopTime);
-                setPartialBottomTime(newPartialBottomTime);
-                setPartial(newPartial);
-                break;
-            }
-        }
-    }, [date, bookings]);
-
-    const handleDayClick = () => {
-        if (!props.disabled && available) {
-            if (active) {
-                if (compareDateWithoutTime(props.bookingBegin, props.bookingEnd) === 0) {
-                    props.setBookingBegin(null);
-                    props.setBookingEnd(null);
-                    return;
-                }
-                const startCompare = calculateDateDiff(props.bookingBegin, date);
-                if (startCompare === 0) {
-                    props.setBookingBegin(props.bookingEnd);
-                } else {
-                    const endCompare = calculateDateDiff(date, props.bookingEnd);
-                    if (endCompare === 0) {
-                        props.setBookingEnd(props.bookingBegin);
-                    } else {
-                        if (startCompare >= endCompare) {
-                            props.setBookingEnd(date);
-                        } else {
-                            props.setBookingBegin(date);
-                        }
-                    }
-                }
-            } else {
-                if (!props.bookingBegin || compareDateWithoutTime(date, props.bookingBegin) < 0) {
-                    props.setBookingBegin(partialTopTime ?? date);
-                }
-                if (!props.bookingEnd || compareDateWithoutTime(date, props.bookingEnd) > 0) {
-                    props.setBookingEnd(partialBottomTime ?? date);
-                }
-            }
-        }
-    };
-
-    const handleMouseDown = () => {
-        props.setDragging(true);
-        setDragStarted(true);
-    };
-
-    const handleMouseUp = () => {
-        setDragStarted(false);
-    };
-
-    const handleMouseLeave = () => {
-        if (dragStated && props.dragging) {
-            handleDayClick();
-            setDragStarted(false);
-        }
-    };
-
-    const handleDrag = () => {
-        if (props.dragging) {
-            handleDayClick();
-            ref.current.focus();
-        }
-    };
-
-    return <button className="calendar-date" onClick={handleDayClick} data-available={available}
-                   aria-disabled={props.disabled || props.maxReached || !available}
-                   aria-label={date.toLocaleDateString()} data-part-available={partialAvailable}
-                   data-partial={!partialTopTime || !partialBottomTime ? partial : 'switch'} data-active={active}
-                   aria-checked={active} role="checkbox" data-part-active={partialActive}
-                   onMouseDown={handleMouseDown} onMouseUp={handleMouseUp} onMouseLeave={handleMouseLeave}
-                   onMouseEnter={handleDrag} ref={ref}>
-        <span>{date.getDate()}</span>
-    </button>;
+    if (available.partial && available.bookings) {
+        return <>
+            <p className="calendar-date-dot">⚫</p>
+            <div className="calendar-date-tooltip">
+                <h4>An diesem Tag bestehen bereits folgende Buchungen:</h4>
+                <ul>
+                    {available.bookings.map((booking, index) => {
+                        return <li key={index}>
+                            {booking.begin ? booking.begin.toLocaleTimeString('de-DE', {
+                                hour: '2-digit',
+                                minute: '2-digit',
+                            }) : 'Anfang des Tages'} -
+                            {booking.end ? booking.end.toLocaleTimeString('de-DE', {
+                                hour: '2-digit',
+                                minute: '2-digit',
+                            }) : 'Ende des Tages'}
+                        </li>;
+                    })}
+                </ul>
+            </div>
+        </>;
+    } else if (!available.available) {
+        return <>
+            <p className="calendar-date-dot">&nbsp;</p>
+            <span className="calendar-date-tooltip">Dieser Tag ist leider ausgebucht.</span>
+        </>;
+    }
+    return <p className="calendar-date-dot">&nbsp;</p>;
 };
 
+CalendarDayTooltip.propTypes = {
+    available: PropTypes.object, //TODO: Shape
+};
+
+const MonthCalendarDay = (props) => {
+        const {date, available, active} = props;
+        const [dragStarted, setDragStarted] = React.useState(false);
+
+        const ref = React.useRef(null);
+
+        const toggleActiveOff = () => {
+            if (compareDateWithoutTime(props.bookingBegin, props.bookingEnd) === 0) {
+                props.setBookingBegin(null);
+                props.setBookingEnd(null);
+                return;
+            }
+
+            const startCompare = calculateDateDiff(props.bookingBegin, date);
+            if (startCompare === 0) {
+                props.setBookingBegin(props.bookingEnd);
+                return;
+            }
+
+            const endCompare = calculateDateDiff(date, props.bookingEnd);
+            if (endCompare === 0) {
+                props.setBookingEnd(props.bookingBegin);
+                return;
+            }
+
+            if (startCompare > endCompare) {
+                props.setBookingEnd(date);
+            } else if (startCompare < endCompare) {
+                props.setBookingBegin(date);
+            } else {
+                props.lastSet === 'begin' ? props.setBookingBegin(date) : props.setBookingEnd(date);
+            }
+        };
+
+        const toggleActiveOn = () => {
+            if (!props.bookingBegin || compareDateWithoutTime(date, props.bookingBegin) < 0) {
+                props.setBookingBegin(available.latest ?? date);
+            }
+            if (!props.bookingEnd || compareDateWithoutTime(date, props.bookingEnd) > 0) {
+                props.setBookingEnd(available.earliest ?? date);
+            }
+        };
+
+        const handleDayClick = () => {
+            if (!props.disabled && available.available) {
+                active.active ? toggleActiveOff() : toggleActiveOn();
+            }
+        };
+
+        const handleMouseDown = () => {
+            props.setDragging(true);
+            setDragStarted(true);
+        };
+
+        const handleMouseUp = () => {
+            setDragStarted(false);
+        };
+
+        const handleMouseEnter = (e) => {
+            if (props.dragging) {
+                handleDayClick();
+                ref.current.focus();
+            }
+        };
+
+        const handleMouseLeave = (e) => {
+            if (dragStarted && props.dragging) {
+                handleDayClick();
+                setDragStarted(false);
+            }
+        };
+
+        return <button className="calendar-date" onClick={handleDayClick} data-available={available.available}
+                       aria-disabled={props.disabled || props.maxReached || !available.available}
+                       aria-label={date.toLocaleDateString()} data-part-available={props.available.partial}
+                       data-active={active.active} data-disabled={props.disabled}
+                       aria-checked={active.active} role="checkbox" data-part-active={active.partial}
+                       onMouseDown={handleMouseDown} onMouseUp={handleMouseUp} onMouseLeave={handleMouseLeave}
+                       onMouseEnter={handleMouseEnter} ref={ref} data-today={props.isToday}>
+            <span>{date.getDate()}</span>
+            {!props.disabled && <CalendarDayTooltip available={available}/> || <p className="calendar-date-dot">&nbsp;</p>}
+        </button>;
+    }
+;
+
 MonthCalendarDay.propTypes = {
-    bookings: PropTypes.arrayOf(PropTypes.shape(convertedBookingPropTypes)).isRequired,
+    active: PropTypes.object.isRequired, // TODO: shape
+    available: PropTypes.object.isRequired, // TODO: shape
     disabled: PropTypes.bool.isRequired,
-    date: PropTypes.object.isRequired,
-    dragging: PropTypes.bool.isRequired,
+    isToday: PropTypes.bool.isRequired,
     setDragging: PropTypes.func.isRequired,
-    maxReached: PropTypes.bool.isRequired,
+    dragging: PropTypes.bool.isRequired,
     bookingBegin: PropTypes.object,
-    setBookingBegin: PropTypes.func.isRequired,
     bookingEnd: PropTypes.object,
+    setBookingBegin: PropTypes.func.isRequired,
     setBookingEnd: PropTypes.func.isRequired,
 };
 

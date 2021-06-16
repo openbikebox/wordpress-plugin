@@ -26,15 +26,32 @@
   background-color: inherit;
 }
 
+.calendar-date[data-today=true] > span:first-child {
+  font-weight: bold;
+  text-decoration: underline;
+  color: #0000ff;
+  text-shadow: 0 0 9px #0000ff;
+}
+
+.calendar-date[data-available=false][data-today=true] > span:first-child {
+  color: #ffd4ff;
+  text-shadow: 0 0 9px #ffd4ff;
+}
+
 .calendar-date[aria-disabled=true] {
   color: $gray;
   font-weight: initial;
 }
 
-.calendar-date[data-available=false][data-partial=false] {
+.calendar-date[data-available=false] {
   background-color: $red;
   cursor: not-allowed;
   color: white;
+}
+
+.calendar-date[data-available=false][data-disabled=true] {
+  background-color: $redMuted;
+  color: whitesmoke;
 }
 
 .calendar-date[data-partial=top] span, .calendar-date[data-partial=bottom] span {
@@ -103,6 +120,33 @@
 .calendar-date[aria-disabled=true]:not[data-active=true]:hover {
   background-color: lightgray;
   cursor: not-allowed;
+}
+
+.calendar-date-tooltip {
+  display: none;
+}
+
+.calendar-date:hover .calendar-date-tooltip, .calendar-date:focus .calendar-date-tooltip {
+  display: block;
+  position: absolute;
+  background-color: $gray;
+  color: white;
+  border-radius: 0 1rem 1rem 1rem;
+  padding: 0.5rem;
+}
+
+.calendar-date-tooltip h4 {
+  color: inherit;
+  font-size: 1rem;
+}
+
+.calendar-date-tooltip ul {
+  text-align: left;
+}
+
+.calendar-date-dot {
+  margin-bottom: 0;
+  font-size: 0.5em;
 }
 
 .calendar-heading-row {

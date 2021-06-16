@@ -27,9 +27,13 @@ const MultiMonthCalendar = (props) => {
     const Months = [];
     let month = current;
     for (let c = 0; c < props.monthCount; c++) {
-        Months.push(<MonthCalendar handleMonthSwitch={handleMonthSwitch} bookings={props.bookings} bookingBegin={props.bookingBegin} bookingEnd={props.bookingEnd}
-                                   allowPast={props.allowPast} maxReached={props.maxReached} initialCurrent={month} today={today}
-                                   disableBack={!props.allowPast && present < 1} setBookingBegin={props.setBookingBegin} setBookingEnd={props.setBookingEnd}/>);
+        Months.push(<MonthCalendar handleMonthSwitch={handleMonthSwitch} bookings={props.bookings}
+                                   bookingBegin={props.bookingBegin} bookingEnd={props.bookingEnd}
+                                   allowPast={props.allowPast} maxReached={props.maxReached} initialCurrent={month}
+                                   today={today} unavailableDates={props.unavailableDates}
+                                   disableBack={!props.allowPast && present < 1} setBookingBegin={props.setBookingBegin}
+                                   setBookingEnd={props.setBookingEnd} lastSet={props.lastSet}
+        />);
         month = new Date(month.getFullYear(), month.getMonth() + 1, 1);
     }
 

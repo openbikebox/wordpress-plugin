@@ -5,7 +5,7 @@ import MonthCalendar from './MonthCalendar';
 import MultiMonthCalendar from './MultiMonthCalendar';
 import BookingForm from './BookingForm';
 import AsapCalendar from './AsapCalendar';
-import {compareDateWithoutTime} from './CalendarHelper';
+import {compareDateWithoutTime, getUnavailableDates} from './CalendarHelper';
 import {rawBookingPropTypes} from './CalendarPropTypes';
 
 const CalendarMeta = (props) => {
@@ -35,6 +35,8 @@ const Calendar = (props) => {
     const [bookingBegin, _setBookingBegin] = React.useState();
     const [bookingEnd, _setBookingEnd] = React.useState();
     const [bookings, setBookings] = React.useState([]);
+    const [unavailableDates, setUnavailableDates] = React.useState(new Map());
+    const [lastSet, setLastSet] = React.useState('end');
 
     const getNewDateWhilePreservingTimeIfNeeded = (oldDate, newDate) => {
         if (newDate) {
@@ -59,23 +61,26 @@ const Calendar = (props) => {
     };
 
     const setBookingBegin = (newBookingBegin) => {
+        setLastSet('begin');
         _setBookingBegin(getNewDateWhilePreservingTimeIfNeeded(bookingBegin, newBookingBegin));
     };
 
     const setBookingEnd = (newBookingEnd) => {
+        setLastSet('end');
         _setBookingEnd(getNewDateWhilePreservingTimeIfNeeded(bookingEnd, newBookingEnd));
     };
 
     React.useEffect(() => {
-        if (!props.bookings) {
-            setBookings([]);
-        } else {
-            let newBookings = [];
+        let newBookings = [];
+        if (props.bookings) {
             for (const booking of props.bookings) {
                 newBookings.push({begin: new Date(booking.begin), end: new Date(booking.end)});
             }
-            setBookings(newBookings);
         }
+
+        //TODO: new bookings even needed at this point?
+        setBookings(newBookings);
+        setUnavailableDates(getUnavailableDates(newBookings));
     }, [props.bookings]);
 
     const submitRef = React.useRef(null);
@@ -133,12 +138,12 @@ const Calendar = (props) => {
         {view === 'day' &&
         <DayCalendar bookings={bookings}/>}
         {view === 'month' &&
-        <MonthCalendar bookings={bookings} bookingBegin={bookingBegin} bookingEnd={bookingEnd} today={today}
-                       maxReached={maxReached} setBookingBegin={setBookingBegin} setBookingEnd={setBookingEnd}/>}
+        <MonthCalendar bookings={bookings} bookingBegin={bookingBegin} bookingEnd={bookingEnd} today={today} unavailableDates={unavailableDates}
+                       maxReached={maxReached} setBookingBegin={setBookingBegin} setBookingEnd={setBookingEnd} lastSet={lastSet}/>}
         {view === '3months' &&
         <MultiMonthCalendar monthCount={3} bookings={bookings} maxReached={maxReached} bookingBegin={bookingBegin}
-                            bookingEnd={bookingEnd} today={today} setBookingBegin={setBookingBegin}
-                            setBookingEnd={setBookingEnd}/>}
+                            bookingEnd={bookingEnd} today={today} setBookingBegin={setBookingBegin} unavailableDates={unavailableDates}
+                            setBookingEnd={setBookingEnd} lastSet={lastSet}/>}
         <CalendarMeta maxReached={maxReached} maxReachedWarning={maxReachedWarning} errorString={errorString}/>
         <BookingForm bookingBegin={bookingBegin} setBookingBegin={setBookingBegin} bookingEnd={bookingEnd}
                      setBookingEnd={setBookingEnd}
