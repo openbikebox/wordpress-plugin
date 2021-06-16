@@ -5,7 +5,7 @@ import MonthCalendar from './MonthCalendar';
 import MultiMonthCalendar from './MultiMonthCalendar';
 import BookingForm from './BookingForm';
 import AsapCalendar from './AsapCalendar';
-import {compareDateWithoutTime, getUnavailableDates} from './CalendarHelper';
+import {calculateNewBookingTime, compareDateWithoutTime, getUnavailableDates} from './CalendarHelper';
 import {rawBookingPropTypes} from './CalendarPropTypes';
 
 const CalendarMeta = (props) => {
@@ -15,14 +15,14 @@ const CalendarMeta = (props) => {
                 {props.maxReached && props.maxReachedWarning}
             </span>
         </p>
-        <p><span className="calendar-meta-display calendar-error-display">{props.errorString}</span></p>
+        <p className="calendar-meta-display calendar-error-display">{props.errorString}</p>
     </div>;
 };
 
 CalendarMeta.propTypes = {
     maxReached: PropTypes.bool.isRequired,
     maxReachedWarning: PropTypes.string,
-    errorString: PropTypes.string,
+    errorString: PropTypes.oneOfType([PropTypes.element, PropTypes.string]),
 };
 
 const Calendar = (props) => {
@@ -30,13 +30,17 @@ const Calendar = (props) => {
 
     const [view, setView] = React.useState(props.initialView ?? 'day');
     const [errorString, setErrorString] = React.useState('');
-    const [errors, _setErrors] = React.useState(new Map());
     const [maxReached, setMaxReached] = React.useState(false);
     const [bookingBegin, _setBookingBegin] = React.useState();
     const [bookingEnd, _setBookingEnd] = React.useState();
     const [bookings, setBookings] = React.useState([]);
     const [unavailableDates, setUnavailableDates] = React.useState(new Map());
     const [lastSet, setLastSet] = React.useState('end');
+    const [maxBookingMS, setMaxBookingMS] = React.useState(null);
+
+    React.useEffect(() => {
+        setMaxBookingMS(props.maxBookingLength && props.maxBookingLength > 0 ? props.maxBookingLength * 1000 : null);
+    }, [props.maxBookingLength]);
 
     const getNewDateWhilePreservingTimeIfNeeded = (oldDate, newDate) => {
         if (newDate) {
@@ -62,12 +66,48 @@ const Calendar = (props) => {
 
     const setBookingBegin = (newBookingBegin) => {
         setLastSet('begin');
-        _setBookingBegin(getNewDateWhilePreservingTimeIfNeeded(bookingBegin, newBookingBegin));
+        const newBegin = getNewDateWhilePreservingTimeIfNeeded(bookingBegin, newBookingBegin);
+        if (newBegin && bookingEnd) {
+            setNewBooking(newBegin, bookingEnd, 'begin');
+        } else {
+            _setBookingBegin(newBegin);
+        }
     };
 
     const setBookingEnd = (newBookingEnd) => {
         setLastSet('end');
-        _setBookingEnd(getNewDateWhilePreservingTimeIfNeeded(bookingEnd, newBookingEnd));
+        const newEnd = getNewDateWhilePreservingTimeIfNeeded(bookingEnd, newBookingEnd);
+        if (bookingBegin && newEnd) {
+            setNewBooking(bookingBegin, newEnd, 'end');
+        } else {
+            _setBookingEnd(newEnd);
+        }
+    };
+
+    const setBookingBeginAndEnd = (newBookingBegin, newBookingEnd) => {
+        if (newBookingBegin && newBookingEnd) {
+            let startAt = lastSet === 'begin' ? 'end' : 'begin';
+            setNewBooking(newBookingBegin, newBookingEnd, startAt);
+            setLastSet(startAt);
+        } else if (!newBookingBegin && !newBookingEnd) {
+            _setBookingBegin(null);
+            _setBookingEnd(null);
+            setLastSet('end');
+        } else {
+            if (newBookingBegin !== bookingBegin) {
+                setBookingBegin(newBookingBegin);
+            }
+            if (newBookingEnd !== bookingEnd) {
+                setBookingEnd(newBookingEnd);
+            }
+        }
+    };
+
+    const setNewBooking = (newBookingBegin, newBookingEnd, startAt) => {
+        const newBookingTime = calculateNewBookingTime(newBookingBegin, newBookingEnd, maxBookingMS, unavailableDates, startAt);
+        setErrors(newBookingTime.errors);
+        _setBookingBegin(newBookingTime.begin);
+        _setBookingEnd(newBookingTime.end);
     };
 
     React.useEffect(() => {
@@ -85,31 +125,24 @@ const Calendar = (props) => {
 
     const submitRef = React.useRef(null);
 
-    const maxReachedWarning = 'Sie haben die längste mögliche Buchnungszeit von ' + props.maxBookingLength + ' Tagen erreicht.';
+    const maxReachedWarning = 'Sie haben die längste mögliche Buchungsdauer erreicht.';
+
+    const errorStore = {
+        unavailable: 'Der von Ihnen ausgewählte Buchungszeitraum enthielt Zeiten, die nicht verfügbar sind. Er wurde automatisch angepasst.',
+        tooLong: 'Der von Ihnen ausgewählte Buchungszeitraum war zu lang. Er wurde automatisch gekürzt.',
+    };
 
     const setErrors = (newErrors) => {
         let newErrorString = '';
+        let tooLong = false;
         newErrors.forEach((error) => {
-            newErrorString = <>{newErrorString}{error}<br/></>;
+            newErrorString = <>{newErrorString}{errorStore[error]}<br/></>;
+            if (error === 'tooLong') {
+                tooLong = true;
+            }
         });
+        setMaxReached(tooLong);
         setErrorString(newErrorString);
-        _setErrors(newErrors);
-    };
-
-    const addError = (key, value) => {
-        if (!errors.has(key)) {
-            let newErrors = errors;
-            newErrors.set(key, value);
-            setErrors(newErrors);
-        }
-    };
-
-    const removeError = (error) => {
-        if (errors.has(error)) {
-            let newErrors = errors;
-            newErrors.delete(error);
-            setErrors(newErrors);
-        }
     };
 
     const handleViewChange = (e) => {
@@ -138,19 +171,22 @@ const Calendar = (props) => {
         {view === 'day' &&
         <DayCalendar bookings={bookings}/>}
         {view === 'month' &&
-        <MonthCalendar bookings={bookings} bookingBegin={bookingBegin} bookingEnd={bookingEnd} today={today} unavailableDates={unavailableDates}
-                       maxReached={maxReached} setBookingBegin={setBookingBegin} setBookingEnd={setBookingEnd} lastSet={lastSet}/>}
+        <MonthCalendar bookings={bookings} bookingBegin={bookingBegin} bookingEnd={bookingEnd} today={today}
+                       unavailableDates={unavailableDates} setBookingBegin={setBookingBegin}
+                       setBookingEnd={setBookingEnd}
+                       maxReached={maxReached} setBookingBeginAndEnd={setBookingBeginAndEnd}
+                       lastSet={lastSet}/>}
         {view === '3months' &&
         <MultiMonthCalendar monthCount={3} bookings={bookings} maxReached={maxReached} bookingBegin={bookingBegin}
-                            bookingEnd={bookingEnd} today={today} setBookingBegin={setBookingBegin} unavailableDates={unavailableDates}
-                            setBookingEnd={setBookingEnd} lastSet={lastSet}/>}
+                            bookingEnd={bookingEnd} today={today} setBookingBeginAndEnd={setBookingBeginAndEnd}
+                            unavailableDates={unavailableDates} lastSet={lastSet} setBookingBegin={setBookingBegin}
+                            setBookingEnd={setBookingEnd}/>}
         <CalendarMeta maxReached={maxReached} maxReachedWarning={maxReachedWarning} errorString={errorString}/>
         <BookingForm bookingBegin={bookingBegin} setBookingBegin={setBookingBegin} bookingEnd={bookingEnd}
                      setBookingEnd={setBookingEnd}
                      today={today} submitRef={submitRef}
                      submit={(e) => {
                          e.preventDefault();
-                         console.log('submit');
                      }}/>
     </div>;
 };

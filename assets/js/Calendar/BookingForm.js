@@ -5,12 +5,16 @@ import TimeSelectorRow from './TimeSelectorRow';
 import {compareDateWithoutTime} from './CalendarHelper';
 
 const BookingForm = (props) => {
+    const [tempBookingBegin, setTempBookingBegin] = React.useState();
+    const [tempBookingEnd, setTempBookingEnd] = React.useState();
     const [beginHour, _setBeginHour] = React.useState(null);
     const [beginMinute, _setBeginMinute] = React.useState(null);
     const [endHour, _setEndHour] = React.useState(null);
     const [endMinute, _setEndMinute] = React.useState(null);
     const [beginSame, setBeginSame] = React.useState(false);
     const [endSame, setEndSame] = React.useState(false);
+    const [editingBegin, setEditingBegin] = React.useState(false);
+    const [editingEnd, setEditingEnd] = React.useState(false);
 
     const updateBeginAndEndSame = () => {
         if (props.bookingBegin) {
@@ -62,6 +66,24 @@ const BookingForm = (props) => {
         }
     };
 
+    const setBookingBegin = () => {
+        if (tempBookingBegin) {
+            props.setBookingBegin(new Date(tempBookingBegin.getFullYear(), tempBookingBegin.getMonth(), tempBookingBegin.getDate(), beginHour, beginMinute));
+        } else {
+            props.setBookingBegin(null);
+        }
+        setEditingBegin(false);
+    };
+
+    const setBookingEnd = () => {
+        if (tempBookingEnd) {
+            props.setBookingEnd(new Date(tempBookingEnd.getFullYear(), tempBookingEnd.getMonth(), tempBookingEnd.getDate(), endHour, endMinute));
+        } else {
+            props.setBookingEnd(null);
+        }
+        setEditingEnd(false);
+    };
+
     React.useEffect(() => {
         if (props.bookingBegin) {
             _setBeginMinute(props.bookingBegin.getMinutes());
@@ -72,6 +94,7 @@ const BookingForm = (props) => {
             _setBeginHour(null);
             setBeginAndEndSame(false);
         }
+        setTempBookingBegin(props.bookingBegin);
     }, [props.bookingBegin]);
 
     React.useEffect(() => {
@@ -84,28 +107,54 @@ const BookingForm = (props) => {
             _setEndHour(null);
             setBeginAndEndSame(false);
         }
+        setTempBookingEnd(props.bookingEnd);
     }, [props.bookingEnd]);
 
     return <form onSubmit={props.submit} ref={props.submitRef}>
         <h3>Buchung</h3>
-        <h4>Von</h4>
         <div className={'calendar-booking-container'}>
-            <DateSelectorRow setDate={props.setBookingBegin} yearId={'calendar-booking-begin-year-input'}
-                             monthId={'calendar-booking-begin-month-input'} date={props.bookingBegin}
-                             minDate={props.today} dayId={'calendar-booking-begin-day-input'}/>
-            <TimeSelectorRow hourId={'calendar-booking-begin-hour-input'}
-                             minuteId={'calendar-booking-begin-minute-input'}
-                             minHour={beginSame ? props.today.getHours() : 0} setHour={setBeginHour} hour={beginHour}
-                             minMinute={beginSame ? props.today.getMinutes() : 0} setMinute={setBeginMinute}
-                             minute={beginMinute}/>
-            <h4>Bis</h4>
-            <DateSelectorRow setDate={props.setBookingEnd} yearId={'calendar-booking-end-year-input'}
-                             monthId={'calendar-booking-end-month-input'} date={props.bookingEnd}
-                             minDate={props.bookingBegin ?? undefined} dayId={'calendar-booking-end-day-input'}/>
-            <TimeSelectorRow hourId={'calendar-booking-end-hour-input'}
-                             minuteId={'calendar-booking-end-minute-input'}
-                             minHour={endSame ? beginHour : 0} hour={endHour} setHour={setEndHour}
-                             minMinute={endSame ? beginMinute : 0} minute={endMinute} setMinute={setEndMinute}/>
+            {editingBegin
+                ? <>
+                    <h4>Von</h4>
+                    <DateSelectorRow setDate={setTempBookingBegin} yearId={'calendar-booking-begin-year-input'}
+                                     monthId={'calendar-booking-begin-month-input'} date={tempBookingBegin}
+                                     minDate={props.today} dayId={'calendar-booking-begin-day-input'}/>
+                    <TimeSelectorRow hourId={'calendar-booking-begin-hour-input'}
+                                     minuteId={'calendar-booking-begin-minute-input'}
+                                     minHour={beginSame ? props.today.getHours() : 0} setHour={setBeginHour}
+                                     hour={beginHour}
+                                     minMinute={beginSame ? props.today.getMinutes() : 0} setMinute={setBeginMinute}
+                                     minute={beginMinute}/>
+                    <button className="button calendar-change-time-button" onClick={setBookingBegin}>Startzeitpunkt
+                        festlegen
+                    </button>
+                </>
+                : <>
+                    <h4> Von: {props.bookingBegin && props.bookingBegin.toLocaleString('de-DE')}</h4>
+                    <button className="button calendar-change-time-button"
+                            onClick={() => setEditingBegin(true)}>Startzeitpunkt {props.bookingBegin ? 'ändern' : 'festlegen'}</button>
+                </>}
+
+            {editingEnd
+                ? <>
+                    <h4>Bis</h4>
+                    <DateSelectorRow setDate={setTempBookingEnd} yearId={'calendar-booking-end-year-input'}
+                                     monthId={'calendar-booking-end-month-input'} date={tempBookingEnd}
+                                     minDate={props.bookingBegin ?? undefined}
+                                     dayId={'calendar-booking-end-day-input'}/>
+                    <TimeSelectorRow hourId={'calendar-booking-end-hour-input'}
+                                     minuteId={'calendar-booking-end-minute-input'}
+                                     minHour={endSame ? beginHour : 0} hour={endHour} setHour={setEndHour}
+                                     minMinute={endSame ? beginMinute : 0} minute={endMinute} setMinute={setEndMinute}/>
+                    <button className="button calendar-change-time-button" onClick={setBookingEnd}>Endzeitpunkt
+                        festlegen
+                    </button>
+                </>
+                : <>
+                    <h4> Bis: {props.bookingEnd && props.bookingEnd.toLocaleString('de-DE')}</h4>
+                    <button className="button calendar-change-time-button"
+                            onClick={() => setEditingEnd(true)}>Endzeitpunkt {props.bookingEnd ? 'ändern' : 'festlegen'}</button>
+                </>}
         </div>
         <button type="submit" className="button is-success" disabled={!props.bookingBegin || !props.bookingEnd}>
             Buchung abschicken

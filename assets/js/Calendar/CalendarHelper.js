@@ -132,7 +132,7 @@ export const checkIfDateAvailable = (date, unavailableDates) => {
     if (unavailableDate && unavailableDate.bookings) {
         availability.bookings = unavailableDate.bookings;
         let earliest;
-        let latest;
+        let last;
         for (const booking of availability.bookings) {
             if (!booking.partial) {
                 availability.available = false;
@@ -142,12 +142,12 @@ export const checkIfDateAvailable = (date, unavailableDates) => {
             if (!earliest || booking.begin < earliest) {
                 earliest = booking.begin;
             }
-            if (!latest || booking.end > latest) {
-                latest = booking.end;
+            if (!last || booking.end > last) {
+                last = booking.end;
             }
         }
         availability.earliest = earliest;
-        availability.latest = latest;
+        availability.last = last;
     }
     return availability;
 };
@@ -174,15 +174,42 @@ export const checkIfDateActive = (date, newBookingBegin, newBookingEnd) => {
     return active;
 };
 
-export const calculateNewBookingTime = (newBeginDate, newEndDate, maxMS) => {
+export const calculateNewBookingTime = (newBeginDate, newEndDate, maxMS, unavailableDates, startAt) => {
+    if (newBeginDate > newEndDate) {
+        throw new Error('Impossible new booking. End cannot be before begin. Start: ' + newBeginDate.toString() + ' End: ' + newEndDate.toString());
+    }
+
     let errors = [];
     if (!newEndDate) {
         newEndDate = new Date(newBeginDate.getTime() + 3600000);
     }
 
-    const bookingTooLong = checkBookingTooLong(newBeginDate, newEndDate, maxMS);
-    if (bookingTooLong[0]) {
-        newEndDate = bookingTooLong[1];
+    let tooLong = false;
+    let bookingTooLong = checkBookingTooLong(newBeginDate, newEndDate, maxMS);
+    if (bookingTooLong) {
+        tooLong = true;
+        if (startAt === 'begin') {
+            newEndDate = fixBookingTooLongFromBegin(newBeginDate, maxMS);
+        } else {
+            newBeginDate = fixBookingTooLongFromEnd(newEndDate, maxMS);
+        }
+    }
+
+    let noMoreUnavailable;
+    if (compareDateWithoutTime(newBeginDate, newEndDate) === 0) {
+        noMoreUnavailable = fixUnavailableSameDayStartAtBegin(newBeginDate, newEndDate, unavailableDates);
+        // TODO: start at end
+    } else {
+        noMoreUnavailable = startAt === 'begin'
+            ? fixUnavailableStartAtBegin(newBeginDate, newEndDate, unavailableDates)
+            : fixUnavailableStartAtEnd(newBeginDate, newEndDate, unavailableDates);
+    }
+
+    if (noMoreUnavailable[0]) {
+        errors.push('unavailable');
+        newBeginDate = noMoreUnavailable[1];
+        newEndDate = noMoreUnavailable[2];
+    } else if (tooLong) {
         errors.push('tooLong');
     }
 
@@ -190,15 +217,18 @@ export const calculateNewBookingTime = (newBeginDate, newEndDate, maxMS) => {
 };
 
 const checkBookingTooLong = (newBeginDate, newEndDate, maxMS) => {
-    let tooLong = false;
-    if (Math.abs(newEndDate - newBeginDate) > maxMS) {
-        tooLong = true;
-        newEndDate = new Date(newBeginDate.getTime() + maxMS);
-    }
-    return [tooLong, newEndDate];
+    return maxMS && Math.abs(newEndDate - newBeginDate) > maxMS;
 };
 
-const getNearestAvailableDate = (tryDate, unavailableDates, stepSize, maxDate, minDate) => {
+const fixBookingTooLongFromBegin = (newBeginDate, maxMS) => {
+    return new Date(newBeginDate.getTime() + maxMS);
+};
+
+const fixBookingTooLongFromEnd = (newEndDate, maxMS) => {
+    return new Date(newEndDate.getTime() - maxMS);
+};
+
+const getNearestAvailableDate = (tryDate, unavailableDates, stepSize, minDate, maxDate) => {
     let changed = false;
     let dateAvailable = checkIfDateAvailable(tryDate, unavailableDates);
     while (!dateAvailable.available && tryDate > minDate && tryDate < maxDate) {
@@ -211,42 +241,118 @@ const getNearestAvailableDate = (tryDate, unavailableDates, stepSize, maxDate, m
         throw 'RangeImpossible';
     }
     if (dateAvailable.partial) {
-        for (const booking of dateAvailable.bookings) {
-            if (booking.endTime && booking.endTime > tryDate) {
-                tryDate = booking.endTime;
+        if (stepSize > 0) {
+            if (dateAvailable.earliest > tryDate) {
+                tryDate = dateAvailable.earliest;
+                changed = true;
+            }
+        } else {
+            if (dateAvailable.last < tryDate) {
+                tryDate = dateAvailable.last;
                 changed = true;
             }
         }
     }
-    return [tryDate, changed];
+    return [changed, tryDate];
 };
 
-export const checkNewBookingContainsUnavailable = (newBeginDate, newEndDate, unavailableDates) => {
+const getFurthestAvailableDateInFrame = (start, unavailableDates, stepSize, min, max) => {
+    let containsUnavailable = false;
+    let returnDate = start;
+    let compareDate = new Date(start.getTime());
+    let lastTime = compareDate.getTime();
+    let tempAvailable = checkIfDateAvailable(new Date(compareDate), unavailableDates);
 
-    if (newBeginDate > newEndDate) {
-        throw error('Impossible new booking. End cannot be before begin.');
-    }
-
-    const earliestPossibleBegin = getNearestAvailableDate(newBeginDate, unavailableDates, 8.64e+7, newEndDate, newBeginDate);
-    newBeginDate = earliestPossibleBegin[0];
-    let containsUnavailable = earliestPossibleBegin[1];
-
-    let tempEndDate = new Date(newBeginDate.getTime());
-    let lastTempDate = tempEndDate.getTime();
-    let tempAvailable = checkIfDateAvailable(tempEndDate, unavailableDates);
-    while (compareDateWithoutTime(newEndDate, tempEndDate) === 1 && tempAvailable.available && !tempAvailable.partial) {
-        lastTempDate = tempEndDate.getTime();
-        tempEndDate.setTime(tempEndDate.getTime() + 8.64e+7);
-        tempAvailable = checkIfDateAvailable(tempEndDate, unavailableDates);
+    let first = true; // TODO: This is not a good solution. Fix when there is time for it.
+    while (tempAvailable.available && ((compareDateWithoutTime(compareDate, min) > 0 && compareDateWithoutTime(max, compareDate) > 0 && !tempAvailable.partial) || first)) {
+        first = false;
+        lastTime = compareDate.getTime();
+        compareDate.setTime(compareDate.getTime() + stepSize);
+        tempAvailable = checkIfDateAvailable(compareDate, unavailableDates);
     }
 
     if (!tempAvailable.available) {
-        newEndDate = new Date(lastTempDate);
+        returnDate = new Date(lastTime);
         containsUnavailable = true;
     } else if (tempAvailable.partial) {
-        newEndDate = getNearestAvailableDate(newEndDate, unavailableDates, 36000, newEndDate, newEndDate)[0];
+        returnDate = stepSize > 0 ? tempAvailable.earliest : tempAvailable.last;
         containsUnavailable = true;
     }
 
-    return [newBeginDate, newEndDate, containsUnavailable];
+    return [containsUnavailable, returnDate];
+};
+
+const fixUnavailableStartAtBegin = (newBeginDate, newEndDate, unavailableDates) => {
+    let containsUnavailable = false;
+    const earliestPossibleBegin = getNearestAvailableDate(newBeginDate, unavailableDates, 8.64e+7, newBeginDate, newEndDate);
+    if (earliestPossibleBegin[0]) {
+        containsUnavailable = true;
+        newBeginDate = earliestPossibleBegin[1];
+    }
+
+    console.log(newBeginDate);
+    console.log(containsUnavailable);
+
+    const lastPossibleEnd = getFurthestAvailableDateInFrame(newBeginDate, unavailableDates, 8.64e+7, newBeginDate, newEndDate);
+    if (lastPossibleEnd[0]) {
+        containsUnavailable = true;
+        newEndDate = lastPossibleEnd[1];
+    }
+
+    return [containsUnavailable, newBeginDate, newEndDate];
+};
+
+const fixUnavailableStartAtEnd = (newBeginDate, newEndDate, unavailableDates) => {
+    const lastPossibleEnd = getNearestAvailableDate(newEndDate, unavailableDates, -8.64e+7, newBeginDate, newEndDate);
+    let containsUnavailable = lastPossibleEnd[0];
+    newEndDate = lastPossibleEnd[1];
+
+    const earliestPossibleBegin = getFurthestAvailableDateInFrame(newEndDate, unavailableDates, -8.64e+7, newBeginDate, newEndDate);
+    if (earliestPossibleBegin[0]) {
+        containsUnavailable = true;
+        newBeginDate = earliestPossibleBegin[1];
+    }
+
+    return [containsUnavailable, newBeginDate, newEndDate];
+};
+
+const fixUnavailableSameDayStartAtBegin = (newBeginDate, newEndDate, unavailableDates) => {
+    const dayAvailability = checkIfDateAvailable(newBeginDate, unavailableDates);
+    if (dayAvailability.partial === false) {
+        let unavailable = false;
+        if (dayAvailability.bookings.length > 1) {
+            for (const booking of dayAvailability.bookings) {
+                if (booking.begin >= newEndDate || booking.end <= newBeginDate) {
+                    // All good
+                    continue;
+                }
+                unavailable = true;
+
+                if (newBeginDate < booking.begin && newEndDate > booking.begin && newEndDate < booking.end) {
+                    newEndDate = booking.begin;
+                } else {
+                    newBeginDate = booking.end;
+                }
+
+                if (newBeginDate > newEndDate) {
+                    newEndDate = newBeginDate;
+                }
+            }
+        } else {
+            if (dayAvailability.from > newBeginDate) {
+                newBeginDate = dayAvailability.from;
+                unavailable = true;
+            }
+            if (dayAvailability.until < newEndDate) {
+                newEndDate = dayAvailability.until;
+                if (newEndDate < newBeginDate) {
+                    newEndDate = newBeginDate;
+                }
+                unavailable = true;
+            }
+        }
+        return [unavailable, newBeginDate, newEndDate];
+    } else {
+        return [!dayAvailability.available, newBeginDate, newEndDate];
+    }
 };

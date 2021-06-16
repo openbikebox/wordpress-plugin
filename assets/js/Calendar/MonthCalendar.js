@@ -4,7 +4,7 @@ import MonthCalendarDay from './MonthCalendarDay';
 import {checkIfDateActive, checkIfDateAvailable, compareMonthAndYear} from './CalendarHelper';
 import {convertedBookingPropTypes} from './CalendarPropTypes';
 
-const getCalendarWeeks = (year, month, day, present, unavailableDates, newBookingBegin, newBookingEnd, dragging, setDragging, lastSet, setBookingBegin, setBookingEnd) => {
+const getCalendarWeeks = (year, month, day, present, unavailableDates, newBookingBegin, newBookingEnd, dragging, setDragging, lastSet, setBookingBegin, setBookingEnd, setBookingBeginAndEnd) => {
     const daysInMonth = new Date(year, month + 1, 0).getDate();
     const firstWeekdayInMonth = new Date(year, month, 1).getDay();
     const lastDayInLastMonth = new Date(year, month, 0);
@@ -49,7 +49,7 @@ const getCalendarWeeks = (year, month, day, present, unavailableDates, newBookin
                                         active={active} isToday={present === 0 && day === elapsed} dragging={dragging}
                                         setDragging={setDragging} lastSet={lastSet} setBookingBegin={setBookingBegin}
                                         setBookingEnd={setBookingEnd} bookingBegin={newBookingBegin}
-                                        bookingEnd={newBookingEnd}/>);
+                                        bookingEnd={newBookingEnd} setBookingBeginAndEnd={setBookingBeginAndEnd}/>);
         }
         weekCounter++;
         weeks.push(days);
@@ -85,7 +85,7 @@ const MonthCalendar = (props) => {
         const newPresent = compareMonthAndYear(current, today);
         setCalendarWeeks(getCalendarWeeks(newYear, newMonth, newDay, newPresent, props.unavailableDates,
             props.bookingBegin, props.bookingEnd, dragging, setDragging, props.lastSet, props.setBookingBegin,
-            props.setBookingEnd));
+            props.setBookingEnd, props.setBookingBeginAndEnd));
         setPresent(newPresent);
     }, [current, props.unavailableDates, props.bookingBegin, props.bookingEnd]);
 
@@ -113,50 +113,6 @@ const MonthCalendar = (props) => {
             goToPreviousMonth();
         }
     };
-
-    // const getPreviousMonthDay = (days, c) => {
-    //     const lastWeekdayInLastMonth = lastDayInLastMonth.getDay();
-    //     let dayValue;
-    //     if (c < lastWeekdayInLastMonth) {
-    //         dayValue = lastDayInLastMonth.getDate() - (lastWeekdayInLastMonth - c);
-    //     } else {
-    //         dayValue = lastDayInLastMonth.getDate();
-    //     }
-    //     return dayValue;
-    // };
-    //
-    // const getDayDisabledState = (elapsed) => {
-    //     if (present === 0) {
-    //         return elapsed < day;
-    //     } else {
-    //         return present === -1;
-    //     }
-    // };
-    //
-    //
-    // let weeks = [];
-    // let elapsed = 0;
-    // let weekCounter = 0;
-    // while (elapsed < daysInMonth) {
-    //     let days = [];
-    //     for (let c = 0; c < 7; c++) {
-    //         let thisDate;
-    //         if ((weekCounter === 0 && c < firstDayOfMonth)) {
-    //             thisDate = new Date(year, month - 1, getPreviousMonthDay(days, c));
-    //         } else {
-    //             elapsed++;
-    //             thisDate = new Date(year, month, elapsed);
-    //         }
-    //         days.push(<MonthCalendarDay date={thisDate} bookingBegin={props.bookingBegin}
-    //                                     bookingEnd={props.bookingEnd} setBookingBegin={props.setBookingBegin}
-    //                                     setBookingEnd={props.setBookingEnd} bookings={props.bookings}
-    //                                     dragging={dragging} maxReached={props.maxReached}
-    //                                     setDragging={setDragging}
-    //                                     disabled={getDayDisabledState(elapsed)}/>);
-    //     }
-    //     weeks.push(days);
-    //     weekCounter++;
-    // }
 
     const weekDays = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
 
@@ -200,6 +156,7 @@ export const monthCalendarPropTypes = {
     bookingEnd: PropTypes.object,
     setBookingBegin: PropTypes.func.isRequired,
     setBookingEnd: PropTypes.func.isRequired,
+    setBookingBeginAndEnd: PropTypes.func.isRequired,
     handleMonthSwitch: PropTypes.func,
     initialCurrent: PropTypes.object,
     allowPast: PropTypes.bool,

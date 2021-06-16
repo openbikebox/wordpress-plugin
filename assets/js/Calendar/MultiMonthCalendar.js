@@ -32,7 +32,7 @@ const MultiMonthCalendar = (props) => {
                                    allowPast={props.allowPast} maxReached={props.maxReached} initialCurrent={month}
                                    today={today} unavailableDates={props.unavailableDates}
                                    disableBack={!props.allowPast && present < 1} setBookingBegin={props.setBookingBegin}
-                                   setBookingEnd={props.setBookingEnd} lastSet={props.lastSet}
+                                   setBookingEnd={props.setBookingEnd} lastSet={props.lastSet} setBookingBeginAndEnd={props.setBookingBeginAndEnd}
         />);
         month = new Date(month.getFullYear(), month.getMonth() + 1, 1);
     }
