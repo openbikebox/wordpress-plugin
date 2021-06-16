@@ -356,3 +356,33 @@ const fixUnavailableSameDayStartAtBegin = (newBeginDate, newEndDate, unavailable
         return [!dayAvailability.available, newBeginDate, newEndDate];
     }
 };
+
+export const calculatePrice = (priceGroup, startDate, endDate) => {
+    const prices = [];
+    if (priceGroup.fee_year) {
+        prices.push({name: 'Jahre', ms: 3.154e+10, fee: priceGroup.fee_year});
+    }
+    if (priceGroup.fee_day) {
+        prices.push({name: 'Monate', ms: 2.678e+9, fee: priceGroup.fee_month});
+    }
+    if (priceGroup.fee_week) {
+        prices.push({name: 'Wochen', ms: 6.048e+8, fee: priceGroup.fee_week});
+    }
+    if (priceGroup.fee_day) {
+        prices.push({name: 'Tage', ms: 8.64e+7, fee: priceGroup.fee_day});
+    }
+    if (priceGroup.fee_hour) {
+        prices.push({name: 'Stunden', ms: 3.6e+6, fee: priceGroup.fee_hour});
+    }
+
+    let remainder = endDate.getTime() - startDate.getTime();
+    let calcPrice = 0;
+    for (const price of prices) {
+        let divisor = (Math.floor(remainder / price.ms));
+        if (divisor > 0) {
+            calcPrice += divisor * price.fee;
+            remainder = remainder % price.ms;
+        }
+    }
+    return calcPrice;
+};

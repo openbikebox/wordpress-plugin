@@ -2,7 +2,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import DateSelectorRow from './DateSelectorRow';
 import TimeSelectorRow from './TimeSelectorRow';
-import {compareDateWithoutTime} from './CalendarHelper';
+import {calculatePrice, compareDateWithoutTime} from './CalendarHelper';
+import {pricegroupPropTypes} from '../Models';
+import PriceDisplay from '../PriceDisplay';
 
 const BookingForm = (props) => {
     const [tempBookingBegin, setTempBookingBegin] = React.useState();
@@ -15,6 +17,7 @@ const BookingForm = (props) => {
     const [endSame, setEndSame] = React.useState(false);
     const [editingBegin, setEditingBegin] = React.useState(false);
     const [editingEnd, setEditingEnd] = React.useState(false);
+    const [price, setPrice] = React.useState(null);
 
     const updateBeginAndEndSame = () => {
         if (props.bookingBegin) {
@@ -110,6 +113,14 @@ const BookingForm = (props) => {
         setTempBookingEnd(props.bookingEnd);
     }, [props.bookingEnd]);
 
+    React.useEffect(() => {
+        if (props.bookingBegin && props.bookingEnd) {
+            setPrice(calculatePrice(props.priceGroup, props.bookingBegin, props.bookingEnd));
+        }else {
+            setPrice(null);
+        }
+    }, [props.bookingBegin, props.bookingEnd]);
+
     return <form onSubmit={props.submit} ref={props.submitRef}>
         <h3>Buchung</h3>
         <div className={'calendar-booking-container'}>
@@ -156,8 +167,8 @@ const BookingForm = (props) => {
                             onClick={() => setEditingEnd(true)}>Endzeitpunkt {props.bookingEnd ? 'ändern' : 'festlegen'}</button>
                 </>}
         </div>
-        <button type="submit" className="button is-success" disabled={!props.bookingBegin || !props.bookingEnd}>
-            Buchung abschicken
+        <button type="submit" className="button is-success calendar-submit-button" disabled={!props.bookingBegin || !props.bookingEnd}>
+            Jetzt {!!price && <>für <PriceDisplay amount={price}/> </>} buchen!
         </button>
     </form>;
 };
@@ -169,6 +180,7 @@ BookingForm.propTypes = {
     setBookingEnd: PropTypes.func.isRequired,
     submit: PropTypes.func.isRequired,
     submitRef: PropTypes.object.isRequired,
+    priceGroup: PropTypes.shape(pricegroupPropTypes).isRequired,
 };
 
 export default BookingForm;
