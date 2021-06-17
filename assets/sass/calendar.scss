@@ -26,9 +26,90 @@
   background-color: inherit;
 }
 
+.calendar-date[data-today=true] > span:first-child {
+  font-weight: bold;
+  text-decoration: underline;
+  color: #0000ff;
+  text-shadow: 0 0 9px #0000ff;
+}
+
+.calendar-date[data-available=false][data-today=true] > span:first-child {
+  color: #ffd4ff;
+  text-shadow: 0 0 9px #ffd4ff;
+}
+
 .calendar-date[aria-disabled=true] {
   color: $gray;
   font-weight: initial;
+}
+
+.calendar-date[data-available=false] {
+  background-color: $red;
+  cursor: not-allowed;
+  color: white;
+}
+
+.calendar-date[data-available=false][data-disabled=true] {
+  background-color: $redMuted;
+  color: whitesmoke;
+}
+
+.calendar-date[data-partial=top] span, .calendar-date[data-partial=bottom] span {
+  background-color: #00000090;
+  border-radius: 2px;
+  color: white;
+}
+
+.calendar-date[data-partial=top] {
+  background: linear-gradient($red 50%, #ff00ff00 50%);
+}
+
+.calendar-date[data-partial=top][data-active=true], .calendar-date[data-partial=top]:hover {
+  background: linear-gradient($red 50%, $greenTransparent 50%)
+}
+
+.calendar-date[data-partial=bottom] {
+  background: linear-gradient(#ff00ff00 50%, $red 50%);
+}
+
+.calendar-date[data-partial=bottom][data-active=true], .calendar-date[data-partial=bottom]:hover {
+  background: linear-gradient($greenTransparent 50%, $red 50%)
+}
+
+.calendar-date[data-partial=switch] {
+  background: linear-gradient(to bottom,
+          #ff00ff00,
+          #ff00ff00 25%,
+          $red 25%,
+          $red 75%,
+          #ff00ff00 75%);
+  color: white;
+}
+
+.calendar-date[data-partial=switch][data-part-available=top]:hover, .calendar-date[data-partial=switch][data-part-active=top][data-active=true] {
+  background: linear-gradient(to bottom,
+          $greenTransparent,
+          $greenTransparent 25%,
+          $red 25%,
+          $red 75%,
+          #ff00ff00 75%);
+}
+
+.calendar-date[data-partial=switch][data-part-available=bottom]:hover, .calendar-date[data-partial=switch][data-part-active=bottom][data-active=true] {
+  background: linear-gradient(to bottom,
+          #f0f0f000,
+          #f0f0f000 25%,
+          $red 25%,
+          $red 75%,
+          $greenTransparent 75%);
+}
+
+.calendar-date[data-partial=switch][data-active=top] {
+  background: linear-gradient($greenTransparent 25%, $red 50%, #ff00ff00 25%)
+}
+
+.calendar-date[data-partial=switch][data-active=bottom] {
+  background: linear-gradient(#ff00ff00 25%, $red 50%, $greenTransparent 25%)
 }
 
 .calendar-date:not([aria-disabled=true]:not([data-active=true])):hover, .calendar-date[data-active=true] {
@@ -36,13 +117,42 @@
   cursor: pointer;
 }
 
-.calendar-date:not([aria-disabled=true])[data-partial=true], .calendar-date[data-partial=true]:not([aria-disabled=true]):hover, .calendar-date[data-partial=true][data-active=true] {
-  background-color: $yellow;
-}
-
 .calendar-date[aria-disabled=true]:not[data-active=true]:hover {
   background-color: lightgray;
   cursor: not-allowed;
+}
+
+.calendar-date-tooltip, .calendar-date:hover .calendar-date-tooltip:empty, .calendar-date:focus .calendar-date-tooltip:empty {
+  display: none;
+}
+
+.calendar-date:hover .calendar-date-tooltip, .calendar-date:focus .calendar-date-tooltip {
+  display: block;
+  position: absolute;
+  background-color: $gray;
+  color: white;
+  border-radius: 0 1rem 1rem 1rem;
+  padding: 0.5rem;
+}
+
+.calendar-date-tooltip p {
+  margin: 0;
+  text-align: left;
+}
+
+.calendar-date-tooltip h4 {
+  color: inherit;
+  margin-top: 0.5rem;
+  font-size: 1rem;
+}
+
+.calendar-date-tooltip ul {
+  text-align: left;
+}
+
+.calendar-date-dot {
+  margin-bottom: 0;
+  font-size: 0.5em;
 }
 
 .calendar-heading-row {
@@ -87,7 +197,13 @@
   padding-bottom: 0.5rem;
 }
 
-.calendar-view-change-button {
+.calendar-view-radio {
+  position: fixed;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.calendar-view-radio + label {
   padding: 0.5rem;
   border: 1px solid;
   border-radius: 0.25rem;
@@ -95,20 +211,16 @@
   cursor: pointer;
 }
 
-.calendar-view-change-button:focus {
-  border-color: $green;
-}
-
-.calendar-view-change-button[data-checked=true] {
-  background-color: $greenTransparent;
+.calendar-view-radio:checked + label {
+  background-color: $darkGreen;
   box-shadow: 2px 2px 2px $darkGreen;
+  border-color: $darkGreen;
+  color: #e5e5e5;
   text-decoration: underline;
 }
 
-.calendar-view-change-button input[type=radio] {
-  position: fixed;
-  opacity: 0;
-  pointer-events: none;
+.calendar-view-radio:focus + label {
+  box-shadow: 3px 3px 3px $darkGreen;
 }
 
 .calendar-meta-display {
@@ -119,6 +231,10 @@
 
 .calendar-meta-display:empty {
   visibility: hidden;
+}
+
+.calendar-error-display:empty {
+  display: none;
 }
 
 .calendar-error-display {
@@ -207,4 +323,14 @@
   .calendar-heading-row h3 {
     font-size: 1rem;
   }
+}
+
+.calendar-change-time-button {
+  font-size: 0.8rem;
+  margin-bottom: 0.5rem;
+  padding: 0.2rem;
+}
+
+.calendar-submit-button {
+  margin-top: 1rem;
 }

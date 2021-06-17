@@ -5,7 +5,9 @@ import MonthCalendar from './MonthCalendar';
 import MultiMonthCalendar from './MultiMonthCalendar';
 import BookingForm from './BookingForm';
 import AsapCalendar from './AsapCalendar';
-import {compareDateWithoutTime} from './CalendarHelper';
+import {calculateNewBookingTime, compareDateWithoutTime, getUnavailableDates} from './CalendarHelper';
+import {rawBookingPropTypes} from './CalendarPropTypes';
+import {pricegroupPropTypes} from '../Models';
 
 const CalendarMeta = (props) => {
     return <div aria-live="assertive" aria-relevant="additions text">
@@ -14,14 +16,14 @@ const CalendarMeta = (props) => {
                 {props.maxReached && props.maxReachedWarning}
             </span>
         </p>
-        <p><span className="calendar-meta-display calendar-error-display">{props.errorString}</span></p>
+        <p className="calendar-meta-display calendar-error-display">{props.errorString}</p>
     </div>;
 };
 
 CalendarMeta.propTypes = {
     maxReached: PropTypes.bool.isRequired,
     maxReachedWarning: PropTypes.string,
-    errorString: PropTypes.string,
+    errorString: PropTypes.oneOfType([PropTypes.element, PropTypes.string]),
 };
 
 const Calendar = (props) => {
@@ -29,11 +31,17 @@ const Calendar = (props) => {
 
     const [view, setView] = React.useState(props.initialView ?? 'day');
     const [errorString, setErrorString] = React.useState('');
-    const [errors, _setErrors] = React.useState(new Map());
     const [maxReached, setMaxReached] = React.useState(false);
     const [bookingBegin, _setBookingBegin] = React.useState();
     const [bookingEnd, _setBookingEnd] = React.useState();
     const [bookings, setBookings] = React.useState([]);
+    const [unavailableDates, setUnavailableDates] = React.useState(new Map());
+    const [lastSet, setLastSet] = React.useState('end');
+    const [maxBookingMS, setMaxBookingMS] = React.useState(null);
+
+    React.useEffect(() => {
+        setMaxBookingMS(props.maxBookingLength && props.maxBookingLength > 0 ? props.maxBookingLength * 1000 : null);
+    }, [props.maxBookingLength]);
 
     const getNewDateWhilePreservingTimeIfNeeded = (oldDate, newDate) => {
         if (newDate) {
@@ -58,52 +66,84 @@ const Calendar = (props) => {
     };
 
     const setBookingBegin = (newBookingBegin) => {
-        _setBookingBegin(getNewDateWhilePreservingTimeIfNeeded(bookingBegin, newBookingBegin));
+        setLastSet('begin');
+        const newBegin = getNewDateWhilePreservingTimeIfNeeded(bookingBegin, newBookingBegin);
+        if (newBegin && bookingEnd) {
+            setNewBooking(newBegin, bookingEnd, 'begin');
+        } else {
+            _setBookingBegin(newBegin);
+        }
     };
 
     const setBookingEnd = (newBookingEnd) => {
-        _setBookingEnd(getNewDateWhilePreservingTimeIfNeeded(bookingEnd, newBookingEnd));
+        setLastSet('end');
+        const newEnd = getNewDateWhilePreservingTimeIfNeeded(bookingEnd, newBookingEnd);
+        if (bookingBegin && newEnd) {
+            setNewBooking(bookingBegin, newEnd, 'end');
+        } else {
+            _setBookingEnd(newEnd);
+        }
+    };
+
+    const setBookingBeginAndEnd = (newBookingBegin, newBookingEnd) => {
+        if (newBookingBegin && newBookingEnd) {
+            let startAt = lastSet === 'begin' ? 'end' : 'begin';
+            setNewBooking(newBookingBegin, newBookingEnd, startAt);
+            setLastSet(startAt);
+        } else if (!newBookingBegin && !newBookingEnd) {
+            _setBookingBegin(null);
+            _setBookingEnd(null);
+            setLastSet('end');
+        } else {
+            if (newBookingBegin !== bookingBegin) {
+                setBookingBegin(newBookingBegin);
+            }
+            if (newBookingEnd !== bookingEnd) {
+                setBookingEnd(newBookingEnd);
+            }
+        }
+    };
+
+    const setNewBooking = (newBookingBegin, newBookingEnd, startAt) => {
+        const newBookingTime = calculateNewBookingTime(newBookingBegin, newBookingEnd, maxBookingMS, unavailableDates, startAt);
+        setErrors(newBookingTime.errors);
+        _setBookingBegin(newBookingTime.begin);
+        _setBookingEnd(newBookingTime.end);
     };
 
     React.useEffect(() => {
-        if (!props.bookings) {
-            setBookings([]);
-        } else {
-            let newBookings = [];
+        let newBookings = [];
+        if (props.bookings) {
             for (const booking of props.bookings) {
                 newBookings.push({begin: new Date(booking.begin), end: new Date(booking.end)});
             }
-            setBookings(newBookings);
         }
+
+        //TODO: new bookings even needed at this point?
+        setBookings(newBookings);
+        setUnavailableDates(getUnavailableDates(newBookings));
     }, [props.bookings]);
 
-    const submitRef = React.createRef();
+    const submitRef = React.useRef(null);
 
-    const maxReachedWarning = 'Sie haben die längste mögliche Buchnungszeit von ' + props.maxBookingLength + ' Tagen erreicht.';
+    const maxReachedWarning = 'Sie haben die längste mögliche Buchungsdauer erreicht.';
+
+    const errorStore = {
+        unavailable: 'Der von Ihnen ausgewählte Buchungszeitraum enthielt Zeiten, die nicht verfügbar sind. Er wurde automatisch angepasst.',
+        tooLong: 'Der von Ihnen ausgewählte Buchungszeitraum war zu lang. Er wurde automatisch gekürzt.',
+    };
 
     const setErrors = (newErrors) => {
         let newErrorString = '';
+        let tooLong = false;
         newErrors.forEach((error) => {
-            newErrorString = <>{newErrorString}{error}<br/></>;
+            newErrorString = <>{newErrorString}{errorStore[error]}<br/></>;
+            if (error === 'tooLong') {
+                tooLong = true;
+            }
         });
+        setMaxReached(tooLong);
         setErrorString(newErrorString);
-        _setErrors(newErrors);
-    };
-
-    const addError = (key, value) => {
-        if (!errors.has(key)) {
-            let newErrors = errors;
-            newErrors.set(key, value);
-            setErrors(newErrors);
-        }
-    };
-
-    const removeError = (error) => {
-        if (errors.has(error)) {
-            let newErrors = errors;
-            newErrors.delete(error);
-            setErrors(newErrors);
-        }
     };
 
     const handleViewChange = (e) => {
@@ -113,51 +153,48 @@ const Calendar = (props) => {
     return <div>
         <CalendarMeta maxReached={maxReached} errorString={errorString} maxReachedWarning={maxReachedWarning}/>
         <p><span className="calendar-view-change-meta-label">Ansicht:</span>
-            <label className={'calendar-view-change-button'} data-checked={view === 'asap'}>
-                <input type="radio" name="view" value="asap" checked={view === 'asap'} onChange={handleViewChange}/>
-                Sofort
-            </label>
-            <label className={'calendar-view-change-button'} data-checked={view === 'day'}>
-                <input type="radio" name="view" value="day" checked={view === 'day'} onChange={handleViewChange}/>
-                Tag
-            </label>
-            <label className={'calendar-view-change-button'} data-checked={view === 'month'}>
-                <input type="radio" name="view" value="month" checked={view === 'month'} onChange={handleViewChange}/>
-                Monat
-            </label>
-            <label className={'calendar-view-change-button'} data-checked={view === '3months'}>
-                <input type="radio" name="view" value="3months" checked={view === '3months'}
-                       onChange={handleViewChange}/>
-                3 Monate
-            </label>
+            <input type="radio" name="view" value="asap" className="calendar-view-radio" checked={view === 'asap'}
+                   onChange={handleViewChange} id="calendar-view-radio-asap"/>
+            <label htmlFor="calendar-view-radio-asap">Sofort</label>
+            <input type="radio" name="view" value="day" className="calendar-view-radio" checked={view === 'day'}
+                   onChange={handleViewChange} id="calendar-view-radio-day"/>
+            <label htmlFor="calendar-view-radio-day">Tag</label>
+            <input type="radio" name="view" value="month" className="calendar-view-radio" checked={view === 'month'}
+                   onChange={handleViewChange} id="calendar-view-radio-month"/>
+            <label htmlFor="calendar-view-radio-month">Monat</label>
+            <input type="radio" name="view" className="calendar-view-radio" value="3months" checked={view === '3months'}
+                   onChange={handleViewChange} id="calendar-view-radio-3months"/>
+            <label htmlFor="calendar-view-radio-3months">3 Monate</label>
         </p>
         {view === 'asap' &&
         <AsapCalendar today={today} setBookingBegin={setBookingBegin} setBookingEnd={setBookingEnd}
-                      submitRef={submitRef}/>}
+                      submitRef={submitRef} bookings={bookings}/>}
         {view === 'day' &&
         <DayCalendar bookings={bookings}/>}
         {view === 'month' &&
         <MonthCalendar bookings={bookings} bookingBegin={bookingBegin} bookingEnd={bookingEnd} today={today}
-                       maxReached={maxReached} setBookingBegin={setBookingBegin} setBookingEnd={setBookingEnd}/>}
+                       unavailableDates={unavailableDates} setBookingBegin={setBookingBegin}
+                       setBookingEnd={setBookingEnd}
+                       maxReached={maxReached} setBookingBeginAndEnd={setBookingBeginAndEnd}
+                       lastSet={lastSet}/>}
         {view === '3months' &&
         <MultiMonthCalendar monthCount={3} bookings={bookings} maxReached={maxReached} bookingBegin={bookingBegin}
-                            bookingEnd={bookingEnd} today={today} setBookingBegin={setBookingBegin}
+                            bookingEnd={bookingEnd} today={today} setBookingBeginAndEnd={setBookingBeginAndEnd}
+                            unavailableDates={unavailableDates} lastSet={lastSet} setBookingBegin={setBookingBegin}
                             setBookingEnd={setBookingEnd}/>}
         <CalendarMeta maxReached={maxReached} maxReachedWarning={maxReachedWarning} errorString={errorString}/>
         <BookingForm bookingBegin={bookingBegin} setBookingBegin={setBookingBegin} bookingEnd={bookingEnd}
-                     setBookingEnd={setBookingEnd}
-                     today={today} submitRef={submitRef}
-                     submit={(e) => {
-                         e.preventDefault();
-                         console.log('submit');
-                     }}/>
+                     setBookingEnd={setBookingEnd} priceGroup={props.priceGroup}
+                     today={today} submitRef={submitRef} handleSubmit={props.handleSubmit}/>
     </div>;
 };
 
 Calendar.propTypes = {
-    bookings: PropTypes.array.isRequired,
-    maxBookingLength: PropTypes.number, //TODO: seconds, not days
+    bookings: PropTypes.arrayOf(PropTypes.shape(rawBookingPropTypes)).isRequired,
+    maxBookingLength: PropTypes.number,
     initialView: PropTypes.oneOf(['day', 'month', '3months', 'asap']),
+    priceGroup: PropTypes.shape(pricegroupPropTypes).isRequired,
+    handleSubmit: PropTypes.func.isRequired,
 };
 
 export default Calendar;

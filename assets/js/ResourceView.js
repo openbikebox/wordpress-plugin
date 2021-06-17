@@ -41,12 +41,18 @@ const ResourceView = (props) => {
             erneut.</p>;
     }
 
-    // TODO: switch between day/week/month display
     return <div>
         <h2>{resource.identifier}</h2>
         {resource.photo && <img src={resource.photo.url} alt={'Foto von ' + resource.identifier}/>}
         <p>{resource.description}</p>
-        <Calendar bookings={[]} maxBookingLength={30} initialView={screen.width > 800 ? 'month' : 'asap'}/>
+        <Calendar handleSubmit={(e) => {
+            // TODO: Actually submit
+            e.preventDefault();
+            alert('Not implemented');
+        }} priceGroup={resource.pricegroup} bookings={[{begin: '2021-06-13T17:00:00', end: '2021-06-17T15:00:00'}, {
+            begin: '2021-06-19T13:12:00',
+            end: '2021-06-19T19:00:00',
+        }]} maxBookingLength={604800} initialView={screen.width > 800 ? 'month' : 'asap'}/>
     </div>;
 };
 
