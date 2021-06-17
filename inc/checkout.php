@@ -114,7 +114,7 @@ function eventually_finalize_booking(WC_Order $order) {
             $extended_order_item->add_meta_data('_followup_order_item_id', $item_id);
             $extended_order_item->save();
         }
-        if (!$item->get_meta('_extend_order_notification_id'))
+        if (OPEN_BIKE_BOX_EXTEND_ENABLED && !$item->get_meta('_extend_order_notification_id'))
             $item->add_meta_data('_extend_order_notification_id', obb_schedule_remember_mail($order, $item));
         $item->save();
     }
@@ -201,6 +201,8 @@ add_filter('woocommerce_thankyou_order_received_text', function (string $text, W
  * schedules the remember e-mail
  */
 function obb_schedule_remember_mail(WC_Order $order, WC_Order_Item $order_item): int {
+    if (!OPEN_BIKE_BOX_EXTEND_ENABLED)
+        return 0;
     $begin = DateTime::createFromFormat(
         'Y-m-d\TH:i:s\Z',
         $order_item->get_meta('_begin'),
@@ -249,5 +251,7 @@ add_action('action_scheduler_run_queue', function() {
  * registers remember mail trigger and by transforming args
  */
 add_action('openbikebox_order_renew_notification', function ($order_id, $order_item_id) {
+    if (!OPEN_BIKE_BOX_EXTEND_ENABLED)
+        return;
     do_action('openbikebox_order_renew_notification_mail', $order_id, $order_item_id);
 }, 10, 2);

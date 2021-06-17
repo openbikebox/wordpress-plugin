@@ -22,6 +22,8 @@ defined('ABSPATH') or die('nope.');
 
 
 function order_item_is_extendable(WC_Order_Item $order_item): bool {
+    if (!OPEN_BIKE_BOX_EXTEND_ENABLED)
+        return false;
     $begin = DateTime::createFromFormat('Y-m-d\TH:i:s\Z', $order_item->get_meta('_begin'), new DateTimeZone('UTC'));
     $end = DateTime::createFromFormat('Y-m-d\TH:i:s\Z', $order_item->get_meta('_end'), new DateTimeZone('UTC'));
     if ($end < new DateTime()) {
@@ -39,6 +41,8 @@ function order_item_is_extendable(WC_Order_Item $order_item): bool {
  * load admin mail
  */
 add_filter( 'woocommerce_email_classes', function(array $email_classes): array {
+    if (!OPEN_BIKE_BOX_EXTEND_ENABLED)
+        return $email_classes;
     include 'remember-mail-admin.php';
     $email_classes['WC_Extend_Booking_Email'] = new WC_Extend_Booking_Email();
     return $email_classes;
@@ -72,7 +76,7 @@ function get_booking_extended_link(WC_Order_Item $order_item): string {
 
 
 add_action('wp', function () {
-    if (!is_cart()) {
+    if (!is_cart() || !OPEN_BIKE_BOX_EXTEND_ENABLED) {
         return;
     }
     if (!isset($_GET['action']) || $_GET['action'] !== 'extend-booking' || !isset($_GET['order']) || !isset($_GET['item']) || !isset($_GET['secret'])) {

@@ -43,6 +43,8 @@ if (!defined('OPEN_BIKE_BOX_BACKEND_USER'))
     define('OPEN_BIKE_BOX_BACKEND_USER', 'unittest');
 if (!defined('OPEN_BIKE_BOX_BACKEND_PASSWORD'))
     define('OPEN_BIKE_BOX_BACKEND_PASSWORD', 'unittest');
+if (!defined('OPEN_BIKE_BOX_EXTEND_ENABLED'))
+    define('OPEN_BIKE_BOX_EXTEND_ENABLED', true);
 
 require 'inc/cart.php';
 require 'inc/urls.php';
