@@ -18,12 +18,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import {requestGet, requestAdminAjaxPost} from "./Helpers";
 
+
 export const getLocations = (base_url) => {
     return requestGet(base_url + '/api/v1/locations');
 }
 
 export const getLocation = (base_url, location_id, format) => {
-    return requestGet(base_url + '/api/v1/location/' + location_id + ((format) ? '?format=format' : ''));
+    return requestGet(base_url + '/api/v1/location/' + String(location_id) + ((format) ? '?format=format' : ''));
 }
 
 export const getLocationBySlug = (base_url, location_slug, format) => {
@@ -31,6 +32,15 @@ export const getLocationBySlug = (base_url, location_slug, format) => {
     if (format)
         params.push('format=' + format)
     return requestGet(base_url + '/api/v1/location?' + params.join('&'));
+}
+
+export const getResourceBySlug = (base_url, resource_slug) => {
+    let params = ['slug=' + resource_slug];
+    return requestGet(base_url + '/api/v1/resource?' + params.join('&'));
+}
+
+export const getResourceActions = (base_url, resource_id) => {
+    return requestGet(base_url + '/api/v1/resource/' + String(resource_id) + '/actions');
 }
 
 export const submitBooking = (data) => {

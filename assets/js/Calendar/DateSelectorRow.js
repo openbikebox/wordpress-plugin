@@ -44,7 +44,6 @@ const DateSelectorRow = (props) => {
             return false;
         }
         if (props.maxDate && newDate > props.maxDate) {
-            console.log('uff');
             return false;
         }
         props.setDate(newDate);
@@ -54,7 +53,6 @@ const DateSelectorRow = (props) => {
 
     const handleYearChange = (e) => {
         const newYear = e.target.value;
-        console.log(newYear);
         if (checkInRange(newYear, e.target)) {
             setYearValid(updateDate(createDate(newYear, month, day)));
         } else {

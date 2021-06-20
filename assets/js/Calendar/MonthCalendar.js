@@ -45,11 +45,21 @@ const getCalendarWeeks = (year, month, day, present, unavailableDates, newBookin
             }
             const available = checkIfDateAvailable(thisDate, unavailableDates);
             const active = checkIfDateActive(thisDate, newBookingBegin, newBookingEnd);
-            days.push(<MonthCalendarDay date={thisDate} disabled={getDayDisabledState(elapsed)} available={available}
-                                        active={active} isToday={present === 0 && day === elapsed} dragging={dragging}
-                                        setDragging={setDragging} lastSet={lastSet} setBookingBegin={setBookingBegin}
-                                        setBookingEnd={setBookingEnd} bookingBegin={newBookingBegin}
-                                        bookingEnd={newBookingEnd} setBookingBeginAndEnd={setBookingBeginAndEnd}/>);
+            days.push(<MonthCalendarDay
+                date={thisDate}
+                disabled={getDayDisabledState(elapsed)}
+                available={available}
+                active={active}
+                isToday={present === 0 && day === elapsed}
+                dragging={dragging}
+                setDragging={setDragging}
+                lastSet={lastSet}
+                setBookingBegin={setBookingBegin}
+                setBookingEnd={setBookingEnd}
+                bookingBegin={newBookingBegin}
+                bookingEnd={newBookingEnd}
+                setBookingBeginAndEnd={setBookingBeginAndEnd}
+            />);
         }
         weekCounter++;
         weeks.push(days);

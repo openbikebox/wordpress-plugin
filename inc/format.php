@@ -19,39 +19,51 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 defined('ABSPATH') or die('nope.');
 
+
+function obb_parse_datetime(string $datetime_string): DateTime {
+    return DateTime::createFromFormat('Y-m-d\TH:i:s\Z', $datetime_string, new DateTimeZone('UTC'));
+}
+
+
 /*
  * localizes datetime string to local datetime
  */
-function localize_datetime(string $datetime_string): DateTime {
-    $dt = DateTime::createFromFormat('Y-m-d\TH:i:s\Z', $datetime_string, new DateTimeZone('UTC'));
-    $dt->setTimeZone(new DateTimeZone('Europe/Berlin'));
-    return $dt;
+function obb_localize_datetime(DateTime $datetime): DateTime {
+    $localized_datetime = clone $datetime;
+    $localized_datetime->setTimeZone(new DateTimeZone('Europe/Berlin'));
+    return $localized_datetime;
 }
 
 /*
  * formats datetime string
  */
-function format_datetime(?string $datetime_string, string $format = 'd.m.Y, H:i'): string {
-    if (!$datetime_string)
-        return '';
-    return localize_datetime($datetime_string)->format($format);
+function obb_format_datetime(DateTime $datetime, bool $transform_midnight = false, bool $include_year = false): string {
+    $localized_datetime = obb_localize_datetime($datetime);
+    if ($transform_midnight && $localized_datetime->format('H:i') === '00:00')
+        return $datetime->format(($include_year) ? 'd.m.Y' : 'd.m.'). ', 24:00 Uhr';
+    return $localized_datetime->format(($include_year) ? 'd.m.Y, H:i' : 'd.m., H:i');
+}
+
+
+function obb_format_combine_datetime(DateTime $begin, DateTime $end, $separator = ' - '): string {
+    if (substr(obb_format_datetime($begin, false, true), 0, 10) === substr(obb_format_datetime($end, true, true), 0, 10))
+        return substr(obb_format_datetime($begin), 0, 6) . ', ' . substr(obb_format_datetime($begin), 8, 5) . $separator . substr(obb_format_datetime($end, true), 8, 5);
+    if ($begin->format('Y') === $end->format('Y'))
+        return obb_format_datetime($begin) . $separator . obb_format_datetime($end, true);
+    return obb_format_datetime($begin, false, true) . $separator . obb_format_datetime($end, true, true);
 }
 
 /*
  * formats combined begin till end datetime string
  */
-function combine_datetime_str(string $begin_string, string $end_string, string $separator = ' - '): string {
-    //$begin = localize_datetime($begin_string);
-    $end = localize_datetime($end_string);
-    /*if ($begin->format('Y') === $end->format('Y'))
-        return $begin->format('d.m.') . $separator . $end->format('d.m.');
-    return $begin->format('d.m.y') . $separator . $end->format('d.m.y');
-    */
-    $end->modify('-12 hours');
-    return 'bis ' . $end->format('d.m.'). ', 24:00 Uhr';
+function obb_format_combine_datetime_str(string $begin_string, string $end_string, bool $future_booking = false): string {
+    $begin = obb_parse_datetime($begin_string);
+    $end = obb_parse_datetime($end_string);
+    if ($future_booking)
+        return obb_format_combine_datetime($begin, $end);
+    return obb_format_end($end);
 }
 
 function obb_format_end(DateTime $end): string {
-    $end = (clone $end)->modify('-12 hours');
-    return 'bis ' . $end->format('d.m.'). ', 24:00 Uhr';
+    return 'bis ' . obb_format_datetime($end);
 }

@@ -9,6 +9,16 @@
   justify-content: space-around;
 }
 
+.calendar-header {
+  text-align: center;
+}
+
+.calender-header label {
+  display: inline-block;
+  width: 30%;
+  font-weight: bold;
+}
+
 .calendar-week {
   width: 100%;
   flex-shrink: 0;
@@ -209,6 +219,7 @@
   border-radius: 0.25rem;
   margin: 0.25rem;
   cursor: pointer;
+  text-align: center;
 }
 
 .calendar-view-radio:checked + label {
@@ -262,6 +273,7 @@
 .calendar-asap-booking-button {
   margin-right: 1rem;
   margin-bottom: 1rem;
+  width: 22%;
 }
 
 .calendar-booking-container {

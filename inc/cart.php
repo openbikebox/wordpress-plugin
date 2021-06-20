@@ -44,8 +44,11 @@ add_filter('woocommerce_cart_item_name', function(string $name, array $cart_item
     if ($cart_item['product_id'] !== OPEN_BIKE_BOX_PRODUCT)
         return $name;
     $result = '<strong>' . $cart_item['_location_name'] . ': Box ' . $cart_item['_resource_identifier'] . '</strong><br>';
-    $result .= 'Zeitraum: ' . combine_datetime_str($cart_item['_begin'], $cart_item['_end']);
-    //$result .= '<br><small>Die Buchung ist noch bis ' . format_datetime($cart_item['_valid_till'], 'H:i') . ' für Sie reserviert.</small>';
+    $result .= 'Zeitraum: ' . obb_format_combine_datetime_str(
+        $cart_item['_begin'],
+        $cart_item['_end'],
+        boolval($cart_item['_future_booking'])
+    );
     return $result;
 }, 10, 2);
 
@@ -57,8 +60,7 @@ add_filter('woocommerce_cart_item_name', function (string $name, array $cart_ite
         return $name;
     }
     $result = '<strong>' . $cart_item['_location_name'] . ': Box ' . $cart_item['_resource_identifier'] . '</strong><br>';
-    $result .= 'Zeitraum: ' . combine_datetime_str($cart_item['_begin'], $cart_item['_end']) . '<br>';
-    //$result .= '<br><small>Die Buchung ist noch bis ' . format_datetime($cart_item['_valid_till'], 'H:i') . ' für Sie reserviert.</small>';
+    $result .= 'Zeitraum: ' . obb_format_combine_datetime_str($cart_item['_begin'], $cart_item['_end'], boolval($cart_item['_future_booking'])) . '<br>';
     return $result;
 }, 10, 2);
 

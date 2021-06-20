@@ -52,7 +52,7 @@ add_action('woocommerce_checkout_create_order_line_item', function (WC_Order_Ite
     $fields = array(
         'uid', 'request_uid', 'session', 'status', 'value_gross', 'value_net', 'value_tax', 'tax_rate', 'requested_at',
         'begin', 'end', 'location_id', 'location_name', 'resource_identifier', 'location_slug', 'operator_name',
-        'valid_till', 'extended_order_id', 'extended_order_item_id', 'auth_methods'
+        'valid_till', 'extended_order_id', 'extended_order_item_id', 'auth_methods', 'future_booking'
     );
     foreach ($fields as $field) {
         if (!array_key_exists('_' . $field, $values))
@@ -92,15 +92,11 @@ function eventually_finalize_booking(WC_Order $order) {
             'request_uid' => $item->get_meta('_request_uid'),
             'session' => $item->get_meta('_session'),
             'paid_at' => gmdate("Y-m-d\TH:i:s\Z"),
-            'token' => array(
-                array(
-                    'type' => 'code',
-                    'identifier' => generate_uid(4, '0123456789')
-                )
-            )
+            'token' => array(array('type' => 'code'))
         ));
         $item->add_meta_data('_code', $result->data->token[0]->secret, true);
         $item->add_meta_data('_pin', $result->data->token[0]->identifier, true);
+        $item->add_meta_data('_code_date', $result->data->token[0]->date, true);
 
         // check if extended order
         $extended_order_id = $item->get_meta('_extended_order_id');
@@ -131,8 +127,8 @@ add_filter('woocommerce_order_item_name', function(string $name, WC_Order_Item_P
         return $name;
     if ($order_item->get_product_id() !== OPEN_BIKE_BOX_PRODUCT)
         return $name;
-    $result = '<strong>' . $order_item->get_meta('_location_name') . ': Box ' . $order_item->get_meta('_resource_identifier') . '</strong><br>';
-    $result .= 'Zeitraum: ' . combine_datetime_str($order_item->get_meta('_begin'), $order_item->get_meta('_end')). '<br>';
+    $result = '<strong>' . $order_item->get_meta('_location_name') . ': ' . $order_item->get_meta('_resource_identifier') . '</strong><br>';
+    $result .= 'Zeitraum: ' . obb_format_combine_datetime_str($order_item->get_meta('_begin'), $order_item->get_meta('_end'), $order_item->get_meta('_future_booking')). '<br>';
     if (is_account_page()) {
         $extended_order_id = $order_item->get_meta('_extended_order_id');
         if ($extended_order_id) {
@@ -175,14 +171,14 @@ add_filter('woocommerce_thankyou_order_received_text', function (string $text, W
         if (in_array('code', $auth_methods) && $order_item->get_meta('_code')) {
             if ($first)
                 $text .= '<h2>Ihre ' . ($order_item->get_meta('_extended_order_id') ? 'neuen ' : '') . 'Zugangsdaten / access code</h2>';
-            $text .= '<table><tr><td>Gültig bis <strong>Datum</strong> /<br>valid until <strong>date</strong></td><th>' . localize_datetime($order_item->get_meta('_end'))->modify("-1 day")->format('Ymd') . '</th></tr>';
+            $text .= '<table><tr><td>Gültig bis <strong>Datum</strong> /<br>valid until <strong>date</strong></td><th>' . $order_item->get_meta('_code_date') . '</th></tr>';
             $text .= '<tr><td>Box <strong>Nummer</strong> /<br>box <strong>number</strong></td><th>' . $order_item->get_meta('_resource_identifier') . '</th></tr>';
             $text .= '<tr><td><strong>PIN</strong></td><th>' . $order_item->get_meta('_pin') . '</th></tr>';
             $text .= '<tr><td>Prüf <strong>Summe</strong> /<br>check <strong>sum</strong></td><th>' . $order_item->get_meta('_code') . '</th></tr></table>';
         }
 
-        $begin = DateTime::createFromFormat('Y-m-d\TH:i:s\Z', $order_item->get_meta('_begin'), new DateTimeZone('UTC'));
-        $end = DateTime::createFromFormat('Y-m-d\TH:i:s\Z', $order_item->get_meta('_end'), new DateTimeZone('UTC'));
+        $begin = obb_parse_datetime($order_item->get_meta('_begin'));
+        $end = obb_parse_datetime($order_item->get_meta('_end'));
         if (in_array('connect', $auth_methods) && $begin->getTimestamp() <= (new DateTime())->getTimestamp() && $end->getTimestamp() >= (new DateTime())->getTimestamp()) {
             $text .= '<div 
                 id="obb-thank-you" 

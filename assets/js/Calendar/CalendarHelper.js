@@ -47,14 +47,17 @@ export const checkInRange = (value, target) => {
 };
 
 export const checkInDateRange = (startDate, endDate, checkDate) => {
-    //TODO: add partial check (i.e start = 1.6.21 15:00, date = 1.6.21 result = secondHalf)
-    const compareStartDate = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate(), 0, 0, 0, 0);
-    const compareEndDate = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate(), 23, 59, 59, 999);
-    return compareStartDate <= checkDate && checkDate <= compareEndDate;
+    //TODO: add partial check (i.e start = 1.6.21 15:00, date = 1.6.21 result = secondHalf)  ER: solved?
+    let checkDatePlusOne = new Date(checkDate);
+    checkDatePlusOne.setDate(checkDatePlusOne.getDate() + 1);
+    return startDate < checkDatePlusOne && endDate > checkDate;
 };
 
-export const calculateDateDiff = (startDate, endDate) => {
-    const diffMs = (new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate()) - new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate()));
+export const calculateDateDiff = (startDate, endDate, excludeEndMoment) => {
+    let calculatedEndDate = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
+    if (excludeEndMoment && endDate.getHours() === 0 && endDate.getMinutes() === 0)
+        calculatedEndDate.setDate(calculatedEndDate.getDate() + 1);
+    const diffMs = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate()) - calculatedEndDate;
     return Math.ceil(diffMs / (1000 * 60 * 60 * 24));
 };
 
@@ -77,23 +80,25 @@ export const getUnavailableDates = (bookings) => {
             throw error('Invalid booking. End time cannot be before start time.');
         }
 
-        const beginDateOfMonth = booking.begin.getDate();
-        const beginDate = new Date(booking.begin.getFullYear(), booking.begin.getMonth(), beginDateOfMonth);
-        const beginTime = beginDate.getTime();
-        const endDate = new Date(booking.end.getFullYear(), booking.end.getMonth(), booking.end.getDate());
-        const endTime = endDate.getTime();
-        const startEndComparison = beginTime === endTime ? 0 : (beginTime < endTime ? -1 : 1);
-        const beginDateString = beginDate.toDateString();
+        let beginDateOfMonth = booking.begin.getDate();
+        let beginDate = new Date(booking.begin.getFullYear(), booking.begin.getMonth(), beginDateOfMonth);
+        let beginTime = beginDate.getTime();
+        let endDate = new Date(booking.end.getFullYear(), booking.end.getMonth(), booking.end.getDate());
+        let endTime = endDate.getTime();
 
+        let startEndComparison = beginTime === endTime ? 0 : (beginTime < endTime ? -1 : 1);
+        let beginDateString = beginDate.toDateString();
         if (startEndComparison === -1) {
-            pushToUnavailableDateBookings(unavailableDates, beginDateString, unavailableDates[beginDateString] = {
-                partial: booking.begin.getHours() > 0 ? 'bottom' : 'false',
+            pushToUnavailableDateBookings(unavailableDates, beginDateString, {
+                partial: booking.begin.getHours() > 0 ? 'bottom' : false,
                 begin: booking.begin,
             });
-            pushToUnavailableDateBookings(unavailableDates, endDate.toDateString(), {
-                partial: booking.end.getHours < 23,
-                end: booking.end,
-            });
+
+            pushToUnavailableDateBookings(
+                unavailableDates,
+                ((booking.end.getHours() === 0) ? new Date(endDate - 86400000) : endDate).toDateString(), // handle 0:00 next day
+                {partial: booking.end.getHours < 23, end: booking.end}
+                );
 
             const betweenDate = new Date(beginDate.getTime());
             let c = beginDateOfMonth + 1;
@@ -175,6 +180,7 @@ export const checkIfDateActive = (date, newBookingBegin, newBookingEnd) => {
 };
 
 export const calculateNewBookingTime = (newBeginDate, newEndDate, maxMS, unavailableDates, startAt) => {
+    console.log([newBeginDate, newEndDate])
     if (newBeginDate > newEndDate) {
         throw new Error('Impossible new booking. End cannot be before begin. Start: ' + newBeginDate.toString() + ' End: ' + newEndDate.toString());
     }
@@ -289,9 +295,6 @@ const fixUnavailableStartAtBegin = (newBeginDate, newEndDate, unavailableDates) 
         containsUnavailable = true;
         newBeginDate = earliestPossibleBegin[1];
     }
-
-    console.log(newBeginDate);
-    console.log(containsUnavailable);
 
     const lastPossibleEnd = getFurthestAvailableDateInFrame(newBeginDate, unavailableDates, 8.64e+7, newBeginDate, newEndDate);
     if (lastPossibleEnd[0]) {

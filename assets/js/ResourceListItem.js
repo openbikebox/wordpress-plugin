@@ -53,7 +53,7 @@ const ResourceListItem = (props) => {
         <p className={resource.photo ? 'resource-description' : 'resource-description fullwidth'}>{resource.description}</p>
         <div className="resource-foot">
             <PricingContainer pricegroup={resource.pricegroup}/>
-            <span className="booking-link"><a className="button is-success" href={'/resource/' + resource.id}>Jetzt Buchen</a></span>
+            <span className="booking-link"><a className="button is-success" href={'/resource/' + resource.slug}>Jetzt Buchen</a></span>
         </div>
     </article>;
 };

@@ -24,17 +24,23 @@ const AsapCalendar = (props) => {
 
     const pushToAllowedBookings = (hourCount, newAllowedBookings) => {
         if (hourCount === 1) {
-            newAllowedBookings.push(
-                <AsapCalendarBookingButton setBookingDuration={setBookingDuration} hourCount={1}
-                                           text="1 Stunde"/>);
+            newAllowedBookings.push(<AsapCalendarBookingButton
+                setBookingDuration={setBookingDuration}
+                hourCount={1}
+                text="1 Stunde"
+            />);
         } else if (hourCount === 24) {
-            newAllowedBookings.push(
-                <AsapCalendarBookingButton setBookingDuration={setBookingDuration} hourCount={24}
-                                           text="1 Tag"/>);
+            newAllowedBookings.push(<AsapCalendarBookingButton
+                setBookingDuration={setBookingDuration}
+                hourCount={24}
+                text="1 Tag"
+            />);
         } else {
-            newAllowedBookings.push(
-                <AsapCalendarBookingButton setBookingDuration={setBookingDuration} hourCount={hourCount}
-                                           text={hourCount + ' Stunden'}/>);
+            newAllowedBookings.push(<AsapCalendarBookingButton
+                setBookingDuration={setBookingDuration}
+                hourCount={hourCount}
+                text={hourCount + ' Stunden'}
+            />);
         }
         return newAllowedBookings;
     };
@@ -77,8 +83,10 @@ const AsapCalendar = (props) => {
 
     const setBookingDuration = (duration) => {
         let updatedToday = new Date();
-        setBookingBegin(updatedToday);
-        setBookingEnd(new Date(updatedToday.getFullYear(), updatedToday.getMonth(), updatedToday.getDate(), updatedToday.getHours() + duration, updatedToday.getMinutes()));
+        props.setBookingBeginAndEnd(
+            updatedToday,
+            new Date(updatedToday.getFullYear(), updatedToday.getMonth(), updatedToday.getDate(), updatedToday.getHours() + duration, updatedToday.getMinutes())
+        );
         if (submitRef.current) {
             submitRef.current.scrollIntoView();
         }
@@ -108,6 +116,7 @@ AsapCalendar.propTypes = {
     submitRef: PropTypes.object.isRequired,
     bookings: PropTypes.arrayOf(PropTypes.shape(convertedBookingPropTypes)).isRequired,
     longestAllowedBooking: PropTypes.number,
+    setBookingBeginAndEnd: PropTypes.func
 };
 
 export default AsapCalendar;

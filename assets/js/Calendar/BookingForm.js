@@ -127,23 +127,33 @@ const BookingForm = (props) => {
             {editingBegin
                 ? <>
                     <h4>Von</h4>
-                    <DateSelectorRow setDate={setTempBookingBegin} yearId={'calendar-booking-begin-year-input'}
-                                     monthId={'calendar-booking-begin-month-input'} date={tempBookingBegin}
-                                     minDate={props.today} dayId={'calendar-booking-begin-day-input'}/>
-                    <TimeSelectorRow hourId={'calendar-booking-begin-hour-input'}
-                                     minuteId={'calendar-booking-begin-minute-input'}
-                                     minHour={beginSame ? props.today.getHours() : 0} setHour={setBeginHour}
-                                     hour={beginHour}
-                                     minMinute={beginSame ? props.today.getMinutes() : 0} setMinute={setBeginMinute}
-                                     minute={beginMinute}/>
-                    <button className="button calendar-change-time-button" onClick={setBookingBegin}>Startzeitpunkt
-                        festlegen
+                    <DateSelectorRow
+                        setDate={setTempBookingBegin}
+                        yearId={'calendar-booking-begin-year-input'}
+                        monthId={'calendar-booking-begin-month-input'}
+                        date={tempBookingBegin}
+                        minDate={props.today}
+                        dayId={'calendar-booking-begin-day-input'}
+                    />
+                    <TimeSelectorRow
+                        hourId={'calendar-booking-begin-hour-input'}
+                        minuteId={'calendar-booking-begin-minute-input'}
+                        minHour={beginSame ? props.today.getHours() : 0}
+                        setHour={setBeginHour}
+                        hour={beginHour}
+                        minMinute={beginSame ? props.today.getMinutes() : 0}
+                        setMinute={setBeginMinute}
+                        minute={beginMinute}
+                    />
+                    <button className="button calendar-change-time-button" onClick={setBookingBegin}>
+                        Startzeitpunkt festlegen
                     </button>
                 </>
                 : <>
                     <h4> Von: {props.bookingBegin && props.bookingBegin.toLocaleString('de-DE')}</h4>
-                    <button className="button calendar-change-time-button"
-                            onClick={() => setEditingBegin(true)}>Startzeitpunkt {props.bookingBegin ? 'ändern' : 'festlegen'}</button>
+                    <button className="button calendar-change-time-button" onClick={() => setEditingBegin(true)}>
+                        Startzeitpunkt {props.bookingBegin ? 'ändern' : 'festlegen'}
+                    </button>
                 </>}
 
             {editingEnd

@@ -28,14 +28,16 @@ add_action('wp_ajax_nopriv_obb_add_to_cart', 'obb_add_to_cart_ajax');
 function obb_add_to_cart_ajax(): array {
     $data = json_decode(stripslashes($_POST['data']));
     obb_clear_cart();
-    echo json_encode(handle_obb_add_to_cart(bike_box_request(OPEN_BIKE_BOX_BACKEND . '/api/v1/action/reserve', array(
+    $request = array(
         'request_uid' => generate_uid(),
         'resource_id' => $data->resource_id,
         'requested_at' => gmdate("Y-m-d\TH:i:s\Z"),
         'begin' => $data->begin,
-        'end' => $data->end,
-        'predefined_daterange' => $data->predefined_daterange
-    ))));
+        'end' => $data->end
+    );
+    if (isset($data->predefined_daterange) && $data->predefined_daterange)
+        $request['predefined_daterange'] = $data->predefined_daterange;
+    echo json_encode(handle_obb_add_to_cart(bike_box_request(OPEN_BIKE_BOX_BACKEND . '/api/v1/action/reserve', $request)));
     wp_die();
 }
 
@@ -63,6 +65,7 @@ function handle_obb_add_to_cart(object $result, ?int $extended_order_id = null, 
             $cart_item_data['_' . $parent_field . '_' . $child_field] = $result->data->$parent_field->$child_field;
         }
     }
+    $cart_item_data['_future_booking'] = $result->data->resource->hardware->future_booking;
     if ($extended_order_item_id !== null && $extended_order_id !== null) {
         $cart_item_data['_extended_order_id'] = $extended_order_id;
         $cart_item_data['_extended_order_item_id'] = $extended_order_item_id;

@@ -18,7 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import React from 'react';
 
-import {getLocationBySlug} from './Api';
+import {getLocationBySlug, getResourceActions} from './Api';
 import {ComponentStatus} from './Helpers';
 import GenericResourceSelector from './GenericResourceSelector';
 import ResourceList from './ResourceList';
@@ -43,15 +43,17 @@ const LocationView = (props) => {
     if (status === ComponentStatus.loading) {
         return <p>Lade Stationsdaten...</p>;
     } else if (status === ComponentStatus.error) {
-        return <p>Beim Laden der Station is ein serverseitiger Fehler aufgetreten.<br/>
-            Bitte versuchen Sie es später erneut.</p>;
+        return <p>
+            Beim Laden der Station is ein serverseitiger Fehler aufgetreten.<br/>
+            Bitte versuchen Sie es später erneut.
+        </p>
     }
 
     if (location.type === 'cargobike') {
         return <ResourceList location={location}/>;
     }
 
-    return <GenericResourceSelector location={location} apiBackend={props.apiBackend} locationSlug={props.locationSlug}/>;
+    return <GenericResourceSelector location={location} apiBackend={props.apiBackend} locationSlug={props.locationSlug} />;
 };
 
 export default LocationView;
