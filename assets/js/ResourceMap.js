@@ -53,7 +53,6 @@ export default class ResourceMap extends Component {
         });
         this.map.fitBounds([[0, 0], [max_y, max_y]])
 
-        this.map.on('click', evt => console.log(evt));
         L.geoJSON(locationGeojson).addTo(this.map)
         /*
         this.setState({
@@ -87,7 +86,6 @@ export default class ResourceMap extends Component {
 export const MapEvents = () => {
     const map = useMapEvents({
         click(evt) {
-            console.log(evt)
         },
     })
     return null;

@@ -34,7 +34,6 @@ const ResourceView = (props) => {
     }
 
     const handleSubmit = (bookingBegin, bookingEnd) => {
-        console.log(bookingBegin);
         submitBooking({
             begin: bookingBegin.toISOString().substr(0, 19) + 'Z',
             end: bookingEnd.toISOString().substr(0, 19) + 'Z',
@@ -46,11 +45,13 @@ const ResourceView = (props) => {
     }
 
     return <div>
-        <h2>{resource.identifier}</h2>
-        {resource.photo && <img src={resource.photo.url} alt={'Foto von ' + resource.identifier}/>}
+        <h2>{resource.name}</h2>
+        {resource.photo && <img src={resource.photo.url} alt={'Foto von ' + resource.name}/>}
         <p>{resource.description}</p>
         <Calendar
+            apiBackend={props.apiBackend}
             handleSubmit={handleSubmit}
+            resource={resource}
             priceGroup={resource.pricegroup}
             bookings={existingBookings}
             maxBookingLength={604800}

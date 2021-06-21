@@ -43,6 +43,11 @@ export const getResourceActions = (base_url, resource_id) => {
     return requestGet(base_url + '/api/v1/resource/' + String(resource_id) + '/actions');
 }
 
+export const getResourcePrice = (base_url, resource_id, begin, end) => {
+    return requestGet(base_url + '/api/v1/resource/' + String(resource_id) + '/price?begin=' + begin + '&end=' + end);
+}
+
+
 export const submitBooking = (data) => {
     return requestAdminAjaxPost(
         wc_add_to_cart_params.ajax_url,

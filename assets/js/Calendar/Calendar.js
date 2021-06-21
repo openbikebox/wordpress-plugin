@@ -6,7 +6,7 @@ import BookingForm from './BookingForm';
 import AsapCalendar from './AsapCalendar';
 import {calculateNewBookingTime, compareDateWithoutTime, getUnavailableDates} from './CalendarHelper';
 import {rawBookingPropTypes} from './CalendarPropTypes';
-import {pricegroupPropTypes} from '../Models';
+import {pricegroupPropTypes, resourcePropTypes} from '../Models';
 
 const CalendarMeta = (props) => {
     return <div aria-live="assertive" aria-relevant="additions text">
@@ -204,6 +204,8 @@ const Calendar = (props) => {
         />}
         <CalendarMeta maxReached={maxReached} maxReachedWarning={maxReachedWarning} errorString={errorString} />
         <BookingForm
+            apiBackend={props.apiBackend}
+            resource={props.resource}
             bookingBegin={bookingBegin}
             setBookingBegin={setBookingBegin}
             bookingEnd={bookingEnd}
@@ -217,11 +219,13 @@ const Calendar = (props) => {
 };
 
 Calendar.propTypes = {
+    apiBackend: PropTypes.string,
     bookings: PropTypes.arrayOf(PropTypes.shape(rawBookingPropTypes)).isRequired,
     maxBookingLength: PropTypes.number,
     initialView: PropTypes.oneOf(['day', 'month', '3months', 'asap']),
     priceGroup: PropTypes.shape(pricegroupPropTypes).isRequired,
     handleSubmit: PropTypes.func.isRequired,
+    resource: PropTypes.shape(resourcePropTypes)
 };
 
 export default Calendar;

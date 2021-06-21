@@ -20,6 +20,7 @@ export const photoPropTypes = {
 };
 
 export const resourcePropTypes = {
+    id: PropTypes.number,
     identifier: PropTypes.string,
     id_url: PropTypes.string,
     created: PropTypes.string,

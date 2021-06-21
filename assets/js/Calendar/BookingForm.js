@@ -5,6 +5,7 @@ import TimeSelectorRow from './TimeSelectorRow';
 import {calculatePrice, compareDateWithoutTime} from './CalendarHelper';
 import {pricegroupPropTypes} from '../Models';
 import PriceDisplay from '../PriceDisplay';
+import {getResourcePrice} from '../Api';
 
 const BookingForm = (props) => {
     const [tempBookingBegin, setTempBookingBegin] = React.useState();
@@ -115,7 +116,11 @@ const BookingForm = (props) => {
 
     React.useEffect(() => {
         if (props.bookingBegin && props.bookingEnd) {
-            setPrice(calculatePrice(props.priceGroup, props.bookingBegin, props.bookingEnd));
+            getResourcePrice(props.apiBackend, props.resource.id, props.bookingBegin.toISOString().substr(0, 19), props.bookingEnd.toISOString().substr(0, 19))
+                .then(data => {
+                    setPrice(data.data.value_gross)
+                });
+
         }else {
             setPrice(null);
         }
@@ -191,6 +196,7 @@ BookingForm.propTypes = {
     handleSubmit: PropTypes.func.isRequired,
     submitRef: PropTypes.object.isRequired,
     priceGroup: PropTypes.shape(pricegroupPropTypes).isRequired,
+    apiBackend: PropTypes.string
 };
 
 export default BookingForm;

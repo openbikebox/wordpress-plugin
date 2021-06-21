@@ -180,7 +180,6 @@ export const checkIfDateActive = (date, newBookingBegin, newBookingEnd) => {
 };
 
 export const calculateNewBookingTime = (newBeginDate, newEndDate, maxMS, unavailableDates, startAt) => {
-    console.log([newBeginDate, newEndDate])
     if (newBeginDate > newEndDate) {
         throw new Error('Impossible new booking. End cannot be before begin. Start: ' + newBeginDate.toString() + ' End: ' + newEndDate.toString());
     }
