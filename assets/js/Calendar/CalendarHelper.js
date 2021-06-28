@@ -405,3 +405,5 @@ export const getEndOfDate = (date) => {
     newDate.setMilliseconds(999);
     return newDate;
 };
+
+export const dateTimeFormatOptions = {dateStyle: 'short', timeStyle: 'short'}

@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import DateSelectorRow from './DateSelectorRow';
 import TimeSelectorRow from './TimeSelectorRow';
-import {calculatePrice, compareDateWithoutTime, getEndOfDate} from './CalendarHelper';
+import {calculatePrice, compareDateWithoutTime, dateTimeFormatOptions, getEndOfDate} from './CalendarHelper';
 import {pricegroupPropTypes} from '../Models';
 import PriceDisplay from '../PriceDisplay';
 import {getResourcePrice} from '../Api';
@@ -163,7 +163,7 @@ const BookingForm = (props) => {
                     </button>
                 </>
                 : <>
-                    <h4> Von: {props.bookingBegin && props.bookingBegin.toLocaleString('de-DE')}</h4>
+                    <h4> Von: {props.bookingBegin && props.bookingBegin.toLocaleString('de-DE', dateTimeFormatOptions)}</h4>
                     <button className="button calendar-change-time-button" onClick={() => setEditingBegin(true)}>
                         Startzeitpunkt {props.bookingBegin ? 'ändern' : 'festlegen'}
                     </button>
@@ -185,7 +185,7 @@ const BookingForm = (props) => {
                     </button>
                 </>
                 : <>
-                    <h4> Bis: {props.bookingEnd && props.bookingEnd.toLocaleString('de-DE')}</h4>
+                    <h4> Bis: {props.bookingEnd && props.bookingEnd.toLocaleString('de-DE', dateTimeFormatOptions)}</h4>
                     <button className="button calendar-change-time-button"
                             onClick={() => setEditingEnd(true)}>Endzeitpunkt {props.bookingEnd ? 'ändern' : 'festlegen'}</button>
                 </>}
