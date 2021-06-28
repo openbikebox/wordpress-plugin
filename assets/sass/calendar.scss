@@ -51,6 +51,7 @@
 .calendar-date[aria-disabled=true] {
   color: $gray;
   font-weight: initial;
+  cursor: not-allowed;
 }
 
 .calendar-date[data-available=false] {
@@ -127,7 +128,7 @@
   cursor: pointer;
 }
 
-.calendar-date[aria-disabled=true]:not[data-active=true]:hover {
+.calendar-date[data-disabled=true]:not[data-active=true], .calendar-date[aria-disabled=true]:not[data-active=true]:hover {
   background-color: lightgray;
   cursor: not-allowed;
 }
