@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import {calculateDateDiff, compareDateWithoutTime} from './CalendarHelper';
+import {calculateDateDiff, compareDateWithoutTime, getEndOfDate, getStartOfDate} from './CalendarHelper';
 import CalendarDayTooltip from './CalendarDayTooltip';
 
 const MonthCalendarDay = (props) => {
@@ -58,13 +58,13 @@ const MonthCalendarDay = (props) => {
             props.setBookingEnd(null);
         } else if (startOrEnd[0] === 'Start') {
             if (startOrEnd[1]) {
-                props.setBookingBegin(props.bookingEnd);
+                props.setBookingBegin(getStartOfDate(props.bookingEnd));
             } else {
                 props.setBookingBegin(date);
             }
         } else {
             if (startOrEnd[1]) {
-                props.setBookingEnd(props.bookingBegin);
+                props.setBookingEnd(getEndOfDate(props.bookingBegin));
             } else {
                 props.setBookingEnd(date);
             }
@@ -74,11 +74,7 @@ const MonthCalendarDay = (props) => {
     const toggleActiveOn = () => {
         let newBegin = props.bookingBegin;
         let newEnd = props.bookingEnd;
-
-        let endOfDate = new Date(date);
-        endOfDate.setHours(23);
-        endOfDate.setMinutes(59);
-        endOfDate.setSeconds(59);
+        let endOfDate = getEndOfDate(date);
 
         if (!props.bookingBegin || compareDateWithoutTime(date, props.bookingBegin) < 0) {
             newBegin = available.last ?? date;

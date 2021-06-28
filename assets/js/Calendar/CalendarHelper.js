@@ -96,8 +96,8 @@ export const getUnavailableDates = (bookings) => {
             pushToUnavailableDateBookings(
                 unavailableDates,
                 ((booking.end.getHours() === 0) ? new Date(endDate - 86400000) : endDate).toDateString(), // handle 0:00 next day
-                {partial: booking.end.getHours < 23, end: booking.end}
-                );
+                {partial: booking.end.getHours < 23, end: booking.end},
+            );
 
             const betweenDate = new Date(beginDate.getTime());
             let c = beginDateOfMonth + 1;
@@ -386,4 +386,22 @@ export const calculatePrice = (priceGroup, startDate, endDate) => {
         }
     }
     return calcPrice;
+};
+
+export const getStartOfDate = (date) => {
+    const newDate = new Date(date.getTime());
+    newDate.setHours(0);
+    newDate.setMinutes(0);
+    newDate.setSeconds(0);
+    newDate.setMilliseconds(0);
+    return newDate;
+};
+
+export const getEndOfDate = (date) => {
+    const newDate = new Date(date.getTime());
+    newDate.setHours(23);
+    newDate.setMinutes(59);
+    newDate.setSeconds(59);
+    newDate.setMilliseconds(999);
+    return newDate;
 };
