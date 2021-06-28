@@ -129,6 +129,7 @@ const Calendar = (props) => {
 
     const errorStore = {
         unavailable: 'Der von Ihnen ausgewählte Buchungszeitraum enthielt Zeiten, die nicht verfügbar sind. Er wurde automatisch angepasst.',
+        unavailable_impossible: 'Der von Ihnen ausgewählte Buchungszeitraum ist bereits vergeben und konnte nicht automatisch angepasst werden. Bitte wählen Sie einen anderen Zeitraum.',
         tooLong: 'Der von Ihnen ausgewählte Buchungszeitraum war zu lang. Er wurde automatisch gekürzt.',
     };
 

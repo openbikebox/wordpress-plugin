@@ -210,9 +210,15 @@ export const calculateNewBookingTime = (newBeginDate, newEndDate, maxMS, unavail
     }
 
     if (noMoreUnavailable[0]) {
-        errors.push('unavailable');
-        newBeginDate = noMoreUnavailable[1];
-        newEndDate = noMoreUnavailable[2];
+        if (!noMoreUnavailable[1] || !noMoreUnavailable[2]) {
+            errors.push('unavailable_impossible');
+            newBeginDate(null);
+            newEndDate(null);
+        } else {
+            errors.push('unavailable');
+            newBeginDate = noMoreUnavailable[1];
+            newEndDate = noMoreUnavailable[2];
+        }
     } else if (tooLong) {
         errors.push('tooLong');
     }
@@ -319,7 +325,7 @@ const fixUnavailableStartAtEnd = (newBeginDate, newEndDate, unavailableDates) =>
 
 const fixUnavailableSameDayStartAtBegin = (newBeginDate, newEndDate, unavailableDates) => {
     const dayAvailability = checkIfDateAvailable(newBeginDate, unavailableDates);
-    if (dayAvailability.partial === false) {
+    if (dayAvailability.partial === true) {
         let unavailable = false;
         if (dayAvailability.bookings.length > 1) {
             for (const booking of dayAvailability.bookings) {
@@ -354,7 +360,10 @@ const fixUnavailableSameDayStartAtBegin = (newBeginDate, newEndDate, unavailable
         }
         return [unavailable, newBeginDate, newEndDate];
     } else {
-        return [!dayAvailability.available, newBeginDate, newEndDate];
+        if (dayAvailability.available) {
+            return [false, newBeginDate, newEndDate];
+        }
+        return [true];
     }
 };
 
@@ -406,4 +415,4 @@ export const getEndOfDate = (date) => {
     return newDate;
 };
 
-export const dateTimeFormatOptions = {dateStyle: 'short', timeStyle: 'short'}
+export const dateTimeFormatOptions = {dateStyle: 'short', timeStyle: 'short'};
