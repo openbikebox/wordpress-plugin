@@ -39,40 +39,44 @@ const BookingForm = (props) => {
     };
 
     const setBeginMinute = (newBeginMinute) => {
-        if (props.bookingBegin) {
-            props.setBookingBegin(new Date(props.bookingBegin.getFullYear(), props.bookingBegin.getMonth(), props.bookingBegin.getDate(), beginHour, newBeginMinute));
-        } else {
-            _setBeginMinute(newBeginMinute);
+        _setBeginMinute(newBeginMinute);
+        if (tempBookingBegin) {
+            setTempBookingBegin(new Date(tempBookingBegin.getFullYear(), tempBookingBegin.getMonth(), tempBookingBegin.getDate(), beginHour ?? 0, newBeginMinute));
+        } else if (props.bookingBegin) {
+            setTempBookingBegin(new Date(props.bookingBegin.getFullYear(), props.bookingBegin.getMonth(), props.bookingBegin.getDate(), beginHour ?? 0, newBeginMinute ?? 0));
         }
     };
 
     const setBeginHour = (newBeginHour) => {
-        if (props.bookingBegin) {
-            props.setBookingBegin(new Date(props.bookingBegin.getFullYear(), props.bookingBegin.getMonth(), props.bookingBegin.getDate(), newBeginHour, beginMinute));
-        } else {
-            _setBeginHour(newBeginHour);
+        _setBeginHour(newBeginHour);
+        if (tempBookingBegin) {
+            setTempBookingBegin(new Date(tempBookingBegin.getFullYear(), tempBookingBegin.getMonth(), tempBookingBegin.getDate(), newBeginHour, beginMinute ?? 0));
+        } else if (props.bookingBegin) {
+            setTempBookingBegin(new Date(props.bookingBegin.getFullYear(), props.bookingBegin.getMonth(), props.bookingBegin.getDate(), newBeginHour, beginMinute ?? 0));
         }
     };
 
     const setEndMinute = (newEndMinute) => {
-        if (props.bookingEnd) {
-            props.setBookingEnd(new Date(props.bookingEnd.getFullYear(), props.bookingEnd.getMonth(), props.bookingEnd.getDate(), endHour, newEndMinute));
-        } else {
-            _setEndMinute(newEndMinute);
+        _setEndMinute(newEndMinute);
+        if (tempBookingEnd) {
+            setTempBookingEnd(new Date(tempBookingEnd.getFullYear(), tempBookingEnd.getMonth(), tempBookingEnd.getDate(), endHour ?? 0, newEndMinute));
+        } else if (props.bookingEnd) {
+            setTempBookingEnd(new Date(props.bookingEnd.getFullYear(), props.bookingEnd.getMonth(), props.bookingEnd.getDate(), newEndHour ?? 0, newEndMinute));
         }
     };
 
     const setEndHour = (newEndHour) => {
-        if (props.bookingEnd) {
-            props.setBookingEnd(new Date(props.bookingEnd.getFullYear(), props.bookingEnd.getMonth(), props.bookingEnd.getDate(), newEndHour, endMinute));
-        } else {
-            _setEndHour(newEndHour);
+        _setEndHour(newEndHour);
+        if (tempBookingEnd) {
+            setTempBookingEnd(new Date(tempBookingEnd.getFullYear(), tempBookingEnd.getMonth(), tempBookingEnd.getDate(), newEndHour, endMinute ?? 0));
+        } else if (props.bookingEnd) {
+            setTempBookingEnd(new Date(props.bookingEnd.getFullYear(), props.bookingEnd.getMonth(), props.bookingEnd.getDate(), newEndHour, endMinute ?? 0));
         }
     };
 
     const setBookingBegin = () => {
         if (tempBookingBegin) {
-            props.setBookingBegin(new Date(tempBookingBegin.getFullYear(), tempBookingBegin.getMonth(), tempBookingBegin.getDate(), beginHour, beginMinute));
+            props.setBookingBegin(new Date(tempBookingBegin.getFullYear(), tempBookingBegin.getMonth(), tempBookingBegin.getDate(), beginHour, beginMinute), false, true);
         } else {
             props.setBookingBegin(null);
         }
@@ -81,7 +85,7 @@ const BookingForm = (props) => {
 
     const setBookingEnd = () => {
         if (tempBookingEnd) {
-            props.setBookingEnd(new Date(tempBookingEnd.getFullYear(), tempBookingEnd.getMonth(), tempBookingEnd.getDate(), endHour, endMinute));
+            props.setBookingEnd(new Date(tempBookingEnd.getFullYear(), tempBookingEnd.getMonth(), tempBookingEnd.getDate(), endHour, endMinute), true);
         } else {
             props.setBookingEnd(null);
         }
@@ -118,10 +122,10 @@ const BookingForm = (props) => {
         if (props.bookingBegin && props.bookingEnd) {
             getResourcePrice(props.apiBackend, props.resource.id, props.bookingBegin.toISOString().substr(0, 19), props.bookingEnd.toISOString().substr(0, 19))
                 .then(data => {
-                    setPrice(data.data.value_gross)
+                    setPrice(data.data.value_gross);
                 });
 
-        }else {
+        } else {
             setPrice(null);
         }
     }, [props.bookingBegin, props.bookingEnd]);
@@ -182,7 +186,8 @@ const BookingForm = (props) => {
                             onClick={() => setEditingEnd(true)}>Endzeitpunkt {props.bookingEnd ? 'ändern' : 'festlegen'}</button>
                 </>}
         </div>
-        <button type="submit" className="button is-success calendar-submit-button" disabled={!props.bookingBegin || !props.bookingEnd}>
+        <button type="submit" className="button is-success calendar-submit-button"
+                disabled={!props.bookingBegin || !props.bookingEnd}>
             Jetzt {!!price && <>für <PriceDisplay amount={price}/> </>} buchen!
         </button>
     </form>;
@@ -196,7 +201,7 @@ BookingForm.propTypes = {
     handleSubmit: PropTypes.func.isRequired,
     submitRef: PropTypes.object.isRequired,
     priceGroup: PropTypes.shape(pricegroupPropTypes).isRequired,
-    apiBackend: PropTypes.string
+    apiBackend: PropTypes.string,
 };
 
 export default BookingForm;

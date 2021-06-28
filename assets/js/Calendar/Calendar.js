@@ -64,9 +64,9 @@ const Calendar = (props) => {
         return newDate;
     };
 
-    const setBookingBegin = (newBookingBegin, preventUpdate) => {
+    const setBookingBegin = (newBookingBegin, preventUpdate, timeSet = false) => {
         setLastSet('begin');
-        const newBegin = getNewDateWhilePreservingTimeIfNeeded(bookingBegin, newBookingBegin);
+        const newBegin = timeSet ? newBookingBegin : getNewDateWhilePreservingTimeIfNeeded(bookingBegin, newBookingBegin);
         if (newBegin && bookingEnd && !preventUpdate) {
             setNewBooking(newBegin, bookingEnd, 'begin');
         } else {
@@ -74,9 +74,9 @@ const Calendar = (props) => {
         }
     };
 
-    const setBookingEnd = (newBookingEnd) => {
+    const setBookingEnd = (newBookingEnd, timeSet = false) => {
         setLastSet('end');
-        const newEnd = getNewDateWhilePreservingTimeIfNeeded(bookingEnd, newBookingEnd);
+        const newEnd = timeSet ? newBookingEnd : getNewDateWhilePreservingTimeIfNeeded(bookingEnd, newBookingEnd);
         if (bookingBegin && newEnd) {
             setNewBooking(bookingBegin, newEnd, 'end');
         } else {
@@ -152,7 +152,7 @@ const Calendar = (props) => {
     const handleSubmit = (evt) => {
         evt.preventDefault();
         props.handleSubmit(bookingBegin, bookingEnd);
-    }
+    };
 
     return <div>
         <CalendarMeta maxReached={maxReached} errorString={errorString} maxReachedWarning={maxReachedWarning}/>
@@ -202,7 +202,7 @@ const Calendar = (props) => {
             setBookingBegin={setBookingBegin}
             setBookingEnd={setBookingEnd}
         />}
-        <CalendarMeta maxReached={maxReached} maxReachedWarning={maxReachedWarning} errorString={errorString} />
+        <CalendarMeta maxReached={maxReached} maxReachedWarning={maxReachedWarning} errorString={errorString}/>
         <BookingForm
             apiBackend={props.apiBackend}
             resource={props.resource}
@@ -225,7 +225,7 @@ Calendar.propTypes = {
     initialView: PropTypes.oneOf(['day', 'month', '3months', 'asap']),
     priceGroup: PropTypes.shape(pricegroupPropTypes).isRequired,
     handleSubmit: PropTypes.func.isRequired,
-    resource: PropTypes.shape(resourcePropTypes)
+    resource: PropTypes.shape(resourcePropTypes),
 };
 
 export default Calendar;
