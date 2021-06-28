@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import {ComponentStatus} from './Helpers';
 import Calendar from './Calendar/Calendar';
-import {getResourceBySlug, getResourceActions, submitBooking} from "./Api";
+import {getResourceBySlug, getResourceActions, submitBooking} from './Api';
 
 const ResourceView = (props) => {
     const [status, setStatus] = React.useState(ComponentStatus.loading);
@@ -12,11 +12,16 @@ const ResourceView = (props) => {
     React.useEffect(() => {
         const func = async () => {
             const fetchedResource = await getResourceBySlug(props.apiBackend, props.resourceSlug);
-            if (fetchedResource) {
-                setResource(fetchedResource.data);
-                const fetchedResourceActions = await getResourceActions(props.apiBackend, fetchedResource.data.id);
-                setExistingBookings(fetchedResourceActions.data);
-                setStatus(ComponentStatus.ready);
+            if (fetchedResource && fetchedResource.data) {
+                try {
+                    setResource(fetchedResource.data);
+                    const fetchedResourceActions = await getResourceActions(props.apiBackend, fetchedResource.data.id);
+                    setExistingBookings(fetchedResourceActions.data);
+                    setStatus(ComponentStatus.ready);
+                } catch (e) {
+                    console.error(e);
+                    setStatus(ComponentStatus.error);
+                }
             } else {
                 setStatus(ComponentStatus.error);
             }
@@ -38,11 +43,11 @@ const ResourceView = (props) => {
             begin: bookingBegin.toISOString().substr(0, 19) + 'Z',
             end: bookingEnd.toISOString().substr(0, 19) + 'Z',
             location_id: resource.location_id,
-            resource_id: resource.id
+            resource_id: resource.id,
         }).then(() => {
             window.location.href = wc_add_to_cart_params.cart_url;
         });
-    }
+    };
 
     return <div>
         <h2>{resource.name}</h2>
@@ -62,7 +67,7 @@ const ResourceView = (props) => {
 
 ResourceView.propTypes = {
     resourceSlug: PropTypes.string,
-    apiBackend: PropTypes.string
-}
+    apiBackend: PropTypes.string,
+};
 
 export default ResourceView;
