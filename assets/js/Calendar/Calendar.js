@@ -214,6 +214,7 @@ const Calendar = (props) => {
             today={today}
             submitRef={submitRef}
             handleSubmit={handleSubmit}
+            setBookingBeginAndEnd={setBookingBeginAndEnd}
         />
     </div>;
 };

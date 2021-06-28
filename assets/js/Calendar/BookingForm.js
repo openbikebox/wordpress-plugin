@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import DateSelectorRow from './DateSelectorRow';
 import TimeSelectorRow from './TimeSelectorRow';
-import {calculatePrice, compareDateWithoutTime} from './CalendarHelper';
+import {calculatePrice, compareDateWithoutTime, getEndOfDate} from './CalendarHelper';
 import {pricegroupPropTypes} from '../Models';
 import PriceDisplay from '../PriceDisplay';
 import {getResourcePrice} from '../Api';
@@ -76,7 +76,11 @@ const BookingForm = (props) => {
 
     const setBookingBegin = () => {
         if (tempBookingBegin) {
-            props.setBookingBegin(new Date(tempBookingBegin.getFullYear(), tempBookingBegin.getMonth(), tempBookingBegin.getDate(), beginHour, beginMinute), false, true);
+            if (props.bookingEnd && tempBookingBegin > props.bookingEnd) {
+                props.setBookingBeginAndEnd(tempBookingBegin, getEndOfDate(tempBookingBegin));
+            } else {
+                props.setBookingBegin(new Date(tempBookingBegin.getFullYear(), tempBookingBegin.getMonth(), tempBookingBegin.getDate(), beginHour, beginMinute), false, true);
+            }
         } else {
             props.setBookingBegin(null);
         }
@@ -198,6 +202,7 @@ BookingForm.propTypes = {
     setBookingBegin: PropTypes.func.isRequired,
     bookingEnd: PropTypes.object,
     setBookingEnd: PropTypes.func.isRequired,
+    setBookingBeginAndEnd: PropTypes.func.isRequired,
     handleSubmit: PropTypes.func.isRequired,
     submitRef: PropTypes.object.isRequired,
     priceGroup: PropTypes.shape(pricegroupPropTypes).isRequired,
