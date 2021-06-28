@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import {calculateDateDiff, compareDateWithoutTime} from './CalendarHelper';
-import CalendarDayTooltip from "./CalendarDayTooltip";
+import CalendarDayTooltip from './CalendarDayTooltip';
 
 const MonthCalendarDay = (props) => {
     const {date, available, active} = props;
@@ -73,19 +73,21 @@ const MonthCalendarDay = (props) => {
 
     const toggleActiveOn = () => {
         let newBegin = props.bookingBegin;
-        let newEnd = props.bookingEnd
+        let newEnd = props.bookingEnd;
 
-        let datePlusOne = new Date(date);
-        datePlusOne.setDate(datePlusOne.getDate() + 1);
+        let endOfDate = new Date(date);
+        endOfDate.setHours(23);
+        endOfDate.setMinutes(59);
+        endOfDate.setSeconds(59);
 
         if (!props.bookingBegin || compareDateWithoutTime(date, props.bookingBegin) < 0) {
             newBegin = available.last ?? date;
         }
-        if (!props.bookingEnd || compareDateWithoutTime(datePlusOne, props.bookingEnd) > 0) {
+        if (!props.bookingEnd || compareDateWithoutTime(endOfDate, props.bookingEnd) > 0) {
             if (available.earliest && newBegin > available.earliest) {
                 newEnd = newBegin;
             } else {
-                newEnd = available.earliest ?? datePlusOne
+                newEnd = available.earliest ?? endOfDate;
             }
         }
 

@@ -47,7 +47,6 @@ export const checkInRange = (value, target) => {
 };
 
 export const checkInDateRange = (startDate, endDate, checkDate) => {
-    //TODO: add partial check (i.e start = 1.6.21 15:00, date = 1.6.21 result = secondHalf)  ER: solved?
     let checkDatePlusOne = new Date(checkDate);
     checkDatePlusOne.setDate(checkDatePlusOne.getDate() + 1);
     return startDate < checkDatePlusOne && endDate > checkDate;
