@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import DateSelectorRow from './DateSelectorRow';
 import TimeSelectorRow from './TimeSelectorRow';
-import {compareDateWithoutTime, dateTimeFormatOptions, getEndOfDate} from './CalendarHelper';
+import {compareDateWithoutTime, dateTimeFormatOptions, getEndOfDate, getStartOfDate} from './CalendarHelper';
 import {pricegroupPropTypes} from '../Models';
 import PriceDisplay from '../PriceDisplay';
 import {getResourcePrice} from '../Api';
@@ -89,7 +89,11 @@ const BookingForm = (props) => {
 
     const setBookingEnd = () => {
         if (tempBookingEnd) {
-            props.setBookingEnd(new Date(tempBookingEnd.getFullYear(), tempBookingEnd.getMonth(), tempBookingEnd.getDate(), endHour, endMinute), true);
+            if (props.bookingBegin && tempBookingEnd < props.bookingBegin) {
+                props.setBookingBeginAndEnd(getStartOfDate(tempBookingEnd), tempBookingEnd);
+            } else {
+                props.setBookingEnd(new Date(tempBookingEnd.getFullYear(), tempBookingEnd.getMonth(), tempBookingEnd.getDate(), endHour, endMinute), true);
+            }
         } else {
             props.setBookingEnd(null);
         }
