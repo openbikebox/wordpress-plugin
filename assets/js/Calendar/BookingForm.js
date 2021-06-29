@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import DateSelectorRow from './DateSelectorRow';
 import TimeSelectorRow from './TimeSelectorRow';
-import {calculatePrice, compareDateWithoutTime, dateTimeFormatOptions, getEndOfDate} from './CalendarHelper';
+import {compareDateWithoutTime, dateTimeFormatOptions, getEndOfDate} from './CalendarHelper';
 import {pricegroupPropTypes} from '../Models';
 import PriceDisplay from '../PriceDisplay';
 import {getResourcePrice} from '../Api';
