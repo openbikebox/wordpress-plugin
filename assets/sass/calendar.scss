@@ -338,6 +338,27 @@
   }
 }
 
+@media(min-width: 950px) {
+  .calendar-container {
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  .calendar-date-container {
+    width: 70%;
+  }
+
+  .calendar-time-container {
+    width: 30%;
+    padding-top: 25%;
+    padding-left: 1rem;
+  }
+
+  .calendar-time-container button {
+    width: 100%;
+  }
+}
+
 .calendar-change-time-button {
   font-size: 0.8rem;
   margin-bottom: 0.5rem;

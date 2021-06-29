@@ -87,7 +87,7 @@ const AsapCalendar = (props) => {
             updatedToday,
             new Date(updatedToday.getFullYear(), updatedToday.getMonth(), updatedToday.getDate(), updatedToday.getHours() + duration, updatedToday.getMinutes())
         );
-        if (submitRef.current) {
+        if (submitRef.current && screen.width < 1000) {
             submitRef.current.scrollIntoView();
         }
     };

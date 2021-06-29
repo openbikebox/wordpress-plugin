@@ -155,68 +155,73 @@ const Calendar = (props) => {
         props.handleSubmit(bookingBegin, bookingEnd);
     };
 
-    return <div>
-        <CalendarMeta maxReached={maxReached} errorString={errorString} maxReachedWarning={maxReachedWarning}/>
-        <p className={'calender-header'}>
-            <span className="calendar-view-change-meta-label">Ansicht:</span>
-            <input type="radio" name="view" value="asap" className="calendar-view-radio" checked={view === 'asap'}
-                   onChange={handleViewChange} id="calendar-view-radio-asap"/>
-            <label htmlFor="calendar-view-radio-asap">Sofort</label>
-            <input type="radio" name="view" value="month" className="calendar-view-radio" checked={view === 'month'}
-                   onChange={handleViewChange} id="calendar-view-radio-month"/>
-            <label htmlFor="calendar-view-radio-month">Monat</label>
-            <input type="radio" name="view" className="calendar-view-radio" value="3months" checked={view === '3months'}
-                   onChange={handleViewChange} id="calendar-view-radio-3months"/>
-            <label htmlFor="calendar-view-radio-3months">3 Monate</label>
-        </p>
-        {view === 'asap' && <AsapCalendar
-            today={today}
-            setBookingBegin={setBookingBegin}
-            setBookingEnd={setBookingEnd}
-            submitRef={submitRef}
-            bookings={bookings}
-            setBookingBeginAndEnd={setBookingBeginAndEnd}
-        />}
+    return <div className="calendar-container">
+        <div className="calendar-date-container">
+            <CalendarMeta maxReached={maxReached} errorString={errorString} maxReachedWarning={maxReachedWarning}/>
+            <p className={'calender-header'}>
+                <span className="calendar-view-change-meta-label">Ansicht:</span>
+                <input type="radio" name="view" value="asap" className="calendar-view-radio" checked={view === 'asap'}
+                       onChange={handleViewChange} id="calendar-view-radio-asap"/>
+                <label htmlFor="calendar-view-radio-asap">Sofort</label>
+                <input type="radio" name="view" value="month" className="calendar-view-radio" checked={view === 'month'}
+                       onChange={handleViewChange} id="calendar-view-radio-month"/>
+                <label htmlFor="calendar-view-radio-month">Monat</label>
+                <input type="radio" name="view" className="calendar-view-radio" value="3months"
+                       checked={view === '3months'}
+                       onChange={handleViewChange} id="calendar-view-radio-3months"/>
+                <label htmlFor="calendar-view-radio-3months">3 Monate</label>
+            </p>
+            {view === 'asap' && <AsapCalendar
+                today={today}
+                setBookingBegin={setBookingBegin}
+                setBookingEnd={setBookingEnd}
+                submitRef={submitRef}
+                bookings={bookings}
+                setBookingBeginAndEnd={setBookingBeginAndEnd}
+            />}
 
-        {view === 'month' && <MonthCalendar
-            bookings={bookings}
-            bookingBegin={bookingBegin}
-            bookingEnd={bookingEnd}
-            today={today}
-            unavailableDates={unavailableDates}
-            setBookingBegin={setBookingBegin}
-            setBookingEnd={setBookingEnd}
-            maxReached={maxReached}
-            setBookingBeginAndEnd={setBookingBeginAndEnd}
-            lastSet={lastSet}
-        />}
-        {view === '3months' && <MultiMonthCalendar
-            monthCount={3}
-            bookings={bookings}
-            maxReached={maxReached}
-            bookingBegin={bookingBegin}
-            bookingEnd={bookingEnd}
-            today={today}
-            setBookingBeginAndEnd={setBookingBeginAndEnd}
-            unavailableDates={unavailableDates}
-            lastSet={lastSet}
-            setBookingBegin={setBookingBegin}
-            setBookingEnd={setBookingEnd}
-        />}
-        <CalendarMeta maxReached={maxReached} maxReachedWarning={maxReachedWarning} errorString={errorString}/>
-        <BookingForm
-            apiBackend={props.apiBackend}
-            resource={props.resource}
-            bookingBegin={bookingBegin}
-            setBookingBegin={setBookingBegin}
-            bookingEnd={bookingEnd}
-            setBookingEnd={setBookingEnd}
-            priceGroup={props.priceGroup}
-            today={today}
-            submitRef={submitRef}
-            handleSubmit={handleSubmit}
-            setBookingBeginAndEnd={setBookingBeginAndEnd}
-        />
+            {view === 'month' && <MonthCalendar
+                bookings={bookings}
+                bookingBegin={bookingBegin}
+                bookingEnd={bookingEnd}
+                today={today}
+                unavailableDates={unavailableDates}
+                setBookingBegin={setBookingBegin}
+                setBookingEnd={setBookingEnd}
+                maxReached={maxReached}
+                setBookingBeginAndEnd={setBookingBeginAndEnd}
+                lastSet={lastSet}
+            />}
+            {view === '3months' && <MultiMonthCalendar
+                monthCount={3}
+                bookings={bookings}
+                maxReached={maxReached}
+                bookingBegin={bookingBegin}
+                bookingEnd={bookingEnd}
+                today={today}
+                setBookingBeginAndEnd={setBookingBeginAndEnd}
+                unavailableDates={unavailableDates}
+                lastSet={lastSet}
+                setBookingBegin={setBookingBegin}
+                setBookingEnd={setBookingEnd}
+            />}
+            <CalendarMeta maxReached={maxReached} maxReachedWarning={maxReachedWarning} errorString={errorString}/>
+        </div>
+        <div className="calendar-time-container">
+            <BookingForm
+                apiBackend={props.apiBackend}
+                resource={props.resource}
+                bookingBegin={bookingBegin}
+                setBookingBegin={setBookingBegin}
+                bookingEnd={bookingEnd}
+                setBookingEnd={setBookingEnd}
+                priceGroup={props.priceGroup}
+                today={today}
+                submitRef={submitRef}
+                handleSubmit={handleSubmit}
+                setBookingBeginAndEnd={setBookingBeginAndEnd}
+            />
+        </div>
     </div>;
 };
 
