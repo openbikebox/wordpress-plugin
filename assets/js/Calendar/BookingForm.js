@@ -6,6 +6,7 @@ import {compareDateWithoutTime, dateTimeFormatOptions, getEndOfDate, getStartOfD
 import {pricegroupPropTypes} from '../Models';
 import PriceDisplay from '../PriceDisplay';
 import {getResourcePrice} from '../Api';
+import CalendarDateTimeStepper from './CalendarDateTimeStepper';
 
 const BookingForm = (props) => {
     const [tempBookingBegin, setTempBookingBegin] = React.useState();
@@ -76,11 +77,7 @@ const BookingForm = (props) => {
 
     const setBookingBegin = () => {
         if (tempBookingBegin) {
-            if (props.bookingEnd && tempBookingBegin > props.bookingEnd) {
-                props.setBookingBeginAndEnd(tempBookingBegin, getEndOfDate(tempBookingBegin));
-            } else {
-                props.setBookingBegin(new Date(tempBookingBegin.getFullYear(), tempBookingBegin.getMonth(), tempBookingBegin.getDate(), beginHour, beginMinute), false, true);
-            }
+            updateBegin(new Date(tempBookingBegin.getFullYear(), tempBookingBegin.getMonth(), tempBookingBegin.getDate(), beginHour, beginMinute));
         } else {
             props.setBookingBegin(null);
         }
@@ -89,15 +86,71 @@ const BookingForm = (props) => {
 
     const setBookingEnd = () => {
         if (tempBookingEnd) {
-            if (props.bookingBegin && tempBookingEnd < props.bookingBegin) {
-                props.setBookingBeginAndEnd(getStartOfDate(tempBookingEnd), tempBookingEnd);
-            } else {
-                props.setBookingEnd(new Date(tempBookingEnd.getFullYear(), tempBookingEnd.getMonth(), tempBookingEnd.getDate(), endHour, endMinute), true);
-            }
+            updateEnd(new Date(tempBookingEnd.getFullYear(), tempBookingEnd.getMonth(), tempBookingEnd.getDate(), endHour, endMinute));
         } else {
             props.setBookingEnd(null);
         }
         setEditingEnd(false);
+    };
+
+    const updateBegin = (newBegin) => {
+        if (props.bookingEnd && newBegin > props.bookingEnd) {
+            props.setBookingBeginAndEnd(newBegin, getEndOfDate(newBegin));
+        } else if (newBegin < props.today) {
+            props.setBookingBegin(props.today, false, true);
+        } else {
+            props.setBookingBegin(newBegin, false, true);
+        }
+    };
+
+    const updateEnd = (newEnd) => {
+        if (props.bookingBegin && newEnd < props.bookingBegin) {
+            props.setBookingBeginAndEnd(getStartOfDate(newEnd), newEnd);
+        } else {
+            if(newEnd.getHours() === 0 && newEnd.getMinutes() === 0) {
+                // Only book until 23:59 instead of 00:00
+                newEnd.setMinutes(- 1);
+            }
+            props.setBookingEnd(newEnd, true);
+        }
+    };
+
+    const normalizeTo15Minutes = (minutes, direction) => {
+        if (minutes === 59) {
+            // Treat 59 minutes as a full hour
+            minutes++;
+        }
+
+        let newMinutes = minutes + (direction * 15);
+        const diffTo15 = newMinutes % 15;
+        if (diffTo15 > 0) {
+            newMinutes += diffTo15 * direction;
+        }
+        return newMinutes;
+    };
+
+    // Add or subtract a day from booking begin
+    const handleBeginDateStep = (direction) => {
+        updateBegin(new Date(props.bookingBegin.getTime() + (direction * 8.64e+7)));
+    };
+
+    // Add or subtract 15 minutes from booking begin
+    const handleBeginTimeStep = (direction) => {
+        let newMinutes = normalizeTo15Minutes(props.bookingBegin.getMinutes(), direction);
+        const newBegin = new Date(props.bookingBegin);
+        newBegin.setMinutes(newMinutes);
+        updateBegin(newBegin);
+    };
+
+    const handleEndDateStep = (direction) => {
+        updateEnd(new Date(props.bookingEnd.getTime() + (direction * 8.64e+7)));
+    };
+
+    const handleEndTimeStep = (direction) => {
+        let newMinutes = normalizeTo15Minutes(props.bookingEnd.getMinutes(), direction);
+        const newEnd = new Date(props.bookingEnd);
+        newEnd.setMinutes(newMinutes);
+        updateEnd(newEnd);
     };
 
     React.useEffect(() => {
@@ -167,7 +220,20 @@ const BookingForm = (props) => {
                     </button>
                 </>
                 : <>
-                    <h4> Von: {props.bookingBegin && props.bookingBegin.toLocaleString('de-DE', dateTimeFormatOptions)}</h4>
+                    <h4>Von:</h4>
+                    <CalendarDateTimeStepper current={props.bookingBegin}
+                                             handleNextDate={() => {
+                                                 handleBeginDateStep(1);
+                                             }}
+                                             handlePreviousDate={() => {
+                                                 handleBeginDateStep(-1);
+                                             }}
+                                             handleNextTime={() => {
+                                                 handleBeginTimeStep(1);
+                                             }}
+                                             handlePreviousTime={() => {
+                                                 handleBeginTimeStep(-1);
+                                             }}/>
                     <button className="button calendar-change-time-button" onClick={() => setEditingBegin(true)}>
                         Startzeitpunkt {props.bookingBegin ? 'ändern' : 'festlegen'}
                     </button>
@@ -189,7 +255,20 @@ const BookingForm = (props) => {
                     </button>
                 </>
                 : <>
-                    <h4> Bis: {props.bookingEnd && props.bookingEnd.toLocaleString('de-DE', dateTimeFormatOptions)}</h4>
+                    <h4>Bis:</h4>
+                    <CalendarDateTimeStepper current={props.bookingEnd}
+                                             handleNextDate={() => {
+                                                 handleEndDateStep(1);
+                                             }}
+                                             handlePreviousDate={() => {
+                                                 handleEndDateStep(-1);
+                                             }}
+                                             handleNextTime={() => {
+                                                 handleEndTimeStep(1);
+                                             }}
+                                             handlePreviousTime={() => {
+                                                 handleEndTimeStep(-1);
+                                             }}/>
                     <button className="button calendar-change-time-button"
                             onClick={() => setEditingEnd(true)}>Endzeitpunkt {props.bookingEnd ? 'ändern' : 'festlegen'}</button>
                 </>}

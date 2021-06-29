@@ -354,9 +354,20 @@
     padding-left: 1rem;
   }
 
-  .calendar-time-container button {
+  .calendar-time-container button:not(.calendar-stepper-button) {
     width: 100%;
   }
+}
+
+.calendar-stepper-container {
+  font-size: 2rem;
+  line-height: 2.5rem;
+  width: 100%;
+}
+
+.calendar-stepper-button {
+  height: 2.5rem;
+  padding: 0.25rem;
 }
 
 .calendar-change-time-button {
@@ -367,4 +378,11 @@
 
 .calendar-submit-button {
   margin-top: 1rem;
+}
+
+.calendar-prev-next-thingie {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.25rem;
 }
