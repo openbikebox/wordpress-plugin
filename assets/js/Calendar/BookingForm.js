@@ -137,7 +137,7 @@ const BookingForm = (props) => {
     return <form onSubmit={props.handleSubmit} ref={props.submitRef}>
         <h3>Buchung</h3>
         <div className={'calendar-booking-container'}>
-            {editingBegin
+            {editingBegin || !props.bookingBegin
                 ? <>
                     <h4>Von</h4>
                     <DateSelectorRow
@@ -169,7 +169,7 @@ const BookingForm = (props) => {
                     </button>
                 </>}
 
-            {editingEnd
+            {editingEnd || !props.bookingEnd
                 ? <>
                     <h4>Bis</h4>
                     <DateSelectorRow setDate={setTempBookingEnd} yearId={'calendar-booking-end-year-input'}
