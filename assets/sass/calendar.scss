@@ -9,16 +9,6 @@
   justify-content: space-around;
 }
 
-.calendar-header {
-  text-align: center;
-}
-
-.calender-header label {
-  display: inline-block;
-  width: 30%;
-  font-weight: bold;
-}
-
 .calendar-week {
   width: 100%;
   flex-shrink: 0;
@@ -208,6 +198,15 @@
   padding-bottom: 0.5rem;
 }
 
+.calendar-header {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.calendar-header span {
+  width: 100%;
+}
+
 .calendar-view-radio {
   position: fixed;
   opacity: 0;
@@ -218,9 +217,10 @@
   padding: 0.5rem;
   border: 1px solid;
   border-radius: 0.25rem;
-  margin: 0.25rem;
   cursor: pointer;
   text-align: center;
+  min-width: 30%;
+  flex-grow: 1;
 }
 
 .calendar-view-radio:checked + label {

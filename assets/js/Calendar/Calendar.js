@@ -158,7 +158,7 @@ const Calendar = (props) => {
     return <div className="calendar-container">
         <div className="calendar-date-container">
             <CalendarMeta maxReached={maxReached} errorString={errorString} maxReachedWarning={maxReachedWarning}/>
-            <p className={'calender-header'}>
+            <p className={'calendar-header'}>
                 <span className="calendar-view-change-meta-label">Ansicht:</span>
                 <input type="radio" name="view" value="asap" className="calendar-view-radio" checked={view === 'asap'}
                        onChange={handleViewChange} id="calendar-view-radio-asap"/>
