@@ -77,7 +77,7 @@ const MonthCalendarDay = (props) => {
         let endOfDate = getEndOfDate(date);
 
         if (!props.bookingBegin || compareDateWithoutTime(date, props.bookingBegin) < 0) {
-            newBegin = available.last ?? date;
+            newBegin = available.last ?? props.isToday ? new Date() : date;
         }
         if (!props.bookingEnd || compareDateWithoutTime(endOfDate, props.bookingEnd) > 0) {
             if (available.earliest && newBegin > available.earliest) {
