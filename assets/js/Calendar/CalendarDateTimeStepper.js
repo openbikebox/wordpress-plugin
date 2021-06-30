@@ -2,18 +2,22 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 const PrevNextThingie = (props) => {
-    return <span className='calendar-prev-next-thingie'>
-        <button className="button calendar-stepper-button" type="button" onClick={props.handlePrev}>‹</button>
+    return <span className="calendar-prev-next-thingie">
+        <button aria-label={props.previousLabel} className="button calendar-stepper-button" type="button"
+                onClick={props.handlePrev}>‹</button>
         {props.children}
-        <button className="button calendar-stepper-button" type="button" onClick={props.handleNext}>›</button>
+        <button aria-label={props.nextLabel} className="button calendar-stepper-button" type="button"
+                onClick={props.handleNext}>›</button>
     </span>;
 };
 
 PrevNextThingie.propTypes = {
     children: PropTypes.element.isRequired,
     handlePrev: PropTypes.func.isRequired,
-    handleNext: PropTypes.func.isRequired
-}
+    handleNext: PropTypes.func.isRequired,
+    previousLabel: PropTypes.string.isRequired,
+    nextLabel: PropTypes.string.isRequired,
+};
 
 const CalendarDateTimeStepper = (props) => {
     let timeDisplay = props.current.toLocaleString('de-DE', {timeStyle: 'short'});
@@ -22,10 +26,12 @@ const CalendarDateTimeStepper = (props) => {
     }
 
     return <div className="calendar-stepper-container">
-        <PrevNextThingie handlePrev={props.handlePreviousDate} handleNext={props.handleNextDate}>
+        <PrevNextThingie handlePrev={props.handlePreviousDate} handleNext={props.handleNextDate}
+                         previousLabel={'Einen Tag früher'} nextLabel={'Einen Tag später'}>
             <span>{props.current.toLocaleString('de-DE', {dateStyle: 'short'})}</span>
         </PrevNextThingie>
-        <PrevNextThingie handlePrev={props.handlePreviousTime} handleNext={props.handleNextTime}>
+        <PrevNextThingie handlePrev={props.handlePreviousTime} handleNext={props.handleNextTime}
+                         previousLabel={'15 Minuten früher'} nextLabel={'15 Minuten später'}>
             <span>{timeDisplay} Uhr</span>
         </PrevNextThingie>
     </div>;
