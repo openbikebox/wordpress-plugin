@@ -209,9 +209,9 @@ const BookingForm = (props) => {
     return <form onSubmit={props.handleSubmit} ref={props.submitRef}>
         <h3>Buchung</h3>
         <div className={'calendar-booking-container'}>
+            <h4>Von:</h4>
             {editingBegin || !props.bookingBegin
                 ? <>
-                    <h4>Von</h4>
                     <DateSelectorRow
                         setDate={setTempBookingBegin}
                         yearId={'calendar-booking-begin-year-input'}
@@ -230,12 +230,12 @@ const BookingForm = (props) => {
                         setMinute={setBeginMinute}
                         minute={beginMinute}
                     />
-                    <button className="button calendar-change-time-button" onClick={setBookingBegin}>
+                    <button className="button calendar-change-time-button" onClick={setBookingBegin}
+                            disabled={!tempBookingBegin}>
                         Startzeitpunkt festlegen
                     </button>
                 </>
                 : <>
-                    <h4>Von:</h4>
                     <CalendarDateTimeStepper current={props.bookingBegin}
                                              previousDateDisabled={beginSame}
                                              previousTimeDisabled={beginPreviousTimeStepperDisabled}
@@ -256,9 +256,9 @@ const BookingForm = (props) => {
                     </button>
                 </>}
 
+            <h4>Bis:</h4>
             {editingEnd || !props.bookingEnd
                 ? <>
-                    <h4>Bis</h4>
                     <DateSelectorRow setDate={setTempBookingEnd} yearId={'calendar-booking-end-year-input'}
                                      monthId={'calendar-booking-end-month-input'} date={tempBookingEnd}
                                      minDate={props.bookingBegin ?? undefined}
@@ -267,12 +267,12 @@ const BookingForm = (props) => {
                                      minuteId={'calendar-booking-end-minute-input'}
                                      minHour={endSame ? beginHour : 0} hour={endHour} setHour={setEndHour}
                                      minMinute={endSame ? beginMinute : 0} minute={endMinute} setMinute={setEndMinute}/>
-                    <button className="button calendar-change-time-button" onClick={setBookingEnd}>Endzeitpunkt
+                    <button className="button calendar-change-time-button" disabled={!tempBookingEnd}
+                            onClick={setBookingEnd}>Endzeitpunkt
                         festlegen
                     </button>
                 </>
                 : <>
-                    <h4>Bis:</h4>
                     <CalendarDateTimeStepper current={props.bookingEnd}
                                              previousDateDisabled={endSame}
                                              previousTimeDisabled={endPreviousTimeStepperDisabled}
