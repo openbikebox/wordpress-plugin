@@ -4,7 +4,7 @@ import MonthCalendarDay from './MonthCalendarDay';
 import {checkIfDateActive, checkIfDateAvailable, compareMonthAndYear} from './CalendarHelper';
 import {convertedBookingPropTypes} from './CalendarPropTypes';
 
-const getCalendarWeeks = (year, month, day, present, unavailableDates, newBookingBegin, newBookingEnd, dragging, setDragging, lastSet, setBookingBegin, setBookingEnd, setBookingBeginAndEnd) => {
+const getCalendarWeeks = (year, month, day, present, unavailableDates, newBookingBegin, newBookingEnd, dragging, setDragging, lastSet, setBookingBegin, setBookingEnd, setBookingBeginAndEnd, today) => {
     const daysInMonth = new Date(year, month + 1, 0).getDate();
     const firstWeekdayInMonth = new Date(year, month, 1).getDay();
     const lastDayInLastMonth = new Date(year, month, 0);
@@ -50,6 +50,7 @@ const getCalendarWeeks = (year, month, day, present, unavailableDates, newBookin
                 disabled={getDayDisabledState(elapsed)}
                 available={available}
                 active={active}
+                today={today}
                 isToday={present === 0 && day === elapsed}
                 dragging={dragging}
                 setDragging={setDragging}
@@ -95,7 +96,7 @@ const MonthCalendar = (props) => {
         const newPresent = compareMonthAndYear(current, today);
         setCalendarWeeks(getCalendarWeeks(newYear, newMonth, newDay, newPresent, props.unavailableDates,
             props.bookingBegin, props.bookingEnd, dragging, setDragging, props.lastSet, props.setBookingBegin,
-            props.setBookingEnd, props.setBookingBeginAndEnd));
+            props.setBookingEnd, props.setBookingBeginAndEnd, props.today));
         setPresent(newPresent);
     }, [current, props.unavailableDates, props.bookingBegin, props.bookingEnd]);
 

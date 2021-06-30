@@ -131,7 +131,7 @@ const BookingForm = (props) => {
             if (timeSet) {
                 props.setBookingEnd(props.bookingBegin);
             } else if (getStartOfDate(newEnd) < props.today) {
-                props.setBookingBeginAndEnd(new Date(), getEndOfDate(props.today));
+                props.setBookingBeginAndEnd(props.today(), getEndOfDate(props.today));
             } else {
                 props.setBookingBeginAndEnd(getStartOfDate(newEnd), newEnd);
             }

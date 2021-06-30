@@ -82,10 +82,9 @@ const AsapCalendar = (props) => {
     }, [props.bookings]);
 
     const setBookingDuration = (duration) => {
-        let updatedToday = new Date();
         props.setBookingBeginAndEnd(
-            updatedToday,
-            new Date(updatedToday.getFullYear(), updatedToday.getMonth(), updatedToday.getDate(), updatedToday.getHours() + duration, updatedToday.getMinutes())
+            props.today,
+            new Date(props.today.getTime() + (duration * 3.6e+6))
         );
         if (submitRef.current && screen.width < 1000) {
             submitRef.current.scrollIntoView();

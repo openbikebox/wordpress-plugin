@@ -77,7 +77,7 @@ const MonthCalendarDay = (props) => {
         let endOfDate = getEndOfDate(date);
 
         if (!props.bookingBegin || compareDateWithoutTime(date, props.bookingBegin) < 0) {
-            newBegin = available.last ?? props.isToday ? new Date() : date;
+            newBegin = available.last ?? props.isToday ? props.today : date;
         }
         if (!props.bookingEnd || compareDateWithoutTime(endOfDate, props.bookingEnd) > 0) {
             if (available.earliest && newBegin > available.earliest) {
@@ -161,6 +161,7 @@ MonthCalendarDay.propTypes = {
     available: PropTypes.object.isRequired, // TODO: shape
     disabled: PropTypes.bool.isRequired,
     isToday: PropTypes.bool.isRequired,
+    today: PropTypes.object.isRequired,
     setDragging: PropTypes.func.isRequired,
     dragging: PropTypes.bool.isRequired,
     bookingBegin: PropTypes.object,

@@ -4,7 +4,7 @@ import MonthCalendar from './MonthCalendar';
 import MultiMonthCalendar from './MultiMonthCalendar';
 import BookingForm from './BookingForm';
 import AsapCalendar from './AsapCalendar';
-import {calculateNewBookingTime, compareDateWithoutTime, getUnavailableDates} from './CalendarHelper';
+import {calculateNewBookingTime, compareDateWithoutTime, getLast15MinStep, getUnavailableDates} from './CalendarHelper';
 import {rawBookingPropTypes} from './CalendarPropTypes';
 import {pricegroupPropTypes, resourcePropTypes} from '../Models';
 
@@ -26,8 +26,7 @@ CalendarMeta.propTypes = {
 };
 
 const Calendar = (props) => {
-    const today = new Date();
-
+    const [today, setToday] = React.useState(getLast15MinStep(new Date()));
     const [view, setView] = React.useState(props.initialView ?? 'day');
     const [errorString, setErrorString] = React.useState('');
     const [maxReached, setMaxReached] = React.useState(false);
@@ -37,6 +36,13 @@ const Calendar = (props) => {
     const [unavailableDates, setUnavailableDates] = React.useState(new Map());
     const [lastSet, setLastSet] = React.useState('end');
     const [maxBookingMS, setMaxBookingMS] = React.useState(null);
+
+    window.setInterval(() => {
+        setToday(getLast15MinStep(new Date()));
+        if (bookingBegin < today) {
+            setBookingBegin(today);
+        }
+    }, 60000);
 
     React.useEffect(() => {
         setMaxBookingMS(props.maxBookingLength && props.maxBookingLength > 0 ? props.maxBookingLength * 1000 : null);

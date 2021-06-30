@@ -406,3 +406,14 @@ export const normalizeTo15Minutes = (minutes) => {
     }
     return minutes;
 };
+
+export const getLast15MinStep = (date) => {
+    let minutes = date.getMinutes();
+    if (minutes === 59) {
+        minutes++;
+    }
+    minutes -= minutes % 15;
+    let newDate = new Date(date);
+    newDate.setMinutes(minutes);
+    return newDate;
+};
