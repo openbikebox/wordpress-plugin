@@ -15,33 +15,41 @@ const BookingForm = (props) => {
     const [beginMinute, _setBeginMinute] = React.useState(null);
     const [endHour, _setEndHour] = React.useState(null);
     const [endMinute, _setEndMinute] = React.useState(null);
-    const [beginSame, setBeginSame] = React.useState(false);
-    const [endSame, setEndSame] = React.useState(false);
+    const [beginSame, _setBeginSame] = React.useState(false);
+    const [endSame, _setEndSame] = React.useState(false);
+    const [beginPreviousTimeStepperDisabled, setBeginPreviousTimeStepperDisabled] = React.useState(false);
+    const [endPreviousTimeStepperDisabled, setEndPreviousTimeStepperDisabled] = React.useState(false);
     const [editingBegin, setEditingBegin] = React.useState(false);
     const [editingEnd, setEditingEnd] = React.useState(false);
     const [price, setPrice] = React.useState(null);
 
-    const setTempBookingBegin = (newTempBookingBegin) => {
-        updateBeginAndEndSame(tempBookingBegin, tempBookingEnd ?? props.bookingEnd);
+    const setBeginSame = (newBeginSame, begin = props.bookingBegin) => {
+        _setBeginSame(newBeginSame);
+        setBeginPreviousTimeStepperDisabled(newBeginSame && props.today.getHours() === begin.getHours() && props.today.getMinutes() >= begin.getMinutes());
+    };
+
+    const setEndSame = (newEndSame, newBeginSame = beginSame, begin = props.bookingBegin, end = props.bookingEnd) => {
+        _setEndSame(newEndSame);
+        setEndPreviousTimeStepperDisabled(newBeginSame && newEndSame && begin.getHours() === end.getHours() && begin.getMinutes() >= end.getMinutes());
+    };
+
+    const setTempBookingBegin = (newTempBookingBegin, skipSameCheck = false) => {
+        if (!skipSameCheck)
+            updateBeginAndEndSame(tempBookingBegin, tempBookingEnd ?? props.bookingEnd);
         _setTempBookingBegin(newTempBookingBegin);
     };
 
-    const setTempBookingEnd = (newTempBookingEnd) => {
-        updateBeginAndEndSame(tempBookingBegin ?? props.bookingBegin, newTempBookingEnd);
+    const setTempBookingEnd = (newTempBookingEnd, skipSameCheck = false) => {
+        if (!skipSameCheck)
+            updateBeginAndEndSame(tempBookingBegin ?? props.bookingBegin, newTempBookingEnd);
         _setTempBookingEnd(newTempBookingEnd);
     };
 
     const updateBeginAndEndSame = (begin = props.bookingBegin, end = props.bookingEnd) => {
-        if (begin) {
-            setBeginSame(compareDateWithoutTime(begin, props.today) === 0);
-        } else {
-            setBeginSame(false);
-        }
-        if (props.bookingEnd) {
-            setEndSame(compareDateWithoutTime(end, begin) === 0);
-        } else {
-            setEndSame(false);
-        }
+        const newBeginSame = begin && compareDateWithoutTime(begin, props.today) === 0;
+        const newEndSame = begin && end && compareDateWithoutTime(end, begin) === 0;
+        setBeginSame(newBeginSame, begin);
+        setEndSame(newEndSame, newBeginSame, begin, end);
     };
 
     const setBeginAndEndSame = (to) => {
@@ -113,9 +121,11 @@ const BookingForm = (props) => {
         }
     };
 
-    const updateEnd = (newEnd) => {
+    const updateEnd = (newEnd, timeSet = false) => {
         if (props.bookingBegin && newEnd < props.bookingBegin) {
-            if (getStartOfDate(newEnd) < props.today) {
+            if (timeSet) {
+                props.setBookingEnd(props.bookingBegin);
+            } else if (getStartOfDate(newEnd) < props.today) {
                 props.setBookingBeginAndEnd(new Date(), getEndOfDate(props.today));
             } else {
                 props.setBookingBeginAndEnd(getStartOfDate(newEnd), newEnd);
@@ -164,7 +174,7 @@ const BookingForm = (props) => {
         let newMinutes = normalizeTo15Minutes(props.bookingEnd.getMinutes(), direction);
         const newEnd = new Date(props.bookingEnd);
         newEnd.setMinutes(newMinutes);
-        updateEnd(newEnd);
+        updateEnd(newEnd, true);
     };
 
     React.useEffect(() => {
@@ -177,7 +187,7 @@ const BookingForm = (props) => {
             _setBeginHour(null);
             setBeginAndEndSame(false);
         }
-        setTempBookingBegin(props.bookingBegin);
+        setTempBookingBegin(props.bookingBegin, true);
     }, [props.bookingBegin]);
 
     React.useEffect(() => {
@@ -190,7 +200,7 @@ const BookingForm = (props) => {
             _setEndHour(null);
             setBeginAndEndSame(false);
         }
-        setTempBookingEnd(props.bookingEnd);
+        setTempBookingEnd(props.bookingEnd, true);
     }, [props.bookingEnd]);
 
     React.useEffect(() => {
@@ -236,6 +246,8 @@ const BookingForm = (props) => {
                 : <>
                     <h4>Von:</h4>
                     <CalendarDateTimeStepper current={props.bookingBegin}
+                                             previousDateDisabled={beginSame}
+                                             previousTimeDisabled={beginPreviousTimeStepperDisabled}
                                              handleNextDate={() => {
                                                  handleBeginDateStep(1);
                                              }}
@@ -271,6 +283,8 @@ const BookingForm = (props) => {
                 : <>
                     <h4>Bis:</h4>
                     <CalendarDateTimeStepper current={props.bookingEnd}
+                                             previousDateDisabled={endSame}
+                                             previousTimeDisabled={endPreviousTimeStepperDisabled}
                                              handleNextDate={() => {
                                                  handleEndDateStep(1);
                                              }}
