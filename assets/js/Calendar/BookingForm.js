@@ -27,6 +27,8 @@ const BookingForm = (props) => {
     const [editingBegin, setEditingBegin] = React.useState(false);
     const [editingEnd, setEditingEnd] = React.useState(false);
     const [price, setPrice] = React.useState(null);
+    const [lastRequest, setLastRequest] = React.useState(0);
+    const [currentRequestTimeout, setCurrentRequestTimeout] = React.useState();
 
     const setBeginSame = (newBeginSame, begin = props.bookingBegin) => {
         _setBeginSame(newBeginSame);
@@ -194,13 +196,26 @@ const BookingForm = (props) => {
         setTempBookingEnd(props.bookingEnd, true);
     }, [props.bookingEnd]);
 
+    const updatePrice = (currentTimeStamp) => {
+        setLastRequest(currentTimeStamp);
+        getResourcePrice(props.apiBackend, props.resource.id, props.bookingBegin.toISOString().substr(0, 19), props.bookingEnd.toISOString().substr(0, 19))
+            .then(data => {
+                setPrice(data.data.value_gross);
+            });
+    };
+
     React.useEffect(() => {
         if (props.bookingBegin && props.bookingEnd) {
-            getResourcePrice(props.apiBackend, props.resource.id, props.bookingBegin.toISOString().substr(0, 19), props.bookingEnd.toISOString().substr(0, 19))
-                .then(data => {
-                    setPrice(data.data.value_gross);
-                });
-
+            const currentTimeStamp = new Date().getTime();
+            if (currentTimeStamp < lastRequest + 1000) {
+                clearTimeout(currentRequestTimeout);
+                setCurrentRequestTimeout(window.setTimeout(() => {
+                    updatePrice(new Date().getTime());
+                }, 1000));
+                console.log('Too many requests, waiting a few seconds.');
+            } else {
+                updatePrice();
+            }
         } else {
             setPrice(null);
         }
