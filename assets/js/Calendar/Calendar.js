@@ -4,7 +4,13 @@ import MonthCalendar from './MonthCalendar';
 import MultiMonthCalendar from './MultiMonthCalendar';
 import BookingForm from './BookingForm';
 import AsapCalendar from './AsapCalendar';
-import {calculateNewBookingTime, compareDateWithoutTime, getLast15MinStep, getUnavailableDates} from './CalendarHelper';
+import {
+    calculateNewBookingTime,
+    compareDateWithoutTime,
+    getLast15MinStep,
+    getUnavailableDates, normalizeDateTo15Minutes,
+    normalizeMinutesTo15Minutes,
+} from './CalendarHelper';
 import {rawBookingPropTypes} from './CalendarPropTypes';
 import {pricegroupPropTypes, resourcePropTypes} from '../Models';
 
@@ -76,7 +82,7 @@ const Calendar = (props) => {
         if (newBegin && bookingEnd && !preventUpdate) {
             setNewBooking(newBegin, bookingEnd, 'begin');
         } else {
-            _setBookingBegin(newBegin);
+            _setBookingBegin(getLast15MinStep(newBegin));
         }
     };
 
@@ -86,7 +92,7 @@ const Calendar = (props) => {
         if (bookingBegin && newEnd) {
             setNewBooking(bookingBegin, newEnd, 'end');
         } else {
-            _setBookingEnd(newEnd);
+            _setBookingEnd(normalizeDateTo15Minutes(newEnd));
         }
     };
 
@@ -112,8 +118,8 @@ const Calendar = (props) => {
     const setNewBooking = (newBookingBegin, newBookingEnd, startAt) => {
         const newBookingTime = calculateNewBookingTime(newBookingBegin, newBookingEnd, maxBookingMS, unavailableDates, startAt);
         setErrors(newBookingTime.errors);
-        _setBookingBegin(newBookingTime.begin);
-        _setBookingEnd(newBookingTime.end);
+        _setBookingBegin(getLast15MinStep(newBookingTime.begin));
+        _setBookingEnd(normalizeDateTo15Minutes(newBookingTime.end));
     };
 
     React.useEffect(() => {

@@ -386,10 +386,22 @@ export const getEndOfDate = (date) => {
 };
 
 export const toNext15MinStep = (minutes, direction) => {
-    return normalizeTo15Minutes(minutes + (direction * 15));
+    return normalizeMinutesTo15Minutes(minutes + (direction * 15));
 };
 
-export const normalizeTo15Minutes = (minutes) => {
+export const normalizeDateTo15Minutes = (date) => {
+    const oldMinutes = date.getMinutes();
+    if (oldMinutes === 59 && date.getHours() === 23) {
+        // Ignore midnight
+        return date;
+    }
+    const newMinutes = normalizeMinutesTo15Minutes(oldMinutes);
+    const newDate = new Date(date);
+    newDate.setMinutes(newMinutes);
+    return newDate;
+};
+
+export const normalizeMinutesTo15Minutes = (minutes) => {
     if (minutes === 59) {
         // Treat 59 minutes as a full hour
         minutes++;
