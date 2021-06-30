@@ -385,4 +385,24 @@ export const getEndOfDate = (date) => {
     return newDate;
 };
 
-export const dateTimeFormatOptions = {dateStyle: 'short', timeStyle: 'short'};
+export const toNext15MinStep = (minutes, direction) => {
+    return normalizeTo15Minutes(minutes + (direction * 15));
+};
+
+export const normalizeTo15Minutes = (minutes) => {
+    if (minutes === 59) {
+        // Treat 59 minutes as a full hour
+        minutes++;
+    }
+
+    let diffMinutes = minutes >= 60 ? minutes - 60 : minutes;
+    const diffTo15 = diffMinutes % 15;
+    if (diffTo15 > 0) {
+        if (diffTo15 > 6) {
+            minutes = minutes - diffTo15 + 15;
+        } else {
+            minutes -= diffTo15;
+        }
+    }
+    return minutes;
+};

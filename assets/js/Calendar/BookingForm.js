@@ -2,7 +2,12 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import DateSelectorRow from './DateSelectorRow';
 import TimeSelectorRow from './TimeSelectorRow';
-import {compareDateWithoutTime, dateTimeFormatOptions, getEndOfDate, getStartOfDate} from './CalendarHelper';
+import {
+    compareDateWithoutTime,
+    getEndOfDate,
+    getStartOfDate,
+    toNext15MinStep,
+} from './CalendarHelper';
 import {pricegroupPropTypes} from '../Models';
 import PriceDisplay from '../PriceDisplay';
 import {getResourcePrice} from '../Api';
@@ -139,20 +144,6 @@ const BookingForm = (props) => {
         }
     };
 
-    const normalizeTo15Minutes = (minutes, direction) => {
-        if (minutes === 59) {
-            // Treat 59 minutes as a full hour
-            minutes++;
-        }
-
-        let newMinutes = minutes + (direction * 15);
-        const diffTo15 = newMinutes % 15;
-        if (diffTo15 > 0) {
-            newMinutes += diffTo15 * direction;
-        }
-        return newMinutes;
-    };
-
     // Add or subtract a day from booking begin
     const handleBeginDateStep = (direction) => {
         updateBegin(new Date(props.bookingBegin.getTime() + (direction * 8.64e+7)));
@@ -160,7 +151,7 @@ const BookingForm = (props) => {
 
     // Add or subtract 15 minutes from booking begin
     const handleBeginTimeStep = (direction) => {
-        let newMinutes = normalizeTo15Minutes(props.bookingBegin.getMinutes(), direction);
+        let newMinutes = toNext15MinStep(props.bookingBegin.getMinutes(), direction);
         const newBegin = new Date(props.bookingBegin);
         newBegin.setMinutes(newMinutes);
         updateBegin(newBegin);
@@ -171,7 +162,7 @@ const BookingForm = (props) => {
     };
 
     const handleEndTimeStep = (direction) => {
-        let newMinutes = normalizeTo15Minutes(props.bookingEnd.getMinutes(), direction);
+        let newMinutes = toNext15MinStep(props.bookingEnd.getMinutes(), direction);
         const newEnd = new Date(props.bookingEnd);
         newEnd.setMinutes(newMinutes);
         updateEnd(newEnd, true);
