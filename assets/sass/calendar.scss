@@ -263,8 +263,14 @@
   color: $orange;
 }
 
-.calendar-numeric-input {
+input[type=number].calendar-numeric-input, select.calendar-numeric-input {
   border-radius: 0.25rem;
+  height: 2rem;
+  font-size: 1.25rem;
+  width: 100%;
+  background-color: inherit;
+  border: 1px solid $lightGray;
+  box-shadow: none;
 }
 
 .calendar-numeric-input:invalid {

@@ -111,21 +111,24 @@ const DateSelectorRow = (props) => {
     };
 
     return <React.Fragment>
-        <div className='calendar-booking-date-input'>
+        <div className="calendar-booking-date-input">
             <label htmlFor={props.dayId}>Tag</label>
-            <input type="number" id={props.dayId} min={getMinDay()} max={getMaxDay()} value={props.date || localChange ? day : ''}
+            <input type="number" id={props.dayId} min={getMinDay()} max={getMaxDay()}
+                   value={props.date || localChange ? day : ''}
                    onChange={handleDayChange} className="calendar-numeric-input"/>
             <DateTimeInputWarning min={getMinDay()} max={getMaxDay()} show={!dayValid}/>
         </div>
-        <div className='calendar-booking-date-input'>
+        <div className="calendar-booking-date-input">
             <label htmlFor={props.monthId}>Monat</label>
-            <input type="number" id={props.monthId} min={getMinMonth()} max={getMaxMonth()} value={props.date || localChange ? month : ''}
+            <input type="number" id={props.monthId} min={getMinMonth()} max={getMaxMonth()}
+                   value={props.date || localChange ? month : ''}
                    onChange={handleMonthChange} className="calendar-numeric-input"/>
             <DateTimeInputWarning min={getMinMonth()} max={getMaxMonth()} show={!monthValid}/>
         </div>
-        <div className='calendar-booking-date-input'>
+        <div className="calendar-booking-date-input">
             <label htmlFor={props.yearId}>Jahr</label>
-            <input type="number" id={props.yearId} min={firstYear} max={getMaxYear()} value={props.date || localChange ? year : ''}
+            <input type="number" id={props.yearId} min={firstYear} max={getMaxYear()}
+                   value={props.date || localChange ? year : ''}
                    onChange={handleYearChange} className="calendar-numeric-input"/>
             <DateTimeInputWarning min={firstYear} max={getMaxYear()} show={!yearValid}/>
         </div>

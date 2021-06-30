@@ -7,77 +7,92 @@ const TimeSelectorRow = (props) => {
 
     const [hour, setHour] = React.useState(props.hour);
     const [minute, setMinute] = React.useState(props.minute);
+    const [midnight, setMidnight] = React.useState(false);
 
+    const [minMinute, setMinMinute] = React.useState(-1);
+    const [maxMinute, setMaxMinute] = React.useState(61);
     const [hourValid, setHourValid] = React.useState(true);
     const [minuteValid, setMinuteValid] = React.useState(true);
 
     React.useEffect(() => {
-        setHour(props.hour);
+        if (props.minute === 59 && props.hour === 23) {
+            setHour(24);
+            setMinute(0);
+            setMidnight(true);
+        } else {
+            setMinute(props.minute);
+            setHour(props.hour);
+            setMidnight(false);
+        }
+        setMinMinute(getMinMinute(hour));
+        setMaxMinute(getMaxMinute());
         setHourValid(true);
-    }, [props.hour]);
+        setMinuteValid(true);
+    }, [props.minute, props.hour]);
 
     React.useEffect(() => {
-        setMinute(props.minute);
-        setMinuteValid(true);
-    }, [props.minute]);
+        setMaxMinute(getMaxMinute());
+        setMinMinute(getMinMinute());
+    }, [props.minHour, props.minMinute]);
 
     const getMinMinute = (checkHour = props.hour) => {
-        if (checkHour === props.minHour) {
+        if (props.minHour && checkHour === props.minHour) {
             return props.minMinute;
         }
-        return 0;
+        return -1;
     };
 
     const getMaxMinute = (checkHour = props.hour) => {
         if (props.maxHour && checkHour === props.maxHour) {
             return props.maxMinute ?? 59;
         }
-        return 59;
+        return 61;
     };
 
     const handleHourChange = (e) => {
         const newHour = e.target.value * 1;
-        if (checkInRange(newHour, e.target)) {
-            props.setHour(newHour);
-            setHourValid(true);
-            if (minute < getMinMinute(newHour)) {
-                setMinute(props.minMinute);
-                props.setMinute(props.minMinute);
-            }
-            if (minute > getMaxMinute(newHour)) {
-                setMinute(props.maxMinute);
-                props.setMinute(props.maxMinute);
-            }
-            setMinuteValid(true);
-            setHourValid(true);
+        if (newHour === 24) {
+            setMidnight(true);
+            props.setHour(23);
+            props.setMinute(59);
         } else {
-            setHourValid(false);
+            setMidnight(false);
+            props.setHour(newHour);
         }
         setHour(newHour);
     };
 
     const handleMinuteChange = (e) => {
         const newMinute = e.target.value * 1;
-        if (checkInRange(newMinute, e.target)) {
-            props.setMinute(newMinute);
-            setMinuteValid(true);
-        } else {
-            setMinuteValid(false);
-        }
         setMinute(newMinute);
+        props.setMinute(newMinute);
     };
 
-    return <div className='calendar-booking-time-row'>
-        <div className='calendar-booking-time-input'>
+    return <div className="calendar-booking-time-row">
+        <div className="calendar-booking-time-input">
             <label htmlFor={props.hourId}>Stunde</label>
-            <input type="number" id={props.hourId} min={props.minHour ?? 0} max={props.maxHour ?? 23}
-                   onChange={handleHourChange} value={hour ?? ''} className="calendar-numeric-input"/>
+            <select id={props.hourId} value={hour ?? undefined} onChange={handleHourChange}
+                    className="calendar-numeric-input">
+                {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24].map((hour) => {
+                    if ((!props.minHour || hour >= props.minHour) && (!props.maxHour || hour <= props.maxHour))
+                        return <option value={hour} key={props.hourId + hour}>{hour}</option>;
+                })}
+            </select>
             <DateTimeInputWarning min={props.minHour ?? 0} max={props.maxHour ?? 23} show={!hourValid}/>
         </div>
-        <div className='calendar-booking-time-input'>
+        <div className="calendar-booking-time-input">
             <label htmlFor={props.minuteId}>Minute</label>
-            <input type="number" id={props.minuteId} min={getMinMinute()} max={getMaxMinute()}
-                   onChange={handleMinuteChange} value={minute ?? ''} className="calendar-numeric-input"/>
+            {midnight
+                ? <select id={props.minuteId} value={minute ?? undefined} className="calendar-numeric-input">
+                    <option value={0}>00</option>
+                </select>
+                : <select id={props.minuteId} onChange={handleMinuteChange} value={minute ?? undefined}
+                          className="calendar-numeric-input">
+                    {['00', '15', '30', '45'].map((minute) => {
+                        return <option disabled={minute < minMinute || minute > maxMinute} key={props.minuteId + minute}
+                                       value={minute * 1}>{minute}</option>;
+                    })}
+                </select>}
             <DateTimeInputWarning min={getMinMinute()} max={getMaxMinute()} show={!minuteValid}/>
         </div>
     </div>;
