@@ -40,7 +40,7 @@ const BookingForm = (props) => {
 
     const setTempBookingBegin = (newTempBookingBegin, skipSameCheck = false) => {
         if (!skipSameCheck)
-            updateBeginAndEndSame(tempBookingBegin, tempBookingEnd ?? props.bookingEnd);
+            updateBeginAndEndSame(newTempBookingBegin, tempBookingEnd ?? props.bookingEnd);
         _setTempBookingBegin(newTempBookingBegin);
     };
 
