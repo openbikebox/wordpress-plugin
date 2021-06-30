@@ -9,8 +9,8 @@ import {getResourcePrice} from '../Api';
 import CalendarDateTimeStepper from './CalendarDateTimeStepper';
 
 const BookingForm = (props) => {
-    const [tempBookingBegin, setTempBookingBegin] = React.useState();
-    const [tempBookingEnd, setTempBookingEnd] = React.useState();
+    const [tempBookingBegin, _setTempBookingBegin] = React.useState();
+    const [tempBookingEnd, _setTempBookingEnd] = React.useState();
     const [beginHour, _setBeginHour] = React.useState(null);
     const [beginMinute, _setBeginMinute] = React.useState(null);
     const [endHour, _setEndHour] = React.useState(null);
@@ -21,14 +21,24 @@ const BookingForm = (props) => {
     const [editingEnd, setEditingEnd] = React.useState(false);
     const [price, setPrice] = React.useState(null);
 
-    const updateBeginAndEndSame = () => {
-        if (props.bookingBegin) {
-            setBeginSame(compareDateWithoutTime(props.bookingBegin, props.today) === 0);
+    const setTempBookingBegin = (newTempBookingBegin) => {
+        updateBeginAndEndSame(tempBookingBegin, tempBookingEnd ?? props.bookingEnd);
+        _setTempBookingBegin(newTempBookingBegin);
+    };
+
+    const setTempBookingEnd = (newTempBookingEnd) => {
+        updateBeginAndEndSame(tempBookingBegin ?? props.bookingBegin, newTempBookingEnd);
+        _setTempBookingEnd(newTempBookingEnd);
+    };
+
+    const updateBeginAndEndSame = (begin = props.bookingBegin, end = props.bookingEnd) => {
+        if (begin) {
+            setBeginSame(compareDateWithoutTime(begin, props.today) === 0);
         } else {
             setBeginSame(false);
         }
         if (props.bookingEnd) {
-            setEndSame(compareDateWithoutTime(props.bookingEnd, props.bookingBegin) === 0);
+            setEndSame(compareDateWithoutTime(end, begin) === 0);
         } else {
             setEndSame(false);
         }
@@ -105,11 +115,15 @@ const BookingForm = (props) => {
 
     const updateEnd = (newEnd) => {
         if (props.bookingBegin && newEnd < props.bookingBegin) {
-            props.setBookingBeginAndEnd(getStartOfDate(newEnd), newEnd);
+            if (getStartOfDate(newEnd) < props.today) {
+                props.setBookingBeginAndEnd(new Date(), getEndOfDate(props.today));
+            } else {
+                props.setBookingBeginAndEnd(getStartOfDate(newEnd), newEnd);
+            }
         } else {
-            if(newEnd.getHours() === 0 && newEnd.getMinutes() === 0) {
+            if (newEnd.getHours() === 0 && newEnd.getMinutes() === 0) {
                 // Only book until 23:59 instead of 00:00
-                newEnd.setMinutes(- 1);
+                newEnd.setMinutes(-1);
             }
             props.setBookingEnd(newEnd, true);
         }
