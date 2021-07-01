@@ -1,8 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import {ComponentStatus} from './Helpers';
-import Calendar from './Calendar/Calendar';
-import {getResourceBySlug, getResourceActions, submitBooking} from './Api';
+import Calendar from 'binary-booking-calendar/dist/binaryBookingCalendar'
+import {getResourceBySlug, getResourceActions, submitBooking, getResourcePrice} from './Api';
 
 const ResourceView = (props) => {
     const [status, setStatus] = React.useState(ComponentStatus.loading);
@@ -49,6 +49,13 @@ const ResourceView = (props) => {
         });
     };
 
+    const getPrice = (bookingBegin, bookingEnd) => {
+        return getResourcePrice(props.apiBackend, resource.id, bookingBegin.toISOString().substr(0, 19), bookingEnd.toISOString().substr(0, 19))
+            .then(data => {
+                return(data.data.value_gross);
+            });
+    }
+
     return <div>
         <h2>{resource.name}</h2>
         {resource.photo && <img src={resource.photo.url} alt={'Foto von ' + resource.name}/>}
@@ -56,11 +63,10 @@ const ResourceView = (props) => {
         <Calendar
             apiBackend={props.apiBackend}
             handleSubmit={handleSubmit}
-            resource={resource}
-            priceGroup={resource.pricegroup}
             bookings={existingBookings}
             maxBookingLength={604800}
             initialView={screen.width > 800 ? 'month' : 'asap'}
+            getPrice={getPrice}
         />
     </div>;
 };
