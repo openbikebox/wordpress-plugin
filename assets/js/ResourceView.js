@@ -38,10 +38,11 @@ const ResourceView = (props) => {
         </p>;
     }
 
-    const handleSubmit = (bookingBegin, bookingEnd) => {
+    const handleSubmit = (bookingBegin, bookingEnd, now) => {
         submitBooking({
             begin: bookingBegin.toISOString().substr(0, 19) + 'Z',
             end: bookingEnd.toISOString().substr(0, 19) + 'Z',
+            now: now,
             location_id: resource.location_id,
             resource_id: resource.id,
         }).then(() => {

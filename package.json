@@ -46,6 +46,6 @@
     "webpack": "^4.43",
     "webpack-bundle-analyzer": "^3.8",
     "webpack-cli": "^3.3",
-    "binary-booking-calendar": "^0.1.7"
+    "binary-booking-calendar": "^0.1.9"
   }
 }
