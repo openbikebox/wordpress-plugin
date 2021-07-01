@@ -43,15 +43,16 @@ const Calendar = (props) => {
     const [lastSet, setLastSet] = React.useState('end');
     const [maxBookingMS, setMaxBookingMS] = React.useState(null);
 
-    React.useEffect(() => {
-        const interval = setInterval(() => {
-            let newToday = getLast15MinStep(new Date());
-            setToday(newToday);
-            if (bookingBegin && bookingBegin < newToday) {
-                setBookingBegin(newToday);
-            }
-        }, 60000);
+    const updateToday = () => {
+        let newToday = getLast15MinStep(new Date());
+        setToday(newToday);
+        if (bookingBegin && bookingBegin < newToday) {
+            setBookingBegin(newToday);
+        }
+    };
 
+    React.useEffect(() => {
+        const interval = setInterval(updateToday, 60000);
         return () => {
             clearInterval(interval);
         };
@@ -171,6 +172,7 @@ const Calendar = (props) => {
 
     const handleSubmit = (evt) => {
         evt.preventDefault();
+        updateToday();
         props.handleSubmit(bookingBegin, bookingEnd);
     };
 
