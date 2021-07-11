@@ -28,7 +28,7 @@ export const resourcePropTypes = {
     modified: PropTypes.string,
     pricegroup: PropTypes.shape(pricegroupPropTypes),
     slug: PropTypes.string,
-    status: PropTypes.oneOf(['free', 'reserved', 'taken']),
+    status: PropTypes.oneOf(['free', 'reserved', 'taken', 'inactive']),
     unavailable_until: PropTypes.string,
     photo: PropTypes.shape(photoPropTypes),
     description: PropTypes.string,
