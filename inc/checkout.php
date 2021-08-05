@@ -177,6 +177,7 @@ add_filter('woocommerce_thankyou_order_received_text', function (string $text, W
             $text .= '<tr><td>Prüf <strong>Summe</strong> /<br>check <strong>sum</strong></td><th>' . $order_item->get_meta('_code') . '</th></tr></table>';
         }
 
+
         $begin = obb_parse_datetime($order_item->get_meta('_begin'));
         $end = obb_parse_datetime($order_item->get_meta('_end'));
         if (in_array('connect', $auth_methods) && $begin->getTimestamp() <= (new DateTime())->getTimestamp() && $end->getTimestamp() >= (new DateTime())->getTimestamp()) {

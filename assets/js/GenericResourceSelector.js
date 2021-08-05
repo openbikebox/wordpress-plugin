@@ -6,6 +6,7 @@ import {locationPropTypes} from './Models';
 import {Decimal} from 'decimal.js';
 import moment from 'moment';
 import {submitBooking} from './Api';
+import { Carousel } from 'react-responsive-carousel';
 
 const GenericResourceSelector = (props) => {
     const {location, apiBackend, locationSlug} = props;
@@ -15,6 +16,10 @@ const GenericResourceSelector = (props) => {
     const [bookingBegin, setBookingBegin] = React.useState(null);
     const [bookingEnd, setBookingEnd] = React.useState(null);
     const [bookingPrice, setBookingPrice] = React.useState(null);
+    const [termsAndConditions, setTermsAndConditions] = React.useState(false);
+    const [bikeSize, setBikeSize] = React.useState(false);
+    const [termsAndConditionsError, setTermsAndConditionsError] = React.useState(false);
+    const [bikeSizeError, setBikeSizeError] = React.useState(false);
 
     const calculatePrice = (resource, timespan) => {
         if (!resource || !timespan)
@@ -62,7 +67,7 @@ const GenericResourceSelector = (props) => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        if (selectedResource && selectedTimespan) {
+        if (selectedResource && selectedTimespan && termsAndConditions && (!location.bike_size_information || bikeSize)) {
             submitBooking({
                 begin: bookingBegin.toISOString().substr(0, 19) + 'Z',
                 end: bookingEnd.toISOString().substr(0, 19) + 'Z',
@@ -72,6 +77,10 @@ const GenericResourceSelector = (props) => {
             }).then(() => {
                 window.location.href = wc_add_to_cart_params.cart_url;
             });
+        }
+        else {
+            setTermsAndConditionsError(!termsAndConditions);
+            setBikeSizeError(location.bike_size_information && !bikeSize)
         }
     };
 
@@ -86,8 +95,9 @@ const GenericResourceSelector = (props) => {
                                 onChange={handleSelectedResourceUpdate}>
                             <option key="resource-0" value={0}>Bitte wählen</option>
                             {location.resource.filter(resource => resource.status === 'free').map(resource =>
-                                <option key={`resource-${resource.id}`}
-                                        value={resource.id}>{resource.identifier}</option>,
+                                <option key={`resource-${resource.id}`} value={resource.id}>
+                                    {resource.identifier}
+                                </option>,
                             )}
                         </select>
                     </div>
@@ -116,6 +126,29 @@ const GenericResourceSelector = (props) => {
                         zum {bookingEnd.clone().subtract(1, 'day').format('D.M.YY, 24:00')} Uhr</p>}
                     {bookingPrice &&
                     <h3 style={{marginTop: 0}}>Preis: {formatPrice(bookingPrice)}</h3>}
+                    {!!location.bike_size_information && <p>
+                        <label className="checkbox" style={{color: (bikeSizeError) ? '#f14668': 'inherit'}}>
+                            <input
+                                type="checkbox"
+                                onChange={() => setBikeSize(!bikeSize)}
+                                value={bikeSize}
+                            />
+                            {' '}{location.bike_size_information}
+                        </label>
+                    </p>}
+                    <p>
+                        <label className="checkbox" style={{color: (termsAndConditionsError) ? '#f14668': 'inherit'}}>
+                            <input
+                                type="checkbox"
+                                onChange={() => setTermsAndConditions(!termsAndConditions)}
+                                value={termsAndConditions}
+                            />
+                            {' '}Ich habe die{' '}
+                            <a href={location.terms_and_conditions} target={'_blank'} onClick={evt => evt.stopPropagation()}>Geschäftsbedingungen</a>
+                            {' '}gelesen und stimme ihnen zu.
+                        </label>
+                    </p>
+
                     <button
                         onClick={handleSubmit}
                         className={`button is-fullwidth ${(selectedResource && selectedTimespan) ? 'is-success' : ''}`}
@@ -127,6 +160,11 @@ const GenericResourceSelector = (props) => {
                 {!!location.description && <div className="block">
                     {location.description}
                 </div>}
+                {location.photos.length && <Carousel>
+                    {location.photos.map(photo => <div key={`photo-${photo.id}`}>
+                        <img src={photo.url} alt={`Photo von ${location.name}`} />
+                    </div>)}
+                </Carousel>}
             </div>
             <div className="column is-6">
                 <ResourceSvg
