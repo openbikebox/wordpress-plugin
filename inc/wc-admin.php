@@ -34,11 +34,15 @@ add_filter('woocommerce_order_item_get_formatted_meta_data', function (array $fo
         }
         if ($item->key === '_begin') {
             $item->display_key = 'Beginn';
-            $item->display_value = format_datetime($item->value);
+            $item->display_value = obb_format_datetime(obb_parse_datetime($item->value));
         }
         if ($item->key === '_end') {
             $item->display_key = 'Ende';
-            $item->display_value = format_datetime($item->value);
+            $item->display_value = obb_format_datetime(obb_parse_datetime($item->value));
+        }
+        if ($item->key === '_code_date') {
+            $item->display_key = 'Datum';
+            $item->display_value = $item->value;
         }
         if ($item->key === '_code') {
             $item->display_key = 'Code';
