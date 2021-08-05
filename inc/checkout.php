@@ -134,7 +134,7 @@ add_filter('woocommerce_order_item_name', function(string $name, WC_Order_Item_P
         if ($extended_order_id) {
             $result .= '<a class="button is-info" href="/mein-konto/bestellung/' . $extended_order_id . '/">Alte Buchung</a> ';
         }
-        if (order_item_is_extendable($order_item)) {
+        if (order_item_is_extendable($order_item) && $order_item->get_order()->get_status() === 'completed') {
             $result .= '<a class="button is-success" href="' . get_booking_extended_link($order_item) . '">jetzt Buchung verlängern</a>';
         }
         else {
