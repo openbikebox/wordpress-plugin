@@ -116,6 +116,8 @@ const GenericResourceSelector = (props) => {
                             <option value="week">Woche</option>}
                             {(!selectedResource || selectedResource.pricegroup.fee_month !== undefined) &&
                             <option value="month">Monat</option>}
+                            {(!selectedResource || selectedResource.pricegroup.fee_quarter !== undefined) &&
+                            <option value="quarter">Quartal</option>}
                             {(!selectedResource || selectedResource.pricegroup.fee_year !== undefined) &&
                             <option value="year">Jahr</option>}
                         </select>

@@ -7,6 +7,7 @@ export const pricegroupPropTypes = {
     fee_day: PropTypes.string,
     fee_week: PropTypes.string,
     fee_month: PropTypes.string,
+    fee_quarter: PropTypes.string,
     fee_year: PropTypes.string,
     modified: PropTypes.string,
 };
