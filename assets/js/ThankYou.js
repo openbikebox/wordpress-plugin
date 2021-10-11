@@ -47,37 +47,56 @@ const ThankYou = (props) => {
 
     const getIcon = classes => <i className={`fa ${classes}`} style={{marginLeft: '20px'}} />;
 
-    return <div className="columns control">
-        <div className="column is-6" style={{marginBottom: 30}}>
-            <button
-                onClick={closeResource}
-                className={`button is-fullwidth is-danger`}
-            >
-                schliessen
-                {requestStatus === RequestStatus.requestCloseRunning && getIcon('fa-spinner fa-spin fa-fw')}
-                {requestStatus === RequestStatus.requestCloseSuccess && getIcon('fa-check-circle')}
-                {requestStatus === RequestStatus.requestCloseFailed && getIcon('fa-exclamation-circle')}
-            </button>
+    const cancelAction = () => {
+        requestJsonPost(props.url + '/api/v1/action/cancel', {session: props.session, request_uid: props.requestUid, uid: props.uid, booked: true})
+            .then(data => {
+                window.location = props.locationUrl
+            })
+    }
+
+    return <>
+        <div className="columns control">
+            <div className="column is-6" style={{marginBottom: 30}}>
+                <button
+                    onClick={closeResource}
+                    className={`button is-fullwidth is-danger`}
+                >
+                    schliessen
+                    {requestStatus === RequestStatus.requestCloseRunning && getIcon('fa-spinner fa-spin fa-fw')}
+                    {requestStatus === RequestStatus.requestCloseSuccess && getIcon('fa-check-circle')}
+                    {requestStatus === RequestStatus.requestCloseFailed && getIcon('fa-exclamation-circle')}
+                </button>
+            </div>
+            <div className="column is-6">
+                <button
+                    onClick={openResource}
+                    className={`button is-fullwidth is-success`}
+                >
+                    öffnen
+                    {requestStatus === RequestStatus.requestOpenRunning && getIcon('fa-spinner fa-spin fa-fw')}
+                    {requestStatus === RequestStatus.requestOpenSuccess && getIcon('fa-check-circle')}
+                    {requestStatus === RequestStatus.requestOpenFailed && getIcon('fa-exclamation-circle')}
+                </button>
+            </div>
         </div>
-        <div className="column is-6">
-            <button
-                onClick={openResource}
-                className={`button is-fullwidth is-success`}
-            >
-                öffnen
-                {requestStatus === RequestStatus.requestOpenRunning && getIcon('fa-spinner fa-spin fa-fw')}
-                {requestStatus === RequestStatus.requestOpenSuccess && getIcon('fa-check-circle')}
-                {requestStatus === RequestStatus.requestOpenFailed && getIcon('fa-exclamation-circle')}
-            </button>
-        </div>
-    </div>
+        {props.expositionMode === 'on' && <div className="columns control">
+            <div className="column is-6" style={{marginTop: 50, marginBottom: 30}}>
+                <button
+                    onClick={cancelAction}
+                    className={`button is-fullwidth is-success`}
+                >Messe-Reset</button>
+            </div>
+        </div>}
+    </>
 }
 
 ThankYou.propTypes = {
     url: PropTypes.string,
     session: PropTypes.string,
     requestUid: PropTypes.string,
-    uid: PropTypes.string
+    uid: PropTypes.string,
+    expositionMode: PropTypes.string,
+    locationUrl: PropTypes.string
 }
 
 export default ThankYou;
