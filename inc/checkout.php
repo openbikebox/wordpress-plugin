@@ -187,7 +187,8 @@ add_filter('woocommerce_thankyou_order_received_text', function (string $text, W
                 data-uid="' . $order_item->get_meta('_uid') . '" 
                 data-request-uid="' . $order_item->get_meta('_request_uid') . '" 
                 data-url="' . OPEN_BIKE_BOX_BACKEND . '"
-                data-resource-id="' . $order_item->get_meta('_resource') . '"
+                data-resource-identifier="' . $order_item->get_meta('_resource_identifier') . '"
+                data-location-id="' . $order_item->get_meta('_location_id') . '"
                 data-exposition-mode="' . OPEN_BIKE_BOX_EXPOSITION_MODE . '"
                 data-location-url="/location/' . $order_item->get_meta('_location_slug') . '"
             ></div>';

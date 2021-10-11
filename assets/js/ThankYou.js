@@ -55,7 +55,7 @@ const ThankYou = (props) => {
     }
 
     return <>
-        <div className="columns control">
+        <div className={`columns control resource-id-${props.resourceId} location-id-${props.locationId}`}>
             <div className="column is-6" style={{marginBottom: 30}}>
                 <button
                     onClick={closeResource}
@@ -96,7 +96,9 @@ ThankYou.propTypes = {
     requestUid: PropTypes.string,
     uid: PropTypes.string,
     expositionMode: PropTypes.string,
-    locationUrl: PropTypes.string
+    locationUrl: PropTypes.string,
+    resourceId: PropTypes.string,
+    locationId: PropTypes.string
 }
 
 export default ThankYou;
