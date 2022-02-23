@@ -32,11 +32,8 @@ function obb_add_to_cart_ajax(): array {
         'request_uid' => generate_uid(),
         'resource_id' => $data->resource_id,
         'requested_at' => gmdate("Y-m-d\TH:i:s\Z"),
-        'begin' => $data->begin,
-        'end' => $data->end
+        'predefined_daterange' => $data->predefined_daterange
     );
-    if (isset($data->predefined_daterange) && $data->predefined_daterange)
-        $request['predefined_daterange'] = $data->predefined_daterange;
     echo json_encode(handle_obb_add_to_cart(bike_box_request(OPEN_BIKE_BOX_BACKEND . '/api/v1/action/reserve', $request)));
     wp_die();
 }

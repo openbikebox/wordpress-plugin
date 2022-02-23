@@ -28,7 +28,7 @@ do_action( 'woocommerce_email_header', $email_heading, $email ); ?>
 
 <p><?php printf( esc_html__( 'Hi %s,', 'woocommerce' ), esc_html( $order->get_billing_first_name() ) ); ?></p>
 <p>
-    Ihre aktuelle Buchung läuft am {old_booking_end_date} aus. Wenn Sie Ihre openbikebox weiternutzen möchten, dann
+    Ihre aktuelle Buchung läuft am {old_booking_end_date} aus. Wenn Sie Ihre Box weiternutzen möchten, dann
     haben Sie jetzt die Gelegenheit, die Buchung bis zum {new_booking_end_date} zu verlängern.
 </p>
 
@@ -44,9 +44,9 @@ do_action( 'woocommerce_email_header', $email_heading, $email ); ?>
         <table class="td" cellspacing="0" cellpadding="6" style="width: 100%; font-family: 'Helvetica Neue', Helvetica, Roboto, Arial, sans-serif;" border="1">
             <thead>
             <tr>
-                <th class="td" scope="col" style="text-align:<?php echo esc_attr( $text_align ); ?>;"><?php esc_html_e( 'Product', 'woocommerce' ); ?></th>
-                <th class="td" scope="col" style="text-align:<?php echo esc_attr( $text_align ); ?>;"><?php esc_html_e( 'Quantity', 'woocommerce' ); ?></th>
-                <th class="td" scope="col" style="text-align:<?php echo esc_attr( $text_align ); ?>;"><?php esc_html_e( 'Price', 'woocommerce' ); ?></th>
+                <th class="td" scope="col"><?php esc_html_e( 'Product', 'woocommerce' ); ?></th>
+                <th class="td" scope="col"><?php esc_html_e( 'Quantity', 'woocommerce' ); ?></th>
+                <th class="td" scope="col"><?php esc_html_e( 'Price', 'woocommerce' ); ?></th>
             </tr>
             </thead>
             <tbody>
@@ -73,8 +73,8 @@ do_action( 'woocommerce_email_header', $email_heading, $email ); ?>
                     $i++;
                     ?>
                     <tr>
-                        <th class="td" scope="row" colspan="2" style="text-align:<?php echo esc_attr( $text_align ); ?>; <?php echo ( 1 === $i ) ? 'border-top-width: 4px;' : ''; ?>"><?php echo wp_kses_post( $total['label'] ); ?></th>
-                        <td class="td" style="text-align:<?php echo esc_attr( $text_align ); ?>; <?php echo ( 1 === $i ) ? 'border-top-width: 4px;' : ''; ?>"><?php echo wp_kses_post( $total['value'] ); ?></td>
+                        <th class="td" scope="row" colspan="2" style="<?php echo ( 1 === $i ) ? 'border-top-width: 4px;' : ''; ?>"><?php echo wp_kses_post( $total['label'] ); ?></th>
+                        <td class="td" style="<?php echo ( 1 === $i ) ? 'border-top-width: 4px;' : ''; ?>"><?php echo wp_kses_post( $total['value'] ); ?></td>
                     </tr>
                     <?php
                 }
@@ -82,8 +82,8 @@ do_action( 'woocommerce_email_header', $email_heading, $email ); ?>
             if ( $order->get_customer_note() ) {
                 ?>
                 <tr>
-                    <th class="td" scope="row" colspan="2" style="text-align:<?php echo esc_attr( $text_align ); ?>;"><?php esc_html_e( 'Note:', 'woocommerce' ); ?></th>
-                    <td class="td" style="text-align:<?php echo esc_attr( $text_align ); ?>;"><?php echo wp_kses_post( nl2br( wptexturize( $order->get_customer_note() ) ) ); ?></td>
+                    <th class="td" scope="row" colspan="2"><?php esc_html_e( 'Note:', 'woocommerce' ); ?></th>
+                    <td class="td"><?php echo wp_kses_post( nl2br( wptexturize( $order->get_customer_note() ) ) ); ?></td>
                 </tr>
                 <?php
             }

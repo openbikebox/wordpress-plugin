@@ -65,5 +65,5 @@ function obb_format_combine_datetime_str(string $begin_string, string $end_strin
 }
 
 function obb_format_end(DateTime $end): string {
-    return 'bis ' . obb_format_datetime($end);
+    return 'bis ' . obb_format_datetime($end, false, $end->format('Y') !== (new DateTime())->format('Y'));
 }

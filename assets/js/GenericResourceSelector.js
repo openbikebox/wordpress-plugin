@@ -69,8 +69,6 @@ const GenericResourceSelector = (props) => {
         e.preventDefault();
         if (selectedResource && selectedTimespan && termsAndConditions && (!location.bike_size_information || bikeSize)) {
             submitBooking({
-                begin: bookingBegin.toISOString().substr(0, 19) + 'Z',
-                end: bookingEnd.toISOString().substr(0, 19) + 'Z',
                 location_id: location.id,
                 resource_id: selectedResource.id,
                 predefined_daterange: selectedTimespan
