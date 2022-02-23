@@ -120,6 +120,8 @@ const GenericResourceSelector = (props) => {
                             <option value="quarter">Quartal</option>}
                             {(!selectedResource || selectedResource.pricegroup.fee_year !== undefined) &&
                             <option value="year">Jahr</option>}
+                            {(!selectedResource || selectedResource.pricegroup.fee_ten_years !== undefined) &&
+                            <option value="ten_years">10 Jahre</option>}
                         </select>
                     </div>
                 </div>

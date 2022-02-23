@@ -9,6 +9,7 @@ export const pricegroupPropTypes = {
     fee_month: PropTypes.string,
     fee_quarter: PropTypes.string,
     fee_year: PropTypes.string,
+    fee_ten_years: PropTypes.string,
     modified: PropTypes.string,
 };
 

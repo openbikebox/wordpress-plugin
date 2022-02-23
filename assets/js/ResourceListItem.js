@@ -20,6 +20,7 @@ const feeTimeMapping = {
     fee_day: 'Tag',
     fee_moth: 'Monat',
     fee_year: 'Jahr',
+    fee_ten_years: '10 Jahre',
 };
 
 const PricingContainer = (props) => {
