@@ -121,7 +121,7 @@ add_action('wp', function () {
         'old_session' => $order_item->get_meta('_session'),
         'begin' => $old_end->format('Y-m-d\TH:i:s\Z'),
         'end' => $new_end->format('Y-m-d\TH:i:s\Z')
-    )), $order_id, $order_item_id);
+    )), $order_item->get_meta('_location_id'), $order_id, $order_item_id);
     if ($result['status']) {
         wc_add_notice('Die Verlängerung konnte nicht zum Warenkorb hinzugefügt werden.', 'error');
         return;

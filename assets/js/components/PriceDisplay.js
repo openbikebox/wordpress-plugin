@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-const PriceDisplay = (props) => {
+const PriceDisplay = props => {
     let {amount} = props;
     if (typeof amount === 'number') {
         amount = amount.toString();

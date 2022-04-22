@@ -18,36 +18,52 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import React from 'react';
 
-import {getLocationBySlug, getResourceActions} from './Api';
-import {ComponentStatus} from './Helpers';
-import GenericResourceSelector from './GenericResourceSelector';
+import {getLocationBySlug} from '../Api';
+import {ComponentStatus} from '../Helpers';
+import GenericResourceSelector from '../resource/GenericResourceSelector';
 import ResourceList from './ResourceList';
 
-const LocationView = (props) => {
+const LocationView = props => {
     const [status, setStatus] = React.useState(ComponentStatus.loading);
     const [location, setLocation] = React.useState(null);
 
     React.useEffect(() => {
-        const func = async () => {
-            const fetchedLocation = await getLocationBySlug(props.apiBackend, props.locationSlug);
-            if (fetchedLocation) {
+        getLocationBySlug(props.apiBackend, props.locationSlug).then(fetchedLocation => {
+            if (!fetchedLocation) {
+                setStatus(ComponentStatus.error);
+                return;
+            }
+            if (props.localUser.type === 'admin') {
                 setLocation(fetchedLocation.data);
                 setStatus(ComponentStatus.ready);
-            } else {
-                setStatus(ComponentStatus.error);
+                return;
             }
-        };
-        func().then();
+            let localLocations = props.localLocations.filter(localLocation => localLocation.id === fetchedLocation.data.id);
+            if (!localLocations.length) {
+                setStatus(ComponentStatus.accessDenied);
+                return;
+            }
+            if (localLocations[0].visibility !== 'public' && props.localUser.locations.indexOf(localLocations[0].wordpress_id) === -1) {
+                setStatus(ComponentStatus.accessDenied);
+                return;
+            }
+            setLocation(fetchedLocation.data);
+            setStatus(ComponentStatus.ready);
+
+        });
     }, []);
 
-    if (status === ComponentStatus.loading) {
-        return <p>Lade Stationsdaten...</p>;
-    } else if (status === ComponentStatus.error) {
+    if (status === ComponentStatus.loading)
+        return <p>Lade Stationsdaten...</p>
+
+    if (status === ComponentStatus.accessDenied)
+        return <p>Kein Zugriff</p>
+
+    if (status === ComponentStatus.error)
         return <p>
             Beim Laden der Station is ein serverseitiger Fehler aufgetreten.<br/>
             Bitte versuchen Sie es später erneut.
         </p>
-    }
 
     if (location.type === 'cargobike') {
         return <ResourceList location={location}/>;

@@ -1,8 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import {ComponentStatus} from './Helpers';
+import {ComponentStatus} from '../Helpers';
 import Calendar from 'binary-booking-calendar/dist/binaryBookingCalendar'
-import {getResourceBySlug, getResourceActions, submitBooking, getResourcePrice} from './Api';
+import {getResourceBySlug, getResourceActions, submitBooking, getResourcePrice} from '../Api';
 
 const ResourceView = (props) => {
     const [status, setStatus] = React.useState(ComponentStatus.loading);
@@ -19,7 +19,6 @@ const ResourceView = (props) => {
                     setExistingBookings(fetchedResourceActions.data);
                     setStatus(ComponentStatus.ready);
                 } catch (e) {
-                    console.error(e);
                     setStatus(ComponentStatus.error);
                 }
             } else {

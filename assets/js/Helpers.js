@@ -68,4 +68,5 @@ export const ComponentStatus = {
     loading: 1,
     ready: 2,
     error: 3,
+    accessDenied: 4,
 };

@@ -1,9 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import ResourceListItem from './ResourceListItem';
-import {locationPropTypes} from './Models';
+import {locationPropTypes} from '../models/location';
 
-const ResourceList = (props) => {
+const ResourceList = props => {
     const {location} = props;
     return <>
         <h2>{location.name} buchen</h2>

@@ -22,11 +22,34 @@ defined('ABSPATH') or die('nope.');
 add_action('wp_ajax_obb_add_to_cart', 'obb_add_to_cart_ajax');
 add_action('wp_ajax_nopriv_obb_add_to_cart', 'obb_add_to_cart_ajax');
 
+
 /*
  * reserves an resource and adds it to cart
  */
 function obb_add_to_cart_ajax(): array {
+    if (!function_exists('get_fields')) {
+        echo json_encode(['status' => -1, 'error' => 'missing plugin']);
+        wp_die();
+    }
     $data = json_decode(stripslashes($_POST['data']));
+    // first we check if the location id is allowed
+    $location = get_wordpress_location(intval($data->location_id));
+    if (!$location) {
+        echo json_encode(['status' => -1, 'error' => 'access denied']);
+        wp_die();
+    }
+    $location_visibility = get_field('visibility', $location->ID);
+    if ($location_visibility === 'login' && !current_user_can('edit_posts')) {
+        $user_locations = get_field('locations', "user_" . strval(get_current_user_id()));
+        if (!$user_locations) {
+            echo json_encode(['status' => -1, 'error' => 'access denied']);
+            wp_die();
+        }
+        if (!in_array($location->ID, $user_locations, true)) {
+            echo json_encode(['status' => -1, 'error' => 'access denied']);
+            wp_die();
+        }
+    }
     obb_clear_cart();
     $request = array(
         'request_uid' => generate_uid(),
@@ -34,16 +57,24 @@ function obb_add_to_cart_ajax(): array {
         'requested_at' => gmdate("Y-m-d\TH:i:s\Z"),
         'predefined_daterange' => $data->predefined_daterange
     );
-    echo json_encode(handle_obb_add_to_cart(bike_box_request(OPEN_BIKE_BOX_BACKEND . '/api/v1/action/reserve', $request)));
+    echo json_encode(
+        handle_obb_add_to_cart(
+            bike_box_request(OPEN_BIKE_BOX_BACKEND . '/api/v1/action/reserve', $request),
+            intval($data->location_id),
+        )
+    );
     wp_die();
 }
 
 
-function handle_obb_add_to_cart(object $result, ?int $extended_order_id = null, ?int $extended_order_item_id = null): array {
+function handle_obb_add_to_cart(object $result, int $location_id, ?int $extended_order_id = null, ?int $extended_order_item_id = null): array {
     if (!$result)
         return array('status' => -1, 'error' => 'invalid response');
     if ($result->status)
         return array('status' => -1, 'error' => 'invalide response status');
+    if ($location_id !== $result->data->location->id)
+        return array('status' => -1, 'error' => 'access denied');
+
     $fields = array(
         'uid', 'request_uid', 'session', 'status', 'value_gross', 'value_net', 'value_tax', 'tax_rate', 'requested_at',
         'begin', 'end', 'valid_till'

@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 import PropTypes from 'prop-types';
-import {requestJsonPost} from './Helpers';
+import {requestJsonPost} from '../Helpers';
 
 const RequestStatus = {
     idle: 1,

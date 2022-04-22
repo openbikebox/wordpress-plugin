@@ -70,3 +70,20 @@ add_filter('woocommerce_cart_item_name', function (string $name, array $cart_ite
 add_action('woocommerce_remove_cart_item', function (string $cart_item_key, WC_Cart $cart) {
     obb_remove_from_cart($cart->cart_contents[$cart_item_key]);
 }, 10, 2);
+
+add_filter('woocommerce_coupon_is_valid_for_product', function ($valid, $product, WC_Coupon $coupon, $values) {
+    if (!function_exists('get_fields'))
+        return false;
+    $coupon_locations = get_field('locations', $coupon->get_id());
+    if (!$coupon_locations)
+        return $valid;
+    $location = get_wordpress_location($values['_location_id']);
+    if (!$location)
+        return false;
+    $valid_payments = get_field('payment', $location->ID);
+    if (!$valid_payments || !in_array('coupon', $valid_payments))
+        return false;
+    if (in_array($location->ID, $coupon_locations, true))
+        return $valid;
+    return false;
+}, 10, 4);

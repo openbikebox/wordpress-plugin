@@ -22,11 +22,11 @@ import '../sass/webapp.scss'
 import React from "react";
 import ReactDOM from "react-dom";
 
-import LocationTileSelector from './LocationTileSelector';
-import LocationView from './LocationView'
+import LocationTileSelector from './locations/LocationTileSelector';
+import LocationView from './location/LocationView'
 import { transformAttribute } from './Helpers';
-import ResourceView from './ResourceView';
-import ThankYou from "./ThankYou";
+import ResourceView from './resource/ResourceView';
+import ThankYou from "./thankyou/ThankYou";
 
 document.addEventListener('DOMContentLoaded', function(event) {
     let reactObjects = {
@@ -39,13 +39,16 @@ document.addEventListener('DOMContentLoaded', function(event) {
     for (const [html_id, ReactClass] of Object.entries(reactObjects)) {
         let dom_obj = document.getElementById(html_id);
         if (dom_obj) {
-            let props = {};
+            let props = {
+                ...(((typeof obb_locations_data === typeof undefined)) ? {} : {localLocations: obb_locations_data}),
+                ...(((typeof obb_user_data === typeof undefined)) ? {} : {localUser: obb_user_data}),
+            };
             dom_obj.getAttributeNames().filter(key => key.substr(0, 5) === 'data-').forEach(key => {
                 props[transformAttribute(key.substr(5))] = dom_obj.getAttribute(key)
             })
             ReactDOM.render(
                 <ReactClass{...props}/>,
-                dom_obj
+                dom_obj,
             );
         }
     }

@@ -59,3 +59,5 @@ require 'inc/checkout.php';
 require 'inc/wc-admin.php';
 require 'inc/shortcodes.php';
 require 'inc/extend-booking.php';
+require 'inc/local-data.php';
+require 'inc/post-types.php';

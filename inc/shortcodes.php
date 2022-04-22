@@ -23,5 +23,14 @@ defined('ABSPATH') or die('nope.');
  * tiles shortcode
  */
 add_shortcode('obb-location-tiles', function ($atts): string {
-    return '<div id="obb-location-tiles-box" data-api-backend="' . OPEN_BIKE_BOX_BACKEND . '"></div>';
+
+    ob_start();
+?>
+<script>
+    var obb_locations_data = <?php echo json_encode(obb_get_local_location_data()); ?>;
+    var obb_user_data = <?php echo json_encode(obb_get_local_user_data()); ?>;
+</script>
+<div id="obb-location-tiles-box" data-api-backend="<?php echo OPEN_BIKE_BOX_BACKEND; ?>"></div>
+<?php
+    return ob_get_clean();
 });

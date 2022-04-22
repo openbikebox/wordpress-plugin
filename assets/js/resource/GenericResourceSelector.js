@@ -1,11 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import {formatPrice} from './Format';
-import ResourceSvg from './ResourceSvg';
-import {locationPropTypes} from './Models';
+import {formatPrice} from '../Format';
+import ResourceSvg from '../location/ResourceSvg';
+import {locationPropTypes} from '../models/location';
 import {Decimal} from 'decimal.js';
 import moment from 'moment';
-import {submitBooking} from './Api';
+import {submitBooking} from '../Api';
 import { Carousel } from 'react-responsive-carousel';
 
 const GenericResourceSelector = (props) => {

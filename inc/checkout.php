@@ -19,6 +19,23 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 defined('ABSPATH') or die('nope.');
 
+add_filter('woocommerce_available_payment_gateways', function ($payment_methods) {
+    if (!function_exists('get_fields'))
+        return [];
+    if (!is_checkout())
+        return $payment_methods;
+    if (!isset($payment_methods['paypal_plus']))
+        return $payment_methods;
+    foreach (WC()->cart->get_cart() as $cart_item) {
+        $location = get_wordpress_location($cart_item['_location_id']);
+        $valid_payments = get_field('payment', $location->ID);
+        if (!$valid_payments || !in_array('paypal', $valid_payments))
+            return [];
+    }
+    return $payment_methods;
+}, 10, 1);
+
+
 /*
  * validates all reservations by renewing them
  */

@@ -1,9 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import {photoPropTypes, pricegroupPropTypes, resourcePropTypes} from './Models';
-import PriceDisplay from './PriceDisplay';
+import {photoPropTypes} from '../models/photo';
+import {pricegroupPropTypes} from '../models/pricegroup';
+import {resourcePropTypes} from '../models/recource';
+import PriceDisplay from '../components/PriceDisplay';
 
-const ImageContainer = (props) => {
+const ImageContainer = props => {
     const {photo} = props;
     return <div>
         <img src={photo.url} alt={props.alt}/>

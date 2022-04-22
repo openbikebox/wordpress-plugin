@@ -18,8 +18,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import React from "react";
 const { Component } = React;
-import {getLocationBySlug, getLocations} from './Api';
-import { ComponentStatus } from "./Helpers";
+import {getLocationBySlug, getLocations} from '../Api';
+import { ComponentStatus } from "../Helpers";
 import { MapContainer, GeoJSON, useMapEvents } from "react-leaflet"
 import { Map, CRS, geoJSON } from 'leaflet';
 
