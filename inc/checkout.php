@@ -82,14 +82,17 @@ add_action('woocommerce_checkout_create_order_line_item', function (WC_Order_Ite
  * finalizes action at backend after successfull order
  */
 add_action('woocommerce_checkout_order_created', function (WC_Order $order) {
-    if ($order->get_payment_method() === 'cod') {
+    if ($order->get_payment_method() === 'cod')
         $order->update_status('completed', 'Automatische Fertigstellung aufgrund von Barzahlung');
-    }
-    if (floatval($order->get_total('raw')) === 0.0) {
+    if (floatval($order->get_total('raw')) === 0.0)
         $order->update_status('completed', 'Automatische Fertigstellung aufgrund von Gutschein');
-    }
 }, 10, 1);
 
+
+add_action('woocommerce_order_status_processing', function (int $order_id, WC_Order $order) {
+    if ($order->get_payment_method() === 'paypal_plus' && $order->get_status() === 'processing')
+        $order->update_status('completed', 'Automatische Fertigstellung aufgrund von erfolgreicher PayPal-Zahlung.');
+}, 10, 2);
 
 add_action('woocommerce_order_status_completed', function (int $order_id, WC_Order $order) {
     eventually_finalize_booking($order);
