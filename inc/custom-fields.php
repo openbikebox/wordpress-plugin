@@ -4,7 +4,7 @@ if( function_exists('acf_add_local_field_group') ):
 
     acf_add_local_field_group(array(
         'key' => 'group_6252cc4fcf532',
-        'title' => 'Benutzer',
+        'title' => 'Standorte',
         'fields' => array(
             array(
                 'key' => 'field_6252cc7091509',
@@ -21,13 +21,10 @@ if( function_exists('acf_add_local_field_group') ):
                 ),
                 'post_type' => array(
                     0 => 'location',
-                    1 => 'shop_coupon',
                 ),
                 'taxonomy' => '',
                 'filters' => array(
                     0 => 'search',
-                    1 => 'post_type',
-                    2 => 'taxonomy',
                 ),
                 'elements' => '',
                 'min' => '',
@@ -41,6 +38,13 @@ if( function_exists('acf_add_local_field_group') ):
                     'param' => 'user_form',
                     'operator' => '==',
                     'value' => 'edit',
+                ),
+            ),
+            array(
+                array(
+                    'param' => 'post_type',
+                    'operator' => '==',
+                    'value' => 'shop_coupon',
                 ),
             ),
         ),
