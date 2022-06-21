@@ -24,7 +24,7 @@ add_filter('woocommerce_available_payment_gateways', function ($payment_methods)
         return [];
     if (!is_checkout())
         return $payment_methods;
-    if (!isset($payment_methods['paypal_plus']))
+    if (!isset($payment_methods['ppcp-gateway']))
         return $payment_methods;
     foreach (WC()->cart->get_cart() as $cart_item) {
         $location = get_wordpress_location($cart_item['_location_id']);
@@ -90,7 +90,7 @@ add_action('woocommerce_checkout_order_created', function (WC_Order $order) {
 
 
 add_action('woocommerce_order_status_processing', function (int $order_id, WC_Order $order) {
-    if ($order->get_payment_method() === 'paypal_plus' && $order->get_status() === 'processing')
+    if ($order->get_payment_method() === 'ppcp-gateway' && $order->get_status() === 'processing')
         $order->update_status('completed', 'Automatische Fertigstellung aufgrund von erfolgreicher PayPal-Zahlung.');
 }, 10, 2);
 
