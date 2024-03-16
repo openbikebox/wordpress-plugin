@@ -1,4 +1,4 @@
-const path = require('path');
+const path= require('path');
 const webpack = require('webpack');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
@@ -15,11 +15,11 @@ module.exports = (env, argv) => {
         ],
         resolve: {
             alias: {
-                './images/layers.png$': path.resolve(__dirname, '../static/images/leaflet/layers.png'),
-                './images/layers-2x.png$': path.resolve(__dirname, '../static/images/leaflet/layers-2x.png'),
-                './images/marker-icon.png$': path.resolve(__dirname, '../static/images/leaflet/marker-icon.png'),
-                './images/marker-icon-2x.png$': path.resolve(__dirname, '../static/images/leaflet/marker-icon-2x.png'),
-                './images/marker-shadow.png$': path.resolve(__dirname, '../static/images/leaflet/marker-shadow.png')
+                'images/layers.png$': path.resolve(__dirname, '../static/images/leaflet/layers.png'),
+                'images/layers-2x.png$': path.resolve(__dirname, '../static/images/leaflet/layers-2x.png'),
+                'images/marker-icon.png$': path.resolve(__dirname, '../static/images/leaflet/marker-icon.png'),
+                'images/marker-icon-2x.png$': path.resolve(__dirname, '../static/images/leaflet/marker-icon-2x.png'),
+                'images/marker-shadow.png$': path.resolve(__dirname, '../static/images/leaflet/marker-shadow.png')
             }
         },
         mode: isDevelopment ? 'development' : argv.mode,
@@ -57,7 +57,7 @@ module.exports = (env, argv) => {
                 },
                 {
                     test: /\.module\.s(a|c)ss$/,
-                    loader: [
+                    use: [
                         isDevelopment ? 'style-loader' : MiniCssExtractPlugin.loader,
                         {
                             loader: 'css-loader',
@@ -73,11 +73,10 @@ module.exports = (env, argv) => {
                             }
                         }
                     ]
-                },
-                {
+                },                {
                     test: /\.s(a|c)ss$/,
                     exclude: /\.module.(s(a|c)ss)$/,
-                    loader: [
+                    use: [
                         isDevelopment ? 'style-loader' : MiniCssExtractPlugin.loader,
                         'css-loader',
                         {

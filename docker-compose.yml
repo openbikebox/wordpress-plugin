@@ -1,7 +1,6 @@
-version: '3'
 services:
   webpack:
-    image: node:12
+    image: node:20
     working_dir: /app
     volumes:
       - .:/app
