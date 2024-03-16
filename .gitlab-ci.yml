@@ -11,7 +11,7 @@ default:
 build-js:
   stage: build
   image:
-    name: node:12
+    name: node:20
   artifacts:
     paths:
       - static

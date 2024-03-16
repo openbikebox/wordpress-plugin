@@ -25,14 +25,12 @@ import ReactDOM from "react-dom";
 import LocationTileSelector from './locations/LocationTileSelector';
 import LocationView from './location/LocationView'
 import { transformAttribute } from './Helpers';
-import ResourceView from './resource/ResourceView';
 import ThankYou from "./thankyou/ThankYou";
 
 document.addEventListener('DOMContentLoaded', function(event) {
     let reactObjects = {
         'obb-resource-select-box': LocationView,
         'obb-location-tiles-box': LocationTileSelector,
-        'obb-resource-info-box': ResourceView,
         'obb-thank-you': ThankYou
     };
 

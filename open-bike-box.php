@@ -32,7 +32,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 defined('ABSPATH') or die('No script kiddies please!');
 
-define('OPEN_BIKE_BOX_VERSION', '1.0.0');
+define('OPEN_BIKE_BOX_VERSION', '1.1.0');
 define('OPEN_BIKE_BOX_BASE_URL', plugins_url('', __FILE__));
 define('OPEN_BIKE_BOX_BASE_PATH', plugin_dir_path(__FILE__));
 if (!defined('OPEN_BIKE_BOX_BACKEND'))
